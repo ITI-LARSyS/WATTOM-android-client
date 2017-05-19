@@ -29,7 +29,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="X acc: "/>
+                    android:text="Yaw acc: "/>
 
                 <TextView
                     android:id="@+id/x_text_field"
@@ -48,7 +48,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Y acc: "/>
+                    android:text="pitch acc: "/>
 
                 <TextView
                     android:id="@+id/y_text_field"
@@ -67,7 +67,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Z acc: "/>
+                    android:text="roll acc: "/>
 
                 <TextView
                     android:id="@+id/z_text_field"

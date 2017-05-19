@@ -44,7 +44,9 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     public static final String WEAR_ACC_SERVICE = "WearAccService";
 
     private long _last_push;
-    private int _sampling_diff = 150;
+    private int _sampling_diff = 20;
+    private float _orientationVals[]={0,0,0};
+    float[] _rotationMatrix = new float[16];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +66,9 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
         });
 
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_LINEAR_ACCELERATION);
+        _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
+
     }
 
     @Override
@@ -89,25 +92,46 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
         //Log.wtf(TAG,event.toString());
 
+/*
+        SensorManager.getRotationMatrixFromVector(_rotationMatrix,
+                event.values);
+        SensorManager
+                .remapCoordinateSystem(_rotationMatrix,
+                        SensorManager.AXIS_X, SensorManager.AXIS_Z,
+                        _rotationMatrix);
+        SensorManager.getOrientation(_rotationMatrix, _orientationVals);
+
+        // Optionally convert the result from radians to degrees
+        _orientationVals[0] = (float) Math.toDegrees(_orientationVals[0]);
+        _orientationVals[1] = (float) Math.toDegrees(_orientationVals[1]);
+        _orientationVals[2] = (float) Math.toDegrees(_orientationVals[2]);
+
+//        Yaw:  _orientationVals[0]
+//        Pitch:  _orientationVals[1]
+//        Roll:     _orientationVals[2]
+
+        float x = _orientationVals[0];//event.values[0];
+        float y = _orientationVals[1];//event.values[1];
+        float z = _orientationVals[2];
+        int val =4;*/
+
+       // if(x>val||y>val||z>val) {
         float x = event.values[0];
         float y = event.values[1];
         float z = event.values[2];
-        int val =4;
-
-       // if(x>val||y>val||z>val) {
 
             _x_acc.setText(x+"");
             _y_acc.setText(y+"");
             _z_acc.setText(z+"");
             _tms.setText(event.timestamp+"");
 
-          //  Log.i(TAG, "x:" + x + "  y:" + y + "  z:" + z + " Event: " + event.timestamp);
+
         //}
         if(System.currentTimeMillis()-_last_push>_sampling_diff){
-            Log.i(TAG,"Sending data");
+          //  Log.i(TAG,"Sending data");
             _last_push = System.currentTimeMillis();
           //  float[] data = {x,y};
-            sendMessage(y+"#"+z);
+            sendMessage(x+"#"+z);
         }
 
     }
@@ -121,7 +145,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
         if(v.getId() == R.id.start_sensor_btn && !sensor_running) {
             _startSensorBtn.setText("Stop Sensor");
-            _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
+            _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_GAME);
             Log.i(TAG, "Aqui starting sensor");
             sensor_running = true;
         }else{
