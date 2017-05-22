@@ -13,6 +13,7 @@ import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     private TextView _y_acc;
     private TextView _z_acc;
     private TextView _tms;
+    private CheckBox _leftHanded;
     private Button _startSensorBtn;
     private SensorManager _sensorManager;
     private Sensor _sensor;
@@ -44,7 +46,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     public static final String WEAR_ACC_SERVICE = "WearAccService";
 
     private long _last_push;
-    private int _sampling_diff = 20;
+    private int _sampling_diff = 40;
     private float _orientationVals[]={0,0,0};
     float[] _rotationMatrix = new float[16];
 
@@ -61,6 +63,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
                 _z_acc          = (TextView) stub.findViewById(R.id.z_text_field);
                 _tms            = (TextView) stub.findViewById(R.id.tms_text_field);
                 _startSensorBtn = (Button) stub.findViewById(R.id.start_sensor_btn);
+                _leftHanded     = (CheckBox) stub.findViewById(R.id.left_handed);
 
             }
         });
@@ -131,6 +134,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
           //  Log.i(TAG,"Sending data");
             _last_push = System.currentTimeMillis();
           //  float[] data = {x,y};
+            z = _leftHanded.isChecked()?z*-1:z;
             sendMessage(x+"#"+z);
         }
 
@@ -145,7 +149,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
         if(v.getId() == R.id.start_sensor_btn && !sensor_running) {
             _startSensorBtn.setText("Stop Sensor");
-            _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_GAME);
+            _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
             Log.i(TAG, "Aqui starting sensor");
             sensor_running = true;
         }else{

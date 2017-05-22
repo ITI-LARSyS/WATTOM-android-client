@@ -60,12 +60,12 @@ public class HttpRequest extends Thread {
     public void run(){
         String request = "";
 
-        request = buildRequest();;
+        request = buildRequest();
 
         RequestFuture<String> future = RequestFuture.newFuture();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, request,future,future);
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                5000,
+                6000,
                 3,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
