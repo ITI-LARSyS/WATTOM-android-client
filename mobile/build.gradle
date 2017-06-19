@@ -10,6 +10,7 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -27,4 +28,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:9.8.0'
     compile 'org.apache.commons:commons-math3:3.6.1'
     compile 'com.android.volley:volley:1.0.0'
+    compile 'com.android.support:multidex:1.0.1'
 }

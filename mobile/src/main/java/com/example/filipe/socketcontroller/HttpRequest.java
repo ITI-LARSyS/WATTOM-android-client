@@ -24,25 +24,22 @@ public class HttpRequest extends Thread {
     private Context _appCtx;
     private String _url;
     private RequestQueue _queue;
-    private JSONObject _data;
+    private String _data;
 
     public HttpRequest(String url, Context application_context){
         this._url = url;
         this._appCtx = application_context;
         _queue = Volley.newRequestQueue(_appCtx);
 
+        Log.wtf(TAG,"--- RUNNING COLOR REQUEST :"+url+" ---");
+
     }
 
-    public JSONObject getData(){
+    public String getData(){
         if(_data!=null)
             return _data;
         else{
-            try {
-                return new JSONObject("{message:error no data}");
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return null;
-            }
+            return "no data";//new JSONObject("{message:error no data}");
         }
     }
 
@@ -52,7 +49,7 @@ public class HttpRequest extends Thread {
     }
 
     private void parseData(String data) throws JSONException {
-        _data = new JSONObject(data);
+        _data = data;//new JSONObject(data);
 
     }
 
