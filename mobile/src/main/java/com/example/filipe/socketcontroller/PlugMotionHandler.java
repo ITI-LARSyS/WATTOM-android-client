@@ -149,8 +149,7 @@ public class PlugMotionHandler extends Thread{
         //Log.wtf(TAG, "compensation returned counter as: "+counter+ " ,lmit: "+limit);
         int total = 0;
         //Log.i(TAG,"total "+total+" "+_isRunning);
-
-
+        _raio =12/(2*Math.PI);
 
         while (_isRunning){
 
@@ -162,21 +161,22 @@ public class PlugMotionHandler extends Thread{
                     _currentLED = _currentLED + _orientation;
                     _currentLED = _currentLED == 12 ? 0 : _currentLED;
                     _currentLED = _currentLED == -1 ? 11 : _currentLED;
-                  //  Log.e(TAG, "Target: "+_led_target+ " Current LED: " + _currentLED+ " orientation "+_orientation);
-                    // Log.e(TAG, "Current LED: " + _currentLED);//+" "+counter+" tms diff (has to be the same as velocity) "+(System.currentTimeMillis()-milis));
+                   // Log.e(TAG, "Current LED: " + _currentLED+ " target "+_led_target);//+" "+counter+" tms diff (has to be the same as velocity) "+(System.currentTimeMillis()-milis));
 
                     counter = 1;
-                    //milis = System.currentTimeMillis();
-
                 }else{
                     counter++;
-                    _temp_val = ((float)counter/((float)_resolution/(float)N_LEDS)+_currentLED);
-                    _raio =12/(2*Math.PI);
+
+                    if(_orientation==1)
+                        _temp_val = ((float)counter/((float)_resolution/(float)N_LEDS)+_currentLED);
+                    else
+                        _temp_val = (_currentLED-(float)counter/((float)_resolution/(float)N_LEDS));
+
                     _angle = (_temp_val/_raio);
 
                     _x = _raio*Math.sin(_angle);
                     _y = _raio*Math.cos(_angle);
-                    //  Log.wtf(TAG, "teste "+_currentLED+","+_x+","+_y);
+                  //  Log.wtf(TAG, "teste-"+_led_target+","+_x+","+_y);
                     _dataPackage.putExtra("x",_x);
                     _dataPackage.putExtra("y",_y);
                     _dataPackage.putExtra(TARGET,_led_target);

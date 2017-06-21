@@ -10,88 +10,37 @@
     android:orientation="vertical"
     tools:context="com.example.filipe.socketcontroller.MainActivity">
 
+    <Button
+        android:id="@+id/plus_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="+"/>
+
+
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World! from the phone"
-        android:gravity="center_horizontal"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="0"/>
 
-    <RadioGroup
-        android:id="@+id/target_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <RadioButton
-            android:id="@+id/main_target"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Main target"/>
-        <RadioButton
-            android:id="@+id/secondary_target"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Secondary target"/>
-        <RadioButton
-            android:id="@+id/tertiary_target"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Secondary target"/>
-    </RadioGroup>
+    <Button
+        android:id="@+id/minus_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:onClick="handleTargetClick"
+        android:text="+"/>
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorPrimaryDark"></LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:text="Start!"/>
 
-        <TextView
-            android:text="ClockWise"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Switch
-            android:id="@+id/direction_selector"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:text="CounterClockWise"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-
-    </LinearLayout>
-
-
-
-    <LinearLayout
-        android:visibility="gone"
-        android:id="@+id/dummy_linear"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#5e5e5e"
-        android:orientation="horizontal"
-        android:gravity="bottom">
-        
-        <LinearLayout
-            android:id="@+id/x_bar"
-            android:orientation="horizontal"
-            android:layout_width="0sp"
-            android:layout_weight="0.25"
-            android:layout_height="50sp"
-            android:background="#FF0000"></LinearLayout>
-        <LinearLayout
-            android:id="@+id/y_bar"
-            android:orientation="horizontal"
-            android:layout_width="0sp"
-            android:layout_weight="0.25"
-            android:layout_height="50sp"
-            android:background="#00FF00"></LinearLayout>
-        <LinearLayout
-            android:id="@+id/z_bar"
-            android:orientation="horizontal"
-            android:layout_width="0sp"
-            android:layout_weight="0.25"
-            android:layout_height="50sp"
-            android:background="#0000FF"></LinearLayout>
-
-    </LinearLayout>
 </LinearLayout>
