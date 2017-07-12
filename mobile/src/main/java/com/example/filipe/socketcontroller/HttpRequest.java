@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Filipe on 18/05/2017.
@@ -30,8 +31,6 @@ public class HttpRequest extends Thread {
         this._url = url;
         this._appCtx = application_context;
         _queue = Volley.newRequestQueue(_appCtx);
-
-        Log.wtf(TAG,"--- RUNNING COLOR REQUEST :"+url+" ---");
 
     }
 
@@ -62,7 +61,7 @@ public class HttpRequest extends Thread {
         RequestFuture<String> future = RequestFuture.newFuture();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, request,future,future);
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                6000,
+                4000,
                 3,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
@@ -72,11 +71,7 @@ public class HttpRequest extends Thread {
             Log.e(TAG, "-----   running request  ------");
             String response = future.get();
             parseData(response);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        }catch (Exception e){
             e.printStackTrace();
         }
 

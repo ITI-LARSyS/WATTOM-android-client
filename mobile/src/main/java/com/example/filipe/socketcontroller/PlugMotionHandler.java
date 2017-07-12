@@ -2,7 +2,6 @@ package com.example.filipe.socketcontroller;
 
 import android.content.Context;
 import android.content.Intent;
-import android.provider.Settings;
 import android.util.Log;
 
 
@@ -20,7 +19,7 @@ public class PlugMotionHandler extends Thread{
 
     private static final String TAG = "PlugMotionHandler";
     private static final int N_LEDS = 12;
-    private static final String SERVER_URL = "http://192.168.8.113:3000/plug/2";
+    private  String _server_url = "http://192.168.8.113:3000/plug/2";
     private static final String TARGET = "target";
 
 
@@ -53,11 +52,12 @@ public class PlugMotionHandler extends Thread{
     private int _led_target;
     private int _target;
 
-    public PlugMotionHandler(Context application_context,int frequency, int target){
+    public PlugMotionHandler(Context application_context,int frequency, int target, String url){
         this._appCtx = application_context;
         _dataPackage = new Intent();
         _ajustedVelocity = frequency;
         _led_target = target;
+        _server_url = url;
         //parsing debug
         try {
             JSONArray json_array = new JSONArray(_message);
@@ -107,11 +107,16 @@ public class PlugMotionHandler extends Thread{
        // Log.i(TAG,"adj_vel:"+_ajustedVelocity+" res: "+_resolution);
     }
 
+    public void forceUpdate(){
+        getPlugData();
+    }
+
     private long getPlugData(){
         long current_time = System.currentTimeMillis();
         try {
-            HttpRequest novo = new HttpRequest(SERVER_URL, _appCtx);
+            HttpRequest novo = new HttpRequest(_server_url, _appCtx);
             novo.start();
+            Log.i(TAG,"--- RUNNING COLOR REQUEST : target "+_led_target+" ---");
             novo.join();
             String data = novo.getData();
             JSONArray json_array = new JSONArray(data);
@@ -134,12 +139,12 @@ public class PlugMotionHandler extends Thread{
 
         // HACK COMENTA MELHOR DEPOIS
         try {
-            sleep(_led_target*1000);
+            sleep(_led_target*555);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        Log.i(TAG,"Thread running "+"resolution "+_resolution);
+        Log.wtf(TAG,"RUNNING THREAD "+_led_target);
         int counter = 0;
         long milis2 = 0;
         long newVel = 0;
@@ -151,29 +156,25 @@ public class PlugMotionHandler extends Thread{
         //Log.i(TAG,"total "+total+" "+_isRunning);
         _raio =12/(2*Math.PI);
 
+        int max = 300;
+
         while (_isRunning){
-
-            if(total<500){
-
+            if(total<max){
                 milis2 = System.currentTimeMillis();
-
                 if(counter == limit) {
                     _currentLED = _currentLED + _orientation;
                     _currentLED = _currentLED == 12 ? 0 : _currentLED;
                     _currentLED = _currentLED == -1 ? 11 : _currentLED;
-                   // Log.e(TAG, "Current LED: " + _currentLED+ " target "+_led_target);//+" "+counter+" tms diff (has to be the same as velocity) "+(System.currentTimeMillis()-milis));
-
+                    //Log.e(TAG, "Current LED: " + _currentLED+ " target "+_led_target);//+" "+counter+" tms diff (has to be the same as velocity) "+(System.currentTimeMillis()-milis));
                     counter = 1;
                 }else{
                     counter++;
-
                     if(_orientation==1)
                         _temp_val = ((float)counter/((float)_resolution/(float)N_LEDS)+_currentLED);
                     else
                         _temp_val = (_currentLED-(float)counter/((float)_resolution/(float)N_LEDS));
 
                     _angle = (_temp_val/_raio);
-
                     _x = _raio*Math.sin(_angle);
                     _y = _raio*Math.cos(_angle);
                   //  Log.wtf(TAG, "teste-"+_led_target+","+_x+","+_y);
@@ -183,13 +184,11 @@ public class PlugMotionHandler extends Thread{
                     _dataPackage.setAction(DATA_KEY+_led_target);
                     _appCtx.sendBroadcast(_dataPackage);
                 }
-
                 try {
-
                     newVel =(_ajustedVelocity-(System.currentTimeMillis()-milis2));
                     total++;
+                    newVel=newVel<0?0:newVel;
                     sleep(newVel);
-
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }catch (IllegalArgumentException e){
