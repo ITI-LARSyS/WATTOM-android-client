@@ -156,7 +156,9 @@ public class PlugMotionHandler extends Thread{
         //Log.i(TAG,"total "+total+" "+_isRunning);
         _raio =12/(2*Math.PI);
 
-        int max = 300;
+        int max = 600;  // alterei o total aqui
+
+        Log.wtf(TAG,"Limit:"+limit+" Resolution:"+_resolution);
 
         while (_isRunning){
             if(total<max){
@@ -183,6 +185,8 @@ public class PlugMotionHandler extends Thread{
                     _dataPackage.putExtra(TARGET,_led_target);
                     _dataPackage.setAction(DATA_KEY+_led_target);
                     _appCtx.sendBroadcast(_dataPackage);
+                   // if(_led_target==0)
+                     //   Log.i(TAG,"DEBUG: pushing simulation "+_led_target);
                 }
                 try {
                     newVel =(_ajustedVelocity-(System.currentTimeMillis()-milis2));

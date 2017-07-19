@@ -43,12 +43,17 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     private Node _phone; // the connected device to send the message to
     //private int _count=0;
 
-    public static final String WEAR_ACC_SERVICE = "WearAccService";
+    public static final String WEAR_ACC_SERVICE = "acc";
 
     private long _last_push;
-    private int _sampling_diff = 40;
+    private int _sampling_diff = 20;        // alterei o sampling rate aqui
     private float _orientationVals[]={0,0,0};
     float[] _rotationMatrix = new float[16];
+
+    float x;
+    float z;
+    private int _factor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,24 +124,27 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
         int val =4;*/
 
        // if(x>val||y>val||z>val) {
-        float x = event.values[0];
-        float y = event.values[1];
-        float z = event.values[2];
+       // float y = event.values[1];
 
-            _x_acc.setText(x+"");
-            _y_acc.setText(y+"");
-            _z_acc.setText(z+"");
-            _tms.setText(event.timestamp+"");
+
+          //  _x_acc.setText(x+"");
+          //  _y_acc.setText(y+"");
+          //  _z_acc.setText(z+"");
+          //  _tms.setText(event.timestamp+"");
 
 
         //}
-        if(System.currentTimeMillis()-_last_push>_sampling_diff){
+           if(System.currentTimeMillis()-_last_push>_sampling_diff){
           //  Log.i(TAG,"Sending data");
-            _last_push = System.currentTimeMillis();
+
           //  float[] data = {x,y};
-            z = _leftHanded.isChecked()?z*-1:z;
+            x = event.values[0];
+            z = event.values[2];
+            z = _factor*z;
             sendMessage(x+"#"+z);
-        }
+           _last_push = System.currentTimeMillis();
+           // Log.i("DEBUG",x+","+y);
+      }
 
     }
 
@@ -148,6 +156,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     public void handleSensorClick(View v){
 
         if(v.getId() == R.id.start_sensor_btn && !sensor_running) {
+            _factor = _leftHanded.isChecked()?-1:1;
             _startSensorBtn.setText("Stop Sensor");
             _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
             Log.i(TAG, "Aqui starting sensor");
