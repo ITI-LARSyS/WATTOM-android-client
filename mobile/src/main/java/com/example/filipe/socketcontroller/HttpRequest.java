@@ -27,6 +27,13 @@ public class HttpRequest extends Thread {
     private RequestQueue _queue;
     private String _data;
 
+    public HttpRequest(String url, Context application_context, RequestQueue queue){
+        this._url = url;
+        this._appCtx = application_context;
+        _queue = queue; //Volley.newRequestQueue(_appCtx);
+
+    }
+
     public HttpRequest(String url, Context application_context){
         this._url = url;
         this._appCtx = application_context;
@@ -61,8 +68,8 @@ public class HttpRequest extends Thread {
         RequestFuture<String> future = RequestFuture.newFuture();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, request,future,future);
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                4000,
-                3,
+                1000,
+                2,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         _queue.add(stringRequest);

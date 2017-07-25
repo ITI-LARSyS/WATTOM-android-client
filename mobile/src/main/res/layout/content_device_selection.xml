@@ -13,24 +13,44 @@
     tools:context="com.example.filipe.socketcontroller.MainActivity"
     tools:showIn="@layout/activity_device_selection">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceLargePopupMenu"
-        android:text="Please select a target..."/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLargePopupMenu"
+                android:text="Please select a target..."/>
 
-    <Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:onClick="handleRefreshClick"
-    android:text="refresh"
-    />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="handleDebugClick"
-        android:text="debug"
-        />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="handleRefreshClick"
+                android:text="refresh"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Caralhinho"
+                android:onClick="handleTestClick"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="DEBUG"
+                android:onClick="handleDebugClick"/>
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

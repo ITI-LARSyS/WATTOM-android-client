@@ -38,7 +38,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
     private GoogleApiClient _client;
 
-    private boolean sensor_running = false;
+    private boolean _sensor_running = false;
 
     private Node _phone; // the connected device to send the message to
     //private int _count=0;
@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     public static final String WEAR_ACC_SERVICE = "acc";
 
     private long _last_push;
-    private int _sampling_diff = 20;        // alterei o sampling rate aqui
+    private long _sampling_diff = 40;        // alterei o sampling rate aqui
     private float _orientationVals[]={0,0,0};
     float[] _rotationMatrix = new float[16];
 
@@ -127,24 +127,19 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
        // float y = event.values[1];
 
 
-          //  _x_acc.setText(x+"");
-          //  _y_acc.setText(y+"");
-          //  _z_acc.setText(z+"");
-          //  _tms.setText(event.timestamp+"");
+
 
 
         //}
-           if(System.currentTimeMillis()-_last_push>_sampling_diff){
           //  Log.i(TAG,"Sending data");
 
           //  float[] data = {x,y};
             x = event.values[0];
             z = event.values[2];
             z = _factor*z;
-            sendMessage(x+"#"+z);
-           _last_push = System.currentTimeMillis();
-           // Log.i("DEBUG",x+","+y);
-      }
+
+        //    Log.i("DEBUG",x+","+z);
+
 
     }
 
@@ -155,22 +150,24 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
     public void handleSensorClick(View v){
 
-        if(v.getId() == R.id.start_sensor_btn && !sensor_running) {
+        if(v.getId() == R.id.start_sensor_btn && !_sensor_running) {
             _factor = _leftHanded.isChecked()?-1:1;
             _startSensorBtn.setText("Stop Sensor");
             _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
             Log.i(TAG, "Aqui starting sensor");
-            sensor_running = true;
+            _sensor_running = true;
+            new PushThread().start();
         }else{
             _startSensorBtn.setText("Start Sensor");
             _sensorManager.unregisterListener(this);
-            sensor_running = false;
+            _sensor_running = false;
 
         }
     }
 
     public void handleQuitClick(View v){
         _sensorManager.unregisterListener(this);
+        _sensor_running = false;
         this.finish();
     }
 
@@ -208,7 +205,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
         if (_phone != null && _client!= null && _client.isConnected()) {
             //   Log.d(TAG, "-- " + _client.isConnected());
             Wearable.MessageApi.sendMessage(
-                    _client, _phone.getId(), WEAR_ACC_SERVICE + "--" + key, null).setResultCallback(
+                    _client, _phone.getId(), WEAR_ACC_SERVICE + "" + key, null).setResultCallback(
 
                     new ResultCallback<MessageApi.SendMessageResult>() {
                         @Override
@@ -226,4 +223,22 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
         }
 
     }
+
+    private class PushThread extends Thread{
+
+        public void run(){
+
+            while(_sensor_running){
+
+                sendMessage(x+"#"+z);
+
+                try {
+                    Thread.sleep(_sampling_diff);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 }

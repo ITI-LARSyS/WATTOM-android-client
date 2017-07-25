@@ -14,6 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
@@ -42,9 +44,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     //communication stuff
     private boolean _started=false;
+    private boolean _updating=false;
 
     //average stuff for the data from the watch
-    private long   _lastAverage;
+    private long   _lastAverage = 0;
     private long _simulationSpeed;      // alterei isto
 
     //correlation stuff
@@ -78,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private int _target;
 
     //testar isto
-    //  boolean _new_acc[];
+      boolean _debug_thread = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                cleanUp();
             }
         });
 
@@ -116,31 +120,67 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _started = true;
 
         String merda = messageEvent.getPath();
-        String data = merda.replace("acc--", "");
+        String data = merda.replace("acc", "");
         String[] tokens = data.split("#");
         // Log.i(TAG,"message received from watch");
         try {
 
-            // if(System.currentTimeMillis()-_lastAverage>20) {  // alterei o total aqui
                 double x = Double.parseDouble(tokens[0]);
                 double z = Double.parseDouble(tokens[1])*-1;
                 _last_acc_x = x;
                 _last_acc_y = z;
-               // Log.i("PUSH","sensor");
-              //   Log.i("DEBUG","from watch "+_last_acc_x+","+_last_acc_y);
-            //    for(int i=0;i<_devices_count;i++)
-             //       _new_acc[i] = true;
-               // _lastAverage = System.currentTimeMillis();
-          //  }
+                testStuff(_last_acc_x,_last_acc_y);
+                // Log.i("WATCH","from watch "+_last_acc_x+","+_last_acc_y);
         } catch (NumberFormatException e) {
             Log.e(TAG, "format exception data " + data);
         }
     }
 
+    /*
+
+            NEW STUFF
+
+     */
+    private void push(int index, double[][] data,double x, double y){
+        if(index < WINDOW_SIZE){
+            data[0][index]=x;
+            data[1][index]=y;
+        }else{
+
+            int i=0;
+            for(i=1; i< WINDOW_SIZE; i++){
+                data[0][i-1]=data[0][i];
+                data[1][i-1]=data[1][i];
+            }
+            data[0][i-1]=x;
+            data[1][i-1]=y;
+        }
+    }
+
+    private void testStuff(double accx, double accy) {
+
+        //   Log.i("TESTSTUFF", _handlers.get(0).getPosition()[0] + "," + _handlers.get(0).getPosition()[1]+","+(accx-150)+","+(accy-40));
+
+       // if(System.currentTimeMillis()-_lastAverage>40){
+        for(int i=0;i<_devices_count && !_updating;i++){
+                _plug_data_indexes[i] = _plug_data_indexes[i] >= (WINDOW_SIZE - 1) ? WINDOW_SIZE : _plug_data_indexes[i] + 1;
+                push(_plug_data_indexes[i], _plug_target_data[i], _handlers.get(i).getPosition()[0], _handlers.get(i).getPosition()[1]);
+                push(_plug_data_indexes[i], _acc_data[i], accx, accy);
+    }
+            //_lastAverage=System.currentTimeMillis();
+        }
+   // }
+    /*
+
+
+                END OF NEW STUFF
+
+
+     */
     private void stopServices(){
 
-        for(PlugMotionBroadcastReceiver receiver : _receivers)
-            unregisterReceiver(receiver);
+      //  for(PlugMotionBroadcastReceiver receiver : _receivers)
+        //    unregisterReceiver(receiver);
 
         for(PlugMotionHandler handler : _handlers) {
             if (handler != null)
@@ -161,13 +201,41 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void handleDebugClick(View v){
 
-        Log.i("DEBUG","x,watch_x,y,watch_y");
-        for(int i=0;i<WINDOW_SIZE;i++){
+     //  Log.i("DEBUG","x,watch_x,y,watch_y");
+     //       for(int i=0;i<WINDOW_SIZE;i++){
             //PearsonsCorrelation pc = new PearsonsCorrelation();
-            Log.i("DEBUG",_plug_target_data[_target][0][i]+","+ _acc_data[_target][0][i]+","
-                    +_plug_target_data[_target][1][i]+","+_acc_data[_target][1][i]);
+    //        Log.i("DEBUG",_plug_target_data[_target][0][i]+","+ _acc_data[_target][0][i]+","
+      //              +_plug_target_data[_target][1][i]+","+_acc_data[_target][1][i]);
+      //  }
+
+        _debug_thread = !_debug_thread;
+    }
+
+    private void cleanUp(){
+        _acc_data = new double[_devices_count][2][WINDOW_SIZE];
+        _plug_target_data = new double[_devices_count][2][WINDOW_SIZE];
+
+        for(int i=0;i<_devices_count;i++){
+            for(int j=0;j<WINDOW_SIZE;j++){
+                _acc_data[i][0][j]=0;
+                _acc_data[i][1][j]=0;
+            }
         }
 
+        for(int i=0;i<_devices_count;i++){
+            for(int j=0;j<WINDOW_SIZE;j++){
+                _plug_target_data[i][0][j]=0;
+                _plug_target_data[i][1][j]=0;
+            }
+        }
+
+    }
+
+    public void handleTestClick(View v){
+
+
+       HttpRequest novo = new HttpRequest("http://192.168.8.113:3000/plug/2/selected/"+_target, getApplicationContext());
+       novo.start();
     }
 
     public void handleRefreshClick(View v){
@@ -180,9 +248,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _corrHandler = new CorrelationHandler();
         // _corrHandler.start();
 
-        _handlers = new ArrayList<PlugMotionHandler>();
-        _receivers = new ArrayList<>();
-        _filters = new ArrayList<>();
+        _handlers = new ArrayList<>();
+        //_receivers = new ArrayList<>();
+        //_filters = new ArrayList<>();
 
         _simulationSpeed = 40;                  // alterei aqui
         _acc_data = new double[_devices_count][2][WINDOW_SIZE];
@@ -193,20 +261,23 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         for(int i=0;i<_devices_count;i++)
             _new_acc[i]=false;
 */
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         for(int i=0;i<_devices_count;i++){
-            _handlers.add(new PlugMotionHandler(getApplicationContext(),(int)_simulationSpeed,i,url));
-            _receivers.add(new PlugMotionBroadcastReceiver(i));
-            _filters.add(new IntentFilter(PlugMotionHandler.DATA_KEY+i));
+            _handlers.add(new PlugMotionHandler(getApplicationContext(),(int)_simulationSpeed,i,url,queue));
+            //_receivers.add(new PlugMotionBroadcastReceiver(i));
+            //_filters.add(new IntentFilter(PlugMotionHandler.DATA_KEY+i));
         }
 
         for(int i=0;i<_devices_count;i++) {
             _handlers.get(i).start();
-            registerReceiver(_receivers.get(i),_filters.get(i));
+            //registerReceiver(_receivers.get(i),_filters.get(i));
         }
 
         _corrHandler.start();
         _correlationRunning = true;
-
+        _started = true;
+        _updating = false;
+        new PrintCurrentData().start();
     }
 
     @Override
@@ -251,6 +322,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _plug_data_indexes = new int[_devices_count];
 
             Log.i(TAG,"TARGET: "+_target);
+            _started = true;
+            _updating = false;
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -301,22 +375,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }
 
 
-        private void push(int index, double[][] data,double x, double y){
-            if(index < WINDOW_SIZE){
-                data[0][index]=x;
-                data[1][index]=y;
-            }else{
-
-                int i=0;
-                for(i=1; i< WINDOW_SIZE; i++){
-                    data[0][i-1]=data[0][i];
-                    data[1][i-1]=data[1][i];
-                }
-                data[0][i-1]=x;
-                data[1][i-1]=y;
-            }
-        }
-
         @Override
         public void onReceive(Context context, Intent intent) {
             if(_started) {
@@ -329,8 +387,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         push(_plug_data_indexes[i], _plug_target_data[i], intent.getDoubleExtra("x", -1), intent.getDoubleExtra("y", -1));
                         push(_plug_data_indexes[i], _acc_data[i], _last_acc_x, _last_acc_y);
                     }
-                 //   if(target ==_target)
-                   //     Log.i("PUSH","simulation");
+                    if(target ==_target)
+                       Log.i("PUSH","simulation");
                 }
             }
         }
@@ -370,8 +428,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
                 for(int i=0;i<_devices_count;i++){
 
+                  //  Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
 
-                    if (_correlations[0][i] > 0.8 && _correlations[1][i]>0.8) {
+                    if (_correlations[0][i] > 0.85 && _correlations[1][i]>0.85) {
                         updateCorrelations(i,_correlations_count);
                         Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
                         if(_correlations_count[i]==5) {
@@ -425,13 +484,16 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         @Override
         public void run(){
-            try {
-                Thread.sleep(1000);
+          // try {
+                _updating = true;
+                _started = false;
+               // Thread.sleep(1000);
                 getPlugsData(_url);
+
                // updateTarget(_url);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+           // } catch (InterruptedException e) {
+            //    e.printStackTrace();
+           // }
 
         }
 
@@ -448,6 +510,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             //  novo.start();
 
             try {
+                _updating = true;
+                _started = false;
+
                 HttpRequest novo = new HttpRequest(URL_PLUG+"/start/6", getApplicationContext());
                 novo.start();
                 novo.join();
@@ -464,9 +529,32 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
 
                 updateTarget(URL_PLUG+_plug_selected);
+
+               // Thread.sleep(3000);
+                _updating = false;
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private class PrintCurrentData extends Thread{
+
+        public void run(){
+
+            while(true){
+
+
+                try {
+                        //testStuff(_last_acc_x,_last_acc_y);
+                    sleep(_simulationSpeed);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
         }
     }
 
