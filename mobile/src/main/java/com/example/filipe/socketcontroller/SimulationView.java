@@ -82,7 +82,7 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     private void drawCircles(Canvas c){
 
 
-        c.drawCircle((x+2)*100, ((y*-1)+2)*100, 10f, p);
+        c.drawCircle((x+2)*120, ((y*-1)+2)*120, 20f, p);
 
     }
 

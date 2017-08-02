@@ -1,6 +1,8 @@
 package com.example.filipe.socketcontroller;
 
 import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -92,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     boolean _debug_thread = false;
     SimulationView _simuView;
 
+    //for the study
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,14 +113,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
         });
 
-        _counter = (TextView)findViewById(R.id.counter);
-        _pId     = (EditText)findViewById(R.id.participant_id);
-        _simuView = (SimulationView)findViewById(R.id.simulation_view);
-        _client = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+        _counter    = (TextView)findViewById(R.id.counter);
+        _pId        = (EditText)findViewById(R.id.participant_id);
+        _simuView   = (SimulationView)findViewById(R.id.simulation_view);
+        _client     = new GoogleApiClient.Builder(this)
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
 
         _client.connect();
 
@@ -147,18 +151,18 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
 
         if(index < WINDOW_SIZE){
-            data[0][index]=x;
-            data[1][index]=y;
+            data[0][index] = x;
+            data[1][index] = y;
 
         }else{
 
             int i=0;
             for(i=1; i< WINDOW_SIZE; i++){
-                data[0][i-1]=data[0][i];
-                data[1][i-1]=data[1][i];
+                data[0][i-1] = data[0][i];
+                data[1][i-1] = data[1][i];
             }
-            data[0][i-1]=x;
-            data[1][i-1]=y;
+            data[0][i-1] = x;
+            data[1][i-1] = y;
         }
     }
 
@@ -250,10 +254,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _handlers = new ArrayList<>();
         _aggregators = new ArrayList<>();
 
-        _simulationSpeed = 40;   // alterei aqui
-        _acc_data = new double[_devices_count][2][WINDOW_SIZE];
-        _plug_target_data = new double[_devices_count][2][WINDOW_SIZE];
-        _plug_data_indexes = new int[_devices_count];
+        _simulationSpeed    = 40;   // alterei aqui
+        _acc_data           = new double[_devices_count][2][WINDOW_SIZE];
+        _plug_target_data   = new double[_devices_count][2][WINDOW_SIZE];
+        _plug_data_indexes  = new int[_devices_count];
 
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         for(int i=0;i<_devices_count;i++){
@@ -306,13 +310,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     Log.wtf(TAG, " não devia dar prob aqui");
                 }
             }
-            _acc_data = new double[_devices_count][2][WINDOW_SIZE];
-            _plug_target_data = new double[_devices_count][2][WINDOW_SIZE];
-            _plug_data_indexes = new int[_devices_count];
+            _acc_data           = new double[_devices_count][2][WINDOW_SIZE];
+            _plug_target_data   = new double[_devices_count][2][WINDOW_SIZE];
+            _plug_data_indexes  = new int[_devices_count];
 
             Log.i(TAG,"TARGET: "+_target);
-            _started = true;
-            _updating = false;
+            _started            = true;
+            _updating           = false;
             _correlationRunning = true;
             new CorrelationHandler().start();
 
@@ -375,7 +379,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         @Override
         public void run(){
 
-            _correlations = new double[2][_devices_count];
+            _correlations       = new double[2][_devices_count];
             _correlations_count = new int[_devices_count];
 
             while(_correlationRunning){
@@ -388,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 for(int i=0;i<_devices_count;i++){
 
 
-                    if (_correlations[0][i] > 0.8 && _correlations[1][i]>0.8) {
+                    if (_correlations[0][i] > 0.85 && _correlations[1][i]>0.85) {
                         updateCorrelations(i,_correlations_count);
                         Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
                         if(_correlations_count[i]==5) {
@@ -417,6 +421,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 if (i == _target){
                                     HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + i, getApplicationContext());
                                     selected_request.start();
+                                    try {
+                                        Thread.sleep(1500);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    new UpdateStudy(3).start();
+
                                 }else
                                     Log.i(TAG,"Wrong correlation");
                             }
@@ -450,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 getPlugsData(_url);
                 Thread.sleep(1000);
                 handleStartClick(_url);
-                Thread.sleep(3000);
+                Thread.sleep(1000);
                 _correlationRunning = true;
                 _started = true;
                 _updating = false;
@@ -535,7 +546,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     _plug_data_indexes[_led_target] = _plug_data_indexes[_led_target] >= (WINDOW_SIZE - 1) ? WINDOW_SIZE : _plug_data_indexes[_led_target] + 1;
                     push(_plug_data_indexes[_led_target], _plug_target_data[_led_target], _handlers.get(_led_target).getPosition()[0], _handlers.get(_led_target).getPosition()[1]);
                     push(_plug_data_indexes[_led_target], _acc_data[_led_target], _last_acc_x,_last_acc_y);
-                    if((_led_target==_target)&&_debug_thread) {
+
+                    if((_led_target==_target)&&_debug_thread) {     // used to print the simulation on the screen
                         _simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1]);
                     }
                 }
@@ -559,39 +571,51 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             super.handleMessage(msg);
             if(msg.arg1==1){
                 _counter.setText(msg.arg2+"");
+            }else if(msg.arg1==2){
+                _counter.setText("Start !!");
             }
 
         }
     }
-    /*
-        //correlation stuff
-    private class PlugMotionBroadcastReceiver extends BroadcastReceiver {
 
-        int target;
+    private class UpdateStudy extends Thread{
 
-        public PlugMotionBroadcastReceiver(int target){
-            this.target = target;
+        private int _countDown;
+
+        public UpdateStudy(int countDown){
+            _countDown = countDown;
         }
-
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if(_started) {
+        public void run(){
+            try {
+                // refreshes the view
+                RefreshTarget thread = new RefreshTarget();
+                thread.start();
+                thread.join();
 
-
-                for(int i=0;i<_devices_count;i++){
-                    if(target==i){
-                        //_new_acc[i] = false;
-                        _plug_data_indexes[i] = _plug_data_indexes[i] >= (WINDOW_SIZE - 1) ? WINDOW_SIZE : _plug_data_indexes[i] + 1;
-                        push(_plug_data_indexes[i], _plug_target_data[i], intent.getDoubleExtra("x", -1), intent.getDoubleExtra("y", -1));
-                        push(_plug_data_indexes[i], _acc_data[i], _last_acc_x, _last_acc_y);
-                    }
-                    if(target ==_led_target)
-                       Log.i("PUSH","simulation");
+                // count down
+                for(int i=_countDown;i>=0;i--) {
+                    Message msg = Message.obtain();
+                    msg.arg1 = 1;
+                    msg.arg2 = i;
+                    _ui_handler.sendMessage(msg);
+                    Thread.sleep(1000);
+                    Log.i(TAG,"Sleeping "+i+" "+_countDown);
                 }
+
+                // Start!
+                Message msg = Message.obtain();
+                msg.arg1=2;
+                _ui_handler.sendMessage(msg);
+
+                // Beep to start
+                ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+                toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP,150);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
-     */
-
 }
