@@ -8,20 +8,57 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.filipe.socketcontroller.MainActivity"
     tools:showIn="@layout/activity_device_selection">
 
     <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="0.5"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Participant ID:"></TextView>
+        <EditText
+            android:id="@+id/participant_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <Button
+            android:layout_marginTop="30dp"
+            android:text="Start Study"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="handleStartStudyClick"/>
+        <TextView
+            android:layout_marginTop="30dp"
+            android:id="@+id/counter"
+            android:layout_width="match_parent"
+            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="-"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="30dp"
         android:orientation="horizontal">
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="0.5"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="vertical">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -39,18 +76,40 @@
                 android:layout_height="wrap_content"
                 android:text="Caralhinho"
                 android:onClick="handleTestClick"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="0.5"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+
             <Button
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="DEBUG"
+                android:id="@+id/start_thread"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Star Debug Thread"
                 android:onClick="handleDebugClick"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="force_update"
+                android:onClick="handleUpdateClick"/>
+
         </LinearLayout>
+    </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+        <Button
+            android:id="@+id/debug_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DEBUG"
+            android:onClick="handleDebugClick"/>
+
+        <com.example.filipe.socketcontroller.SimulationView
+            android:id="@+id/simulation_view"
+            android:layout_width="500dp"
+            android:layout_height="500dp" />
     </LinearLayout>
 
 </LinearLayout>

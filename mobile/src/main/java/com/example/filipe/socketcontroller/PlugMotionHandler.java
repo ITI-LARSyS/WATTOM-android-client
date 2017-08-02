@@ -34,7 +34,8 @@ public class PlugMotionHandler extends Thread{
     private int _ajustedVelocity;
     private int _orientation;
     private boolean _isRunning = true;
-    private float _currentLED = -1;
+
+    public float _currentLED = -1;
     private int _period = 50;
     private int _resolution; // factor to multiply by the number of leds, to increase the resolution from the 12
 
@@ -119,6 +120,10 @@ public class PlugMotionHandler extends Thread{
         _isRunning = false;
     }
 
+    public float getCurrentLed(){
+        return _currentLED;
+    }
+
     public int get_ajustedVelocity() {
         return _ajustedVelocity;
     }
@@ -126,6 +131,7 @@ public class PlugMotionHandler extends Thread{
     public void set_target(int _target) {
         this._target = _target;
     }
+
     private void handlePlugMessage(JSONObject data){
 
         try {
@@ -135,11 +141,9 @@ public class PlugMotionHandler extends Thread{
             _orientation = _orientation == 1 ? 1 : -1;
             _period          = N_LEDS*_velocity;
             _resolution      = Math.round(_period/_ajustedVelocity);
-            /*hack*/
-            _currentLED = _currentLED + _orientation;
+            _currentLED = _currentLED - _orientation;
             _currentLED = _currentLED == 12 ? 0 : _currentLED;
             _currentLED = _currentLED == -1 ? 11 : _currentLED;
-            /*hack*/
            // Log.i("ORIENTATION",": "+_orientation);
             //_ajustedVelocity = Math.round(_period/(float)_resolution);
 
@@ -165,10 +169,7 @@ public class PlugMotionHandler extends Thread{
             JSONArray json_array = new JSONArray(data);
             JSONObject json_message = json_array.getJSONObject(_led_target);
             handlePlugMessage(json_message);
-
-            long diff = System.currentTimeMillis()-current_time;
-            // Log.i(TAG, "request duration:"+diff);
-            return diff;
+            return  (System.currentTimeMillis()-current_time);
         }catch(InterruptedException e){
             e.printStackTrace();
             return 0;
@@ -177,12 +178,13 @@ public class PlugMotionHandler extends Thread{
             return 0;
         }
     }
+
     @Override
     public void run() {
 
         // HACK COMENTA MELHOR DEPOIS
         try {
-            sleep(_led_target*50);
+            sleep(_led_target*10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -194,33 +196,20 @@ public class PlugMotionHandler extends Thread{
         long compensation = getPlugData();
         counter = Math.round((compensation*(_resolution/N_LEDS))/_velocity)*2;
         int limit = _resolution/N_LEDS;
-        //Log.wtf(TAG, "compensation returned counter as: "+counter+ " ,lmit: "+limit);
         int total = 0;
-        //Log.i(TAG,"total "+total+" "+_isRunning);
         _raio =12/(2*Math.PI);
 
-        int max = 300;  // alterei o total aqui
+        int max = 400;  // alterei o total aqui
 
         Log.wtf(TAG,"Limit:"+limit+" Resolution:"+_resolution);
 
         while (_isRunning){
-            if(total<max){
+            if(total<_resolution*2){
                 milis2 = System.currentTimeMillis();
                 if(counter == limit) {
                     _currentLED = _currentLED + _orientation;
                     _currentLED = _currentLED == 12 ? 0 : _currentLED;
                     _currentLED = _currentLED == -1 ? 11 : _currentLED;
-
-                 /*  if(_orientation==1)
-                        _temp_val = ((float)counter/((float)_resolution/(float)N_LEDS)+_currentLED);
-                    else
-                        _temp_val = (_currentLED-(float)counter/((float)_resolution/(float)N_LEDS));
-
-                    _angle = (_temp_val/_raio);
-                    _x = _raio*Math.sin(_angle);
-                    _y = _raio*Math.cos(_angle);*/
-
-                    //Log.e(TAG, "Current LED: " + _currentLED+ " target "+_led_target);//+" "+counter+" tms diff (has to be the same as velocity) "+(System.currentTimeMillis()-milis));
                     counter = 1;
                 }else{
                     counter++;
@@ -232,17 +221,9 @@ public class PlugMotionHandler extends Thread{
                     _angle = (_temp_val/_raio);
                     _x = _raio*Math.sin(_angle);
                     _y = _raio*Math.cos(_angle);
-                  //  Log.wtf(TAG, "teste-"+_led_target+","+_x+","+_y);
-                  /*  _dataPackage.putExtra("x",_x);
-                    _dataPackage.putExtra("y",_y);
-                    _dataPackage.putExtra(TARGET,_led_target);
-                    _dataPackage.setAction(DATA_KEY+_led_target);
-                    _appCtx.sendBroadcast(_dataPackage);*/
-                   // if(_led_target==0)
-                     //   Log.i(TAG,"DEBUG: pushing simulation "+_led_target);
                 }
                 try {
-                    newVel =(_ajustedVelocity-(System.currentTimeMillis()-milis2));
+                    newVel =_ajustedVelocity-(System.currentTimeMillis()-milis2);
                     total++;
                     newVel=newVel<0?0:newVel;
                    if(newVel>0)
@@ -253,13 +234,12 @@ public class PlugMotionHandler extends Thread{
                     e.printStackTrace();
                 }
             }else{
-//                Log.i(TAG,"------readjusting-------");
+                Log.i(TAG,"------readjusting-------");
                 compensation = getPlugData();
                 counter = Math.round((compensation*(_resolution/N_LEDS))/_velocity)*2;
                 limit = _resolution/N_LEDS;
                 total = 0;
             }
         }
-
     }
 }
