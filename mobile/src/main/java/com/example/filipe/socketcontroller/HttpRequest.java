@@ -68,8 +68,8 @@ public class HttpRequest extends Thread {
         RequestFuture<String> future = RequestFuture.newFuture();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, request,future,future);
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                1000,
-                2,
+                500,
+                5,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         _queue.add(stringRequest);

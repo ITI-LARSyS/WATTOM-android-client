@@ -142,6 +142,7 @@ public class PlugMotionHandler extends Thread{
             _period          = N_LEDS*_velocity;
             _resolution      = Math.round(_period/_ajustedVelocity);
             _currentLED = _currentLED - _orientation;
+
             _currentLED = _currentLED == 12 ? 0 : _currentLED;
             _currentLED = _currentLED == -1 ? 11 : _currentLED;
            // Log.i("ORIENTATION",": "+_orientation);
@@ -163,7 +164,7 @@ public class PlugMotionHandler extends Thread{
         try {
             _request = new HttpRequest(_server_url, _appCtx,_queue);
             _request.start();
-            Log.i(TAG,"--- RUNNING COLOR REQUEST : target "+_led_target+" ---");
+            //Log.i(TAG,"--- RUNNING COLOR REQUEST : target "+_led_target+" ---");
             _request.join();
             String data = _request.getData();
             JSONArray json_array = new JSONArray(data);
@@ -234,7 +235,7 @@ public class PlugMotionHandler extends Thread{
                     e.printStackTrace();
                 }
             }else{
-                Log.i(TAG,"------readjusting-------");
+               // Log.i(TAG,"------readjusting-------");
                 compensation = getPlugData();
                 counter = Math.round((compensation*(_resolution/N_LEDS))/_velocity)*2;
                 limit = _resolution/N_LEDS;
