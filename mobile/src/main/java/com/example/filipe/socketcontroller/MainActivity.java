@@ -471,20 +471,24 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 msg.arg1 = 3;
                 _ui_handler.sendMessage(msg);
 
-                HttpRequest novo = new HttpRequest(URL_PLUG+"/start/6", getApplicationContext(),_queue);
-                novo.start();
-                novo.join();
+                // Thread.sleep(1000);
 
-                Thread.sleep(400);
+                //   refresh = new HttpRequest(URL_PLUG+"/start/6", getApplicationContext(),_queue);
+                // refresh.start();
+                //    refresh.join();
 
-                novo = new HttpRequest(URL_PLUG+_plug+"/selected", getApplicationContext(),_queue);
-                novo.start();
-                novo.join();
+                Thread.sleep(1000);
+
+                HttpRequest refresh = new HttpRequest(URL_PLUG+_plug+"/refresh/", getApplicationContext(),_queue);
+                refresh.start();
+                refresh.join();
+
+                Thread.sleep(200);
 
                 for(PlugMotionHandler tes: _handlers) {
                     Log.i(TAG,"forcing the update of the handlers");
                     tes.forceUpdate();
-                    Thread.sleep(120);
+                    Thread.sleep(60);
                 }
 
                 updateTarget(URL_PLUG+_plug);
@@ -566,7 +570,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 thread.start();
                 thread.join();
                 // count down
-                for(int i=_countDown;i>=0;i--) {
+                for(int i=_countDown;i>=1;i--) {
                     Message msg = Message.obtain();
                     msg.arg1 = 1;
                     msg.arg2 = i;
@@ -612,8 +616,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlations_count = new int[_devices_count];
 
             while(_correlationRunning){
-                  if(_countingTime)       // check if we are counting time in the current matching process
-                      checkRunningTime();
+                if(_countingTime)       // check if we are counting time in the current matching process
+                    checkRunningTime();
 
                 for(int i=0;(i<_devices_count) && (_plug_data_indexes[_target] == WINDOW_SIZE);i++){
                     _correlations[0][i] = pc.correlation(_plug_target_data[i][0], _acc_data[i][0]);
@@ -657,13 +661,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
                 toneGen1.startTone(ToneGenerator.TONE_CDMA_SOFT_ERROR_LITE,150);
                 Log.wtf("RUNNING TIME","... OVERTIME ...");
-                updateTarget(_target,false);
+                if(_countingTime)       // make sure we do not do this while other updates are going on
+                    updateTarget(_target,false);
                 return false;
             }else
                 return true;
         }
 
-        private void updateTarget(int led_target, boolean match){
+        private synchronized void updateTarget(int led_target, boolean match){
             _countingTime     = false;
             _aquisition_time = System.currentTimeMillis()-_aquisition_time;
             _studyResult = _studyResult +"\n"+_participant+","+_target_selection+","+_aquisition_time+","+_angles[_angleCount]+","+_pointing+","+(System.currentTimeMillis());
@@ -673,44 +678,49 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
                     selected_request.start();
                     selected_request.join();
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
+                    Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
+                     Thread.sleep(1000);
+               } catch (InterruptedException e) {
                     e.printStackTrace();
                }
             }
-          if(_updateStudyWorker==null || !_updateStudyWorker.isAlive()) {
-                 _trialCount++;
-                  Log.wtf("Corr", "trialCount = "+_trialCount);
+            if(_updateStudyWorker==null || !_updateStudyWorker.isAlive()) {
+                _trialCount++;
+                Log.wtf("Corr", "trialCount = "+_trialCount);
 
-              Message msg = Message.obtain();
-              msg.arg1= 0;
-              _ui_handler.sendMessage(msg);
+                Message msg = Message.obtain();
+                msg.arg1= 0;
+                _ui_handler.sendMessage(msg);
 
-              msg = Message.obtain();
-              msg.arg1 = 5;
-              msg.arg2 = _trialCount;
-              _ui_handler.sendMessage(msg);
+                msg = Message.obtain();
+                msg.arg1 = 5;
+                msg.arg2 = _trialCount;
+                _ui_handler.sendMessage(msg);
 
-              // if(_trialCount==3){
-               if(_trialCount==21){
+                // if(_trialCount==1){
+                if(_trialCount==21){
 
-                    _updateStudyWorker = new UpdateStudy(10);
-                    _updateStudyWorker.start();
                     _trialCount = 0;
                     _angleCount++;
 
                     msg = Message.obtain();
                     msg.arg1= 4;
-                    msg.arg2 = _angleCount;
+                    msg.arg2 = _angleCount+1;
                     _ui_handler.sendMessage(msg);
 
-                    //Log.wtf("Corr", "angle= "+_angles[_angleCount]);
+                    Log.wtf("Corr", "angle count="+_angleCount);
 
-                    if(_angle==5){
+                    if(_angleCount==6){
                         msg = Message.obtain();
                         msg.arg1= 99;
                         _ui_handler.sendMessage(msg);
-                        //onStop();
+                        Log.wtf("Corr", "AQUI");
+
+                        stopServices();
+                        _correlationRunning = false;
+                    }else{
+                        _updateStudyWorker = new UpdateStudy(10);
+                        _updateStudyWorker.start();
                     }
                 }else{
                     _updateStudyWorker = new UpdateStudy(3);
@@ -739,6 +749,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _trial_field.setText("Trial "+msg.arg2+" out of 21");
             }else if(msg.arg1==99){
                 _counter.setText("Thank you");
+                _instructions.setText("-");
             }
 
         }

@@ -68,14 +68,14 @@ public class HttpRequest extends Thread {
         RequestFuture<String> future = RequestFuture.newFuture();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, request,future,future);
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(
-                500,
+                2500,
                 5,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         _queue.add(stringRequest);
 
         try {
-           // Log.e(TAG, "-----   running request  ------");
+            Log.e(TAG, "-----   running  request  ------");
             String response = future.get();
             parseData(response);
         }catch (Exception e){

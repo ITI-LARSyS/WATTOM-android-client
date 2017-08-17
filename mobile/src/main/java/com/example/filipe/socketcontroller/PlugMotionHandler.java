@@ -205,7 +205,7 @@ public class PlugMotionHandler extends Thread{
         Log.wtf(TAG,"Limit:"+limit+" Resolution:"+_resolution);
 
         while (_isRunning){
-            if(total<_resolution*2){
+            if(total<_resolution*1.5){
                 milis2 = System.currentTimeMillis();
                 if(counter == limit) {
                     _currentLED = _currentLED + _orientation;
