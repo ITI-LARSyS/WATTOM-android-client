@@ -7,6 +7,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.WatchViewStub;
@@ -54,6 +55,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     float z;
     private int _factor;
 
+    PowerManager.WakeLock cpuWakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +94,11 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
         _client.connect();
 
         Log.i(TAG, "On resume called");
+
+        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+        cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        cpuWakeLock.acquire();
+
        // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
     }
 
@@ -135,10 +142,12 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
           //  float[] data = {x,y};
             x = event.values[0];
+           // _x_acc.setText(x+"");
             z = event.values[2];
             z = _factor*z;
+           // _y_acc.setText(z+"");
 
-        //    Log.i("DEBUG",x+","+z);
+//            Log.i("DEBUG",x+","+z);
 
 
     }
@@ -158,6 +167,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
             _sensor_running = true;
             new PushThread().start();
         }else{
+            cpuWakeLock.release();
             _startSensorBtn.setText("Start Sensor");
             _sensorManager.unregisterListener(this);
             _sensor_running = false;
@@ -231,6 +241,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
             while(_sensor_running){
 
                 sendMessage(x+"#"+z);
+               // Log.i("DEBUG",x+"#"+z);
 
                 try {
                     Thread.sleep(_sampling_diff);

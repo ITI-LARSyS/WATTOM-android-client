@@ -20,6 +20,9 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     float x;
     float y;
 
+    float x2;
+    float y2;
+
     Paint p;
 
     public SimulationView(Context context, AttributeSet attrs) {
@@ -84,11 +87,15 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
 
         c.drawCircle((x+2)*120, ((y*-1)+2)*120, 20f, p);
 
+        c.drawCircle((x2+2), ((y2*-1)+2), 20f, p);
+
     }
 
-    public void setCoords(float x, float y){
+    public void setCoords(float x, float y,float x2, float y2){
         this.x = x;
         this.y = y;
+        this.x2 = x2;
+        this.y2 = y2;
         requestRender();
     }
 

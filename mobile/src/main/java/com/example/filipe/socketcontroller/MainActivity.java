@@ -76,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     //plugs url for notifying good correlation
     private final static String BASE_URL = "http://192.168.8.113:3000";
+  //  private final static String BASE_URL = "http://192.168.1.7:3000";
+
     private final static String PLUGS_URL =BASE_URL+"/plug/";
     private  String SELECTED_URL =BASE_URL+"/plug/%/selected/";
     private  String PLUG_URL =BASE_URL+"/plug/%";
@@ -113,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     int _plug     = 3;
     int _trialCount = 0;
     int _angleCount = 0;
-    final int _angles[]={15, 30, 45, 60, 75, 90};
+    final int _angles[]={1, 2, 3, 4, 5, 6};
     private TextView _instructions;
     private TextView _condition;
     private TextView _trial_field;
@@ -173,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             double z = Double.parseDouble(tokens[1])*-1;
             _last_acc_x = x;            // updatre the global variables to be used elsewhere in the code
             _last_acc_y = z;
-            //  Log.i(TAG,"got data from watch");
+             Log.i(TAG,"got data from watch x "+x+","+z);
         } catch (NumberFormatException e) {
             Log.e(TAG, "format exception data " + data);
         }
@@ -200,10 +202,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private void stopServices(){
 
-        for(PlugMotionHandler handler : _handlers) {
-            if (handler != null)
-                handler.stopSimulation();
-            Log.i(TAG, "stoping simulation");
+        if(_handlers!=null){
+            for(PlugMotionHandler handler : _handlers) {
+                if (handler != null)
+                    handler.stopSimulation();
+                Log.i(TAG, "stoping simulation");
+            }
         }
     }
 
@@ -277,8 +281,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void handleRefreshClick(View v){
 
-        new RefreshTarget().start();
-
+        _corrHandler.updateTarget(0,false);
     }
 
     private void cleanUp(){
@@ -443,9 +446,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _updating = false;
                 _corrHandler.start();
 
-                for(PlugMotionHandler tes: _handlers) {
+                for(int i=1;i<_handlers.size();i++) {
                     Log.d(TAG,"forcing the update of the handlers");
-                    tes.forceUpdate();
+                    _handlers.get(i).forceUpdate();
                     Thread.sleep(100);
                 }
                 _aquisition_time = System.currentTimeMillis()+5000;
@@ -483,13 +486,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 refresh.start();
                 refresh.join();
 
-                Thread.sleep(200);
+                Thread.sleep(300);
 
                 for(PlugMotionHandler tes: _handlers) {
                     Log.i(TAG,"forcing the update of the handlers");
                     tes.forceUpdate();
                     Thread.sleep(60);
                 }
+
+                Thread.sleep(100);
 
                 updateTarget(URL_PLUG+_plug);
 
@@ -538,7 +543,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     push(_plug_data_indexes[_led_target], _acc_data[_led_target], _last_acc_x,_last_acc_y);
 
                     if((_led_target==_target)&&_debug_thread) {     // used to print the simulation on the screen
-                        _simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1]);
+                        _simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1],(float)_last_acc_x,(float)_last_acc_y);
                     }
                 }
                 try {
@@ -577,7 +582,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     _ui_handler.sendMessage(msg);
                     Thread.sleep(1000);
                     Log.i(TAG,"Sleeping "+i+" "+_countDown);
+                   // _handlers.get(0).forceUpdate();
                 }
+                //meio hack
+
                 // Start!
                 Message msg = Message.obtain();
                 msg.arg1=2;
@@ -586,6 +594,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
                 toneGen1.startTone(ToneGenerator.TONE_CDMA_CALLDROP_LITE,150);
                 // reset the vars that count the aquisition time
+                _handlers.get(0).forceUpdate();
+
                 _countingTime    = true;
                 _updating        = false;
                 _aquisition_time = System.currentTimeMillis();
@@ -624,11 +634,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     _correlations[1][i] = pc.correlation(_plug_target_data[i][1], _acc_data[i][1]);
                 }
                 for(int i=0;i<_devices_count;i++){
-                    if ((_correlations[0][i] > 0.85 && _correlations[0][i] < 0.9999) && (_correlations[1][i]>0.85 &&  _correlations[1][i]<0.9999)) {  // sometimes at the start we get 1.0 we want to avoid that
+                    Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
+
+                    if ((_correlations[0][i] > 0.8 && _correlations[0][i] < 0.9999) && (_correlations[1][i]>0.8 &&  _correlations[1][i]<0.9999)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
-                        if(_correlations_count[i]==4) {
+                        if(_correlations_count[i]==3) {
                             _correlations_count[i] = 0;
                             if (i == _target){
                                 _target_selection = true;
@@ -744,7 +756,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }else if(msg.arg1==3){
                 _counter.setText("Please wait!!");
             }else if(msg.arg1==4){
-                _instructions.setText("Pease move to chair number "+msg.arg2);
+                _instructions.setText("Pease move to the next position");
             }else if(msg.arg1==5){
                 _trial_field.setText("Trial "+msg.arg2+" out of 21");
             }else if(msg.arg1==99){
