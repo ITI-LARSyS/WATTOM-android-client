@@ -11,8 +11,6 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-
 /**
  * Created by Filipe on 16/05/2017.
  */
@@ -115,7 +113,6 @@ public class PlugMotionHandler extends Thread{
 
     public double[] getPosition(){
         return new double[]{_x, _y};
-
     }
 
     public void stopSimulation(){
@@ -134,7 +131,7 @@ public class PlugMotionHandler extends Thread{
         this._target = _target;
     }
 
-    private void handlePlugMessage(JSONObject data){
+    public void handlePlugMessage(JSONObject data){
 
         try {
             _currentLED = data.getInt("position");

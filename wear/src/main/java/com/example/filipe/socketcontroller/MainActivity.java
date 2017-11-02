@@ -1,31 +1,49 @@
 package com.example.filipe.socketcontroller;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.service.chooser.ChooserTarget;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-public class MainActivity extends Activity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+import org.w3c.dom.Text;
+
+import java.util.TimerTask;
+import java.util.Timer;
+
+
+public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "Main Activity Watch";
     private TextView _x_acc;
@@ -36,6 +54,32 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     private Button _startSensorBtn;
     private SensorManager _sensorManager;
     private Sensor _sensor;
+
+    private Timer timer;
+    private TimerTask checkSecond;
+
+
+    //Done by Pedro to implement the schedule service
+    private Button _buttonStart;
+    private Button _buttonEnd;
+    private Button _buttonSchedule;
+    private TextView _StartTime;
+    private TextView _EndTime;
+    private TextView _consumo;
+    private int seconds;
+
+
+    private int Primeiroconsumo;
+    private int consumo;
+    private int primeiro;
+    private int consumoTotal;
+    private int count = 0;
+    private TimePicker InitialTime;
+    private TimePicker EndTime;
+    private LinearLayout chooseStartTime;
+    private LinearLayout chooseEndTime;
+    private boolean changedStart;
+    private boolean changedEnd;
 
     private GoogleApiClient _client;
 
@@ -50,10 +94,10 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     private long _sampling_diff = 40;        // alterei o sampling rate aqui
     private float _orientationVals[]={0,0,0};
     float[] _rotationMatrix = new float[16];
-
     float x;
     float z;
     private int _factor;
+    private int vez = 0;
 
     PowerManager.WakeLock cpuWakeLock;
 
@@ -62,6 +106,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
@@ -71,14 +116,54 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
                 _tms            = (TextView) stub.findViewById(R.id.tms_text_field);
                 _startSensorBtn = (Button) stub.findViewById(R.id.start_sensor_btn);
                 _leftHanded     = (CheckBox) stub.findViewById(R.id.left_handed);
+                _buttonSchedule = (Button) stub.findViewById(R.id.buttonSchedule);
+                _buttonStart    = (Button) stub.findViewById(R.id.buttonStart);
+                _buttonEnd      = (Button) stub.findViewById(R.id.buttonEnd);
+                _StartTime      = (TextView) stub.findViewById(R.id.HoraInicio);
+                _EndTime        = (TextView) stub.findViewById(R.id.HoraFim);
+                _consumo        =  (TextView) stub.findViewById(R.id.ConsumoInsert);
 
+                InitialTime         = (TimePicker) stub.findViewById(R.id.InitialPicker);
+                InitialTime.setIs24HourView(true);
+                InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                        _StartTime.setText(hourOfDay+":"+minute);
+                        changedStart = true;
+
+                    }
+                });
+                EndTime         = (TimePicker) stub.findViewById(R.id.EndPicker);
+                EndTime.setIs24HourView(true);
+                EndTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+
+                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                        _EndTime.setText(hourOfDay+":"+minute);
+                        changedEnd = true;
+                    }
+                });
+
+                chooseStartTime = (LinearLayout) stub.findViewById(R.id.PrimeiroTempo);
+                chooseEndTime   = (LinearLayout) stub.findViewById(R.id.UltimoTempo);
+                chooseStartTime.setVisibility(LinearLayout.GONE);
+                chooseEndTime.setVisibility(LinearLayout.GONE);
             }
         });
+        seconds = 0;
+        Primeiroconsumo=0;
+        consumo = 0;
+        primeiro = 0;
+        consumoTotal = 0;
 
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Wearable.MessageApi.removeListener(_client, this);
+        _client.disconnect();
     }
 
     @Override
@@ -92,6 +177,8 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
                     .build();
 
         _client.connect();
+        Wearable.MessageApi.addListener(_client, this);
+
 
         Log.i(TAG, "On resume called");
 
@@ -100,6 +187,14 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
         cpuWakeLock.acquire();
 
        // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
     }
 
     @Override
@@ -149,7 +244,23 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
 //            Log.i("DEBUG",x+","+z);
 
+    //Log.i(TAG,"sending data form watch");
+    }
 
+    public void ShowStartPicker(View v){
+        if(chooseStartTime.getVisibility() == LinearLayout.GONE){
+            chooseStartTime.setVisibility(LinearLayout.VISIBLE);
+        }else{
+            chooseStartTime.setVisibility(LinearLayout.GONE);
+        }
+    }
+
+    public void ShowEndPicker(View v){
+        if(chooseEndTime.getVisibility() == LinearLayout.GONE){
+            chooseEndTime.setVisibility(LinearLayout.VISIBLE);
+        }else{
+            chooseEndTime.setVisibility(LinearLayout.GONE);
+        }
     }
 
     @Override
@@ -167,18 +278,19 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
             _sensor_running = true;
             new PushThread().start();
         }else{
-            cpuWakeLock.release();
+            //cpuWakeLock.release();
             _startSensorBtn.setText("Start Sensor");
             _sensorManager.unregisterListener(this);
             _sensor_running = false;
-
         }
     }
 
     public void handleQuitClick(View v){
+        cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
         this.finish();
+
     }
 
     public void handleSendReadingsClick(View v){
@@ -197,6 +309,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
                         for (Node node : nodes.getNodes()) {
                             _phone = node;
                         }
+                        Log.i(TAG,"watch connected");
                     }
                 });
     }
@@ -234,6 +347,37 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
     }
 
+    public void Schedule(View v){
+        if(v.getId() ==  R.id.buttonSchedule){
+            String StartTime = _StartTime.getText().toString()+"/";
+            StartTime += _EndTime.getText().toString();
+            //Log.i("HOUR",StartTime);
+            if(vez == 0){
+                _buttonSchedule.setText("Confirm Start");
+                vez++;
+            }else if(vez == 1){
+                _buttonSchedule.setText("Confirm End");
+                vez++;
+            }else{
+                _buttonSchedule.setText("Set Schedule");
+                vez = 0;
+            }
+            sendMessage(StartTime);
+        }
+    }
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+        try{
+            String power = messageEvent.getPath();
+            _consumo.setText(power);
+        }catch(Exception e){
+            Log.i("Error",messageEvent.getPath());
+            e.printStackTrace();
+        }
+
+    }
+
     private class PushThread extends Thread{
 
         public void run(){
@@ -241,7 +385,7 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
             while(_sensor_running){
 
                 sendMessage(x+"#"+z);
-               // Log.i("DEBUG",x+"#"+z);
+                //Log.i("DEBUG",x+"#"+z);
 
                 try {
                     Thread.sleep(_sampling_diff);
@@ -251,5 +395,8 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
             }
         }
     }
+
+
+
 
 }

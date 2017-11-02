@@ -75,7 +75,7 @@ public class HttpRequest extends Thread {
         _queue.add(stringRequest);
 
         try {
-            Log.e(TAG, "-----   running  request  ------");
+            Log.e(TAG, "-----   running  request  ------ "+_url);
             String response = future.get();
             parseData(response);
         }catch (Exception e){
