@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,6 +17,8 @@ import android.os.PowerManager;
 import android.service.chooser.ChooserTarget;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.support.wearable.view.GridViewPager;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
@@ -37,7 +40,8 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import org.w3c.dom.Text;
+import org.eazegraph.lib.charts.PieChart;
+import org.eazegraph.lib.models.PieModel;
 
 import java.util.TimerTask;
 import java.util.Timer;
@@ -80,6 +84,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private LinearLayout chooseEndTime;
     private boolean changedStart;
     private boolean changedEnd;
+    private String [] ChartColor = new String[4];
 
     private GoogleApiClient _client;
 
@@ -92,7 +97,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private long _last_push;
     private long _sampling_diff = 40;        // alterei o sampling rate aqui
-    private float _orientationVals[]={0,0,0};
+    //private float _orientationVals[]={0,0,0};
     float[] _rotationMatrix = new float[16];
     float x;
     float z;
@@ -100,6 +105,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private int vez = 0;
 
     PowerManager.WakeLock cpuWakeLock;
+    private PieChart mPieChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +113,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         setContentView(R.layout.activity_main);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        ChartColor[0] = "#FE6DA8";
+        ChartColor[1] = "#56B7F1";
+        ChartColor[2] = "#CDA67F";
+        ChartColor[3] = "#FED70E";
+
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
@@ -121,7 +133,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 _buttonEnd      = (Button) stub.findViewById(R.id.buttonEnd);
                 _StartTime      = (TextView) stub.findViewById(R.id.HoraInicio);
                 _EndTime        = (TextView) stub.findViewById(R.id.HoraFim);
-                _consumo        =  (TextView) stub.findViewById(R.id.ConsumoInsert);
+                _consumo        = (TextView) stub.findViewById(R.id.ConsumoInsert);
 
                 InitialTime         = (TimePicker) stub.findViewById(R.id.InitialPicker);
                 InitialTime.setIs24HourView(true);
@@ -146,6 +158,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 chooseEndTime   = (LinearLayout) stub.findViewById(R.id.UltimoTempo);
                 chooseStartTime.setVisibility(LinearLayout.GONE);
                 chooseEndTime.setVisibility(LinearLayout.GONE);
+
+                mPieChart = (PieChart) stub.findViewById(R.id.piechart);
             }
         });
         seconds = 0;
@@ -369,8 +383,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         try{
-            String power = messageEvent.getPath();
-            _consumo.setText(power);
+            String [] valores = messageEvent.getPath().split("-");
+            if(valores.length > 1){
+                mPieChart.clearChart();
+                int tamanho = (valores.length - 1 )/ 2;
+                for(int i = 0; i < tamanho; i++){
+                    mPieChart.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[mPieChart.getChildCount()])));
+                }
+                mPieChart.startAnimation();
+            }else{
+                String power = messageEvent.getPath();
+                _consumo.setText(power);
+            }
         }catch(Exception e){
             Log.i("Error",messageEvent.getPath());
             e.printStackTrace();

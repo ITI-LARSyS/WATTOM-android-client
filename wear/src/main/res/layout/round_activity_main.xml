@@ -1,29 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.example.filipe.socketcontroller.MainActivity"
-    tools:deviceIds="wear_square">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              tools:context="com.example.filipe.socketcontroller.MainActivity"
+              tools:deviceIds="wear_square">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:weightSum="1">
 
+            <org.eazegraph.lib.charts.PieChart
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/piechart"
+                android:layout_width="match_parent"
+                android:layout_height="223dp"
+                android:padding="8dp"
+                app:egLegendTextSize="18sp"
+                app:egUsePieRotation="true"
+                app:egValueTextSize="36sp"/>
+
+            <TextView
+                android:id="@+id/textPercentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
             <Button
                 android:id="@+id/start_sensor_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="handleSensorClick"
-                android:text="Start sensor" />
+                android:text="Start sensor"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -34,13 +49,13 @@
                     android:id="@+id/textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Yaw acc: " />
+                    android:text="Yaw acc: "/>
 
                 <TextView
                     android:id="@+id/x_text_field"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="--" />
+                    android:text="--"/>
 
 
             </LinearLayout>
@@ -53,13 +68,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="pitch acc: " />
+                    android:text="pitch acc: "/>
 
                 <TextView
                     android:id="@+id/y_text_field"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="--" />
+                    android:text="--"/>
 
             </LinearLayout>
 
@@ -72,13 +87,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="roll acc: " />
+                    android:text="roll acc: "/>
 
                 <TextView
                     android:id="@+id/z_text_field"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="--" />
+                    android:text="--"/>
 
             </LinearLayout>
 
@@ -91,13 +106,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Timestamp: " />
+                    android:text="Timestamp: "/>
 
                 <TextView
                     android:id="@+id/tms_text_field"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="--" />
+                    android:text="--"/>
 
             </LinearLayout>
 
@@ -105,14 +120,14 @@
                 android:id="@+id/left_handed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="LeftHanded" />
+                android:text="LeftHanded"/>
 
             <Button
                 android:id="@+id/button3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="handleQuitClick"
-                android:text="Quit" />
+                android:text="Quit"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -124,14 +139,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="ShowStartPicker"
-                    android:text="Set start" />
+                    android:text="Set start"/>
 
                 <TextView
                     android:id="@+id/HoraInicio"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="00:00" />
+                    android:text="00:00"/>
 
             </LinearLayout>
 
@@ -159,14 +174,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="ShowEndPicker"
-                    android:text="Set End" />
+                    android:text="Set End"/>
 
                 <TextView
                     android:id="@+id/HoraFim"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="00:00" />
+                    android:text="00:00"/>
 
 
             </LinearLayout>
@@ -190,7 +205,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="Schedule"
-                android:text="Set Schedule" />
+                android:text="Set Schedule"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -202,14 +217,14 @@
                     android:id="@+id/ConsumoText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Consumo:" />
+                    android:text="Consumo:"/>
 
                 <TextView
                     android:id="@+id/ConsumoInsert"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="---" />
+                    android:text="---"/>
 
 
             </LinearLayout>

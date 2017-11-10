@@ -69,6 +69,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     //View stuff
     private TextView _counter;
     private EditText _pId;
+
+    private ArrayList<String> users;
+    private ArrayList<Float> powers;
+
     //private UI_Handler _ui_handler = new UI_Handler();
 
     // arrays to store acc and plug data
@@ -147,6 +151,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private TextView _condition;
     private TextView _trial_field;
 
+    //stats
+
+
 
     //On/Off
     private boolean IsOn = false;
@@ -155,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private Timer hourlyTimer;
     private Timer minTimer;
     private Timer PowerTimer;
+    private int index;
 
     private boolean isScheduleMode;
     private String Device_Name;
@@ -173,6 +181,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         setContentView(R.layout.activity_device_selection);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        users = new ArrayList <String>();
+        powers = new ArrayList <Float>();
 
         _counter        = (TextView) findViewById(R.id.counter);
         _pId            = (EditText) findViewById(R.id.participant_id);
@@ -233,14 +244,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 detailsStart = horas[1].split(":");
                 hourEnd = Integer.parseInt(detailsStart[0]);
                 minEnd = Integer.parseInt(detailsStart[1]);
-
-
                 HourScheduleStart = hourStart;
                 MinScheduleStart = minStart;
                 HourScheduleEnd = hourEnd;
                 MinScheduleEnd = minEnd;
-
-
 
                 if(hourStart > 12){
                     hourStart = hourStart - 12;
@@ -263,25 +270,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }else{
                     minEnd = Math.round(minEnd/5);
                 }
-                HttpRequest showStartTime;
-                showStartTime = new HttpRequest("http://192.168.8.113:3000/plug/SelectedTime/"+ hourStart+"-"+minStart, getApplicationContext(),_queue);
-                try{
-                    showStartTime.start();
-                    //showStartTime.join();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
+                SelectedTime(hourStart,minStart);
                 vez++;
             }else if(vez == 1){
-                HttpRequest showEndTime;
-                showEndTime = new HttpRequest("http://192.168.8.113:3000/plug/SelectedTime/"+hourEnd+"-"+minEnd, getApplicationContext(),_queue);
-                try{
-                    showEndTime.start();
-                    //showEndTime.join();
-                    wait(3000);
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
+                SelectedTime(hourEnd,minEnd);
                 vez++;
             }else {
                 HttpRequest CrazyLights = new HttpRequest("http://192.168.8.113:3000/plug/ScheduleMode", getApplicationContext(), _queue);
@@ -316,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             data[0][index] = x;
             data[1][index] = y;
         }else{
-            int i=0;
+            int i;
             for(i=1; i< WINDOW_SIZE; i++){
                 data[0][i-1] = data[0][i];
                 data[1][i-1] = data[1][i];
@@ -418,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             public void run () {
                 Date dNow = new Date();
                 SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
-                String data = dateFormat.format(dNow).toString();
+                String data = dateFormat.format(dNow);
                 String DataURL = EnergyData+data;
                 HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
                 try{
@@ -434,13 +426,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     percentage *= 100;
                     renewableEnergy =  Math.round(percentage);
                     String ChangeEnergy = ChangeEnergyURL+renewableEnergy;
-
-                    HttpRequest novo = new HttpRequest(ChangeEnergy, getApplicationContext() ,_queue);
-                    novo.start();
-                    novo.join();
-
+                    ChangeColorByEnergy(ChangeEnergy);
                     new RefreshData().start();
-
                 }catch(Exception e){
                     e.printStackTrace();
                 }
@@ -498,6 +485,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         e.printStackTrace();
                     }
                 }
+                ConsultUsers();
             }
         };
         PowerTimer.schedule(checkPower, 10 ,500*60/*0,5min = 30s*/);
@@ -580,6 +568,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "Connection to Google API client was suspended");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        ConsultUsers();
     }
 
     //com falha na conexao
@@ -672,6 +667,17 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         _client.connect();
+    }
+
+    private void SelectedTime(int hour, int min){
+        HttpRequest showTime;
+        showTime = new HttpRequest("http://192.168.8.113:3000/plug/SelectedTime/"+ hour+"-"+min, getApplicationContext(),_queue);
+        try{
+            showTime.start();
+            //showStartTime.join();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
 
@@ -975,6 +981,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             //Log.wtf("Corr", "aq time= "+_aquisition_time);
             for(int j = 0; j<_devices_count;j++){
                 if(match && led_target == _target[j]){
+                    index = j;
                     if(isScheduleMode){
                         TimerTask minTask = new TimerTask () {
                             @Override
@@ -984,65 +991,23 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
                                 HttpRequest selected_request;
                                 if(actualMinute == MinScheduleStart && actualHour == HourScheduleStart){
-                                    selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(led_target)+"/relay/0", getApplicationContext(),_queue);
-                                    IsOn = true;
-                                    try{
-                                        selected_request.start();
-                                        selected_request.join();
-                                    }catch(Exception e){
-                                        e.printStackTrace();
-                                    }
+                                    TurnOnAndAdd(index);
                                 }else if(actualMinute == MinScheduleEnd && actualHour == HourScheduleEnd){
-                                    selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(led_target)+"/relay/1", getApplicationContext(),_queue);
-                                    IsOn = false;
-                                    try{
-                                        selected_request.start();
-                                        selected_request.join();
-                                    }catch(Exception e){
-                                        e.printStackTrace();
-                                    }
+                                    TurnOffAndRemove(index);
                                 }
 
                             }
                         };
                         minTimer.schedule (minTask, 10 ,1000*60/*1min*/);
                         String ChangeEnergy = ChangeEnergyURL+renewableEnergy;
-                        HttpRequest novo = new HttpRequest(ChangeEnergy, getApplicationContext() ,_queue);
-                        try{
-                            novo.start();
-                            //novo.join();
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-                        new RefreshData().start();
+                        ChangeColorByEnergy(ChangeEnergy);
                         isScheduleMode = false;
                     }else{
                         try {
-                            HttpRequest selected_request;
-                            if(IsOn == true){
-                                selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
-                                selected_request.start();
-                                selected_request.join();
-                                IsOn = false;
-                                HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
-                                try{
-                                    enviaNome.start();
-                                    enviaNome.join();
-                                }catch (Exception e){
-                                    e.printStackTrace();
-                                }
+                            if(IsOn){
+                                TurnOffAndRemove(j);
                             }else{
-                                selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
-                                selected_request.start();
-                                selected_request.join();
-                                IsOn = true;
-                                HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
-                                try{
-                                    enviaNome.start();
-                                    enviaNome.join();
-                                }catch (Exception e){
-                                    e.printStackTrace();
-                                }
+                                TurnOnAndAdd(j);
                             }
                             //HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
                            // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
@@ -1054,6 +1019,50 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
             }
         }
+    }
+
+    public void ChangeColorByEnergy(String url){
+        HttpRequest novo = new HttpRequest(url, getApplicationContext() ,_queue);
+        try{
+            novo.start();
+            //novo.join();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        new RefreshData().start();
+    }
+
+    public void TurnOffAndRemove(int j){
+        try{
+        HttpRequest selected_request;
+        selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
+        selected_request.start();
+        selected_request.join();
+        IsOn = false;
+        HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
+
+            enviaNome.start();
+            enviaNome.join();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        ConsultUsers();
+    }
+
+    public void TurnOnAndAdd(int j){
+        try{
+        HttpRequest selected_request;
+        selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
+        selected_request.start();
+        selected_request.join();
+        IsOn = true;
+        HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
+            enviaNome.start();
+            enviaNome.join();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        ConsultUsers();
     }
 
 //    private class UI_Handler extends Handler{
@@ -1134,6 +1143,29 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             e.printStackTrace();
         } catch(InterruptedException e){
             e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void ConsultUsers(){
+        HttpRequest CheckUsers = new HttpRequest("http://192.168.8.113:3000/plug/Power", getApplicationContext(),_queue);
+        try{
+            CheckUsers.start();
+            CheckUsers.join();
+            String ArrayIdPower = CheckUsers.getData();
+            JSONArray IdPower = new JSONArray(ArrayIdPower);
+            for(int i = 0; i < IdPower.length(); i++){
+                JSONObject User = (JSONObject) IdPower.get(i);
+                users.add(User.get("id").toString());
+                powers.add(Float.parseFloat(User.get("power").toString()));
+            }
+            String message = "Power";
+            for(int i = 0; i < users.size(); i++){
+                String temp = "-"+users.get(i)+"-"+powers.get(i);
+                message += temp;
+            }
+            sendMessage(message);
         }catch (Exception e){
             e.printStackTrace();
         }
