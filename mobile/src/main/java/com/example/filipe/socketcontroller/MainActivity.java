@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private String _pointing =  "towards";
     private long _match_limit=7000;
     private boolean _countingTime=false;
-//    private UpdateStudy _updateStudyWorker;
+    //    private UpdateStudy _updateStudyWorker;
 //    int _plug     = 3;
 //    int _trialCount = 0;
 //    int _angleCount = 0;
@@ -574,7 +574,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     protected void onResume() {
         super.onResume();
 
-        ConsultUsers();
+        //ConsultUsers();
     }
 
     //com falha na conexao
@@ -596,13 +596,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             String data = novo.getData();
             JSONArray json_array = new JSONArray(data);
             _devices_count = json_array.length();
-
             for (int i = 0; i < _devices_count; i++) {
                 JSONObject obj = (JSONObject) json_array.get(i);
                 try {
                     if ((int) (obj.get("blue")) == 0)
                         _target = i;
-
                 } catch (JSONException e) {
                     Log.wtf(TAG, " não devia dar prob aqui");
                 }
@@ -610,23 +608,19 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _acc_data           = new double[_devices_count][2][WINDOW_SIZE];
             _plug_target_data   = new double[_devices_count][2][WINDOW_SIZE];
             _plug_data_indexes  = new int[_devices_count];
-
             Log.i(TAG,"TARGET: "+_target);
             _started            = true;
             _correlationRunning = true;
             new CorrelationHandler().start();
-
         }catch (Exception e){
             Log.wtf("UPDATE","Exception aqui");
             e.printStackTrace();
         }
     }
-
     //Envia um pedido HTTTP recebe dados e adiciona as plugs que existir
     private void getPlugsData(String server_url){
         try {
             _plug_names = new ArrayList<>();
-
             HttpRequest novo = new HttpRequest(server_url, getApplicationContext());
             novo.start();
             novo.join();
@@ -639,10 +633,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 try {
                     if ((int) (obj.get("blue")) == 0)
                         _target = i;
-
                     _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
                     Log.i(TAG, "plug "+_plug_names.get(i));
-
                 }catch (JSONException e){
                     Log.wtf(TAG," não devia dar prob aqui");
                 }
@@ -917,7 +909,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlations_count = new int[_devices_count];
             while(_correlationRunning){
                 //if(_countingTime)     // check if we are counting time in the current matching process
-                 //   checkRunningTime();
+                //   checkRunningTime();
                 /**
                  *  -0.1 to 0.1 indicates no linear correlation
                  -0.5 to -0.1 or 0.1 to 0.5 indicates a “weak” correlation
@@ -932,7 +924,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     if ((_correlations[0][i] > 0.8 && _correlations[0][i] < 0.9999) && (_correlations[1][i]>0.8 &&  _correlations[1][i]<0.9999)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
-                       // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
+                        // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
                         if(_correlations_count[i]==3) {
                             _correlations_count[i] = 0;
                             //if (i == _target[i]){
@@ -995,7 +987,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 }else if(actualMinute == MinScheduleEnd && actualHour == HourScheduleEnd){
                                     TurnOffAndRemove(index);
                                 }
-
                             }
                         };
                         minTimer.schedule (minTask, 10 ,1000*60/*1min*/);
@@ -1010,12 +1001,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 TurnOnAndAdd(j);
                             }
                             //HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
-                           // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
+                            // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
+                    return;
                 }
             }
         }
@@ -1034,12 +1026,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void TurnOffAndRemove(int j){
         try{
-        HttpRequest selected_request;
-        selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
-        selected_request.start();
-        selected_request.join();
-        IsOn = false;
-        HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
+            HttpRequest selected_request;
+            selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
+            selected_request.start();
+            selected_request.join();
+            IsOn = false;
+            HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
 
             enviaNome.start();
             enviaNome.join();
@@ -1051,12 +1043,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void TurnOnAndAdd(int j){
         try{
-        HttpRequest selected_request;
-        selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
-        selected_request.start();
-        selected_request.join();
-        IsOn = true;
-        HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
+            HttpRequest selected_request;
+            selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
+            selected_request.start();
+            selected_request.join();
+            IsOn = true;
+            HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
             enviaNome.start();
             enviaNome.join();
         }catch (Exception e){
@@ -1092,9 +1084,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
 
   /*  private class MatchTimer implements Runnable{
-
         private final String TAG = "Timer";
-
         @Override
         public void run() {
             try {
@@ -1109,7 +1099,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
     }*/
 
@@ -1126,13 +1115,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _devices_count = json_array.length();
             _target = new int [_devices_count];
 
-           // Log.i(TAG, "---- AVAILABLE PLUGS ---");
+            // Log.i(TAG, "---- AVAILABLE PLUGS ---");
             for(int i=0;i<_devices_count;i++){
                 JSONObject obj = (JSONObject) json_array.get(i);
                 try {
                     _target[i]=i;
                     _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
-                   // Log.i(TAG, "plug "+_plug_names.get(i));
+                    // Log.i(TAG, "plug "+_plug_names.get(i));
                 }catch (JSONException e){
                     //Log.wtf(TAG," não devia dar prob aqui");
                 }
