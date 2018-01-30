@@ -1,6 +1,8 @@
 package com.example.filipe.socketcontroller;
 
 import android.accounts.AccountManager;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
@@ -99,15 +101,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private Node _wear;
 
     //plugs url for notifying good correlation
-    private final static String BASE_URL = "http://192.168.8.113:3000";
+    private static String BASE_URL = "http://0.0.0.0:3000";
     //  private final static String BASE_URL = "http://192.168.1.7:3000";
     private final static String EnergyData = "http://aveiro.m-iti.org/sinais_energy_production/services/today_production_request.php?date=";
 
-    private final static String PLUGS_URL =BASE_URL+"/plug/";
-    private  String SELECTED_URL =BASE_URL+"/plug/%/selected/";
-    private  String PLUG_URL =BASE_URL+"/plug/%";
+    private static String PLUGS_URL =BASE_URL+"/plug/";
+    private  String SELECTED_URL = BASE_URL+"/plug/%/selected/";
+    private  String PLUG_URL = BASE_URL+"/plug/%";
     private int _plug_selected = 0;
-    private final static String ChangeEnergyURL = PLUGS_URL+"energy/";
+    private static String ChangeEnergyURL = PLUGS_URL+"energy/";
     private int renewableEnergy = 0;
     private int vez = 0;
 
@@ -178,6 +180,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        askIP();
+
         setContentView(R.layout.activity_device_selection);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -276,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 SelectedTime(hourEnd,minEnd);
                 vez++;
             }else {
-                HttpRequest CrazyLights = new HttpRequest("http://192.168.8.113:3000/plug/ScheduleMode", getApplicationContext(), _queue);
+                HttpRequest CrazyLights = new HttpRequest(BASE_URL + "/plug/ScheduleMode", getApplicationContext(), _queue);
                 try {
                     CrazyLights.start();
                     //CrazyLights.join();
@@ -452,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             public void run () {
                 if(IsOn){
                     int powerTotal = 0;
-                    HttpRequest Pessoas = new HttpRequest("http://192.168.8.113:3000/plug/Persons", getApplicationContext() ,_queue);
+                    HttpRequest Pessoas = new HttpRequest(BASE_URL + "/plug/Persons", getApplicationContext() ,_queue);
                     try{
                         Pessoas.start();
                         Pessoas.join();
@@ -469,7 +474,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                     plugs[j] = Integer.parseInt(plug.substring(0, plug.indexOf(".")).replace("plug", ""));
                                 }
                                 for(int w = 0; w < plugs.length;w++){
-                                    String DataURL = "http://192.168.8.113:3000/plug/"+plugs[w]+"/Power";
+                                    String DataURL = BASE_URL + "/plug/"+plugs[w]+"/Power";
                                     HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
                                     request.start();
                                     request.join();
@@ -663,7 +668,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private void SelectedTime(int hour, int min){
         HttpRequest showTime;
-        showTime = new HttpRequest("http://192.168.8.113:3000/plug/SelectedTime/"+ hour+"-"+min, getApplicationContext(),_queue);
+        showTime = new HttpRequest(BASE_URL + "/plug/SelectedTime/"+ hour+"-"+min, getApplicationContext(),_queue);
         try{
             showTime.start();
             //showStartTime.join();
@@ -705,7 +710,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
             HttpRequest TurnOff;
             for(int i = 0; i < _plug_names.size();i++){
-                TurnOff = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(i)+"/relay/1", getApplicationContext(),_queue);
+                TurnOff = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(i)+"/relay/1", getApplicationContext(),_queue);
                 try{
                     TurnOff.start();
                 }catch(Exception e){
@@ -721,7 +726,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         public void run() {
             try{
                 HttpRequest _request;
-                _request = new HttpRequest("http://192.168.8.113:3000/plug", getApplicationContext() ,_queue);
+                _request = new HttpRequest(BASE_URL + "/plug", getApplicationContext() ,_queue);
                 _request.start();
                 //Log.i(TAG,"--- RUNNING COLOR REQUEST : target "+_led_target+" ---");
                 _request.join();
@@ -1027,11 +1032,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     public void TurnOffAndRemove(int j){
         try{
             HttpRequest selected_request;
-            selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
+            selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
             selected_request.start();
             selected_request.join();
             IsOn = false;
-            HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
+            HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
 
             enviaNome.start();
             enviaNome.join();
@@ -1044,11 +1049,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     public void TurnOnAndAdd(int j){
         try{
             HttpRequest selected_request;
-            selected_request = new HttpRequest("http://192.168.8.113:3000/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
+            selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
             selected_request.start();
             selected_request.join();
             IsOn = true;
-            HttpRequest enviaNome = new HttpRequest("http://192.168.8.113:3000/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
+            HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
             enviaNome.start();
             enviaNome.join();
         }catch (Exception e){
@@ -1107,7 +1112,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private void getPlugsData(){
         try {
             _plug_names = new ArrayList<>();
-            HttpRequest novo = new HttpRequest("http://192.168.8.113:3000/plug/AvailablePlugs", getApplicationContext());
+            HttpRequest novo = new HttpRequest(BASE_URL + "/plug/AvailablePlugs", getApplicationContext());
             novo.start();
             novo.join();
             String data = novo.getData();
@@ -1138,7 +1143,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
 
     private void ConsultUsers(){
-        HttpRequest CheckUsers = new HttpRequest("http://192.168.8.113:3000/plug/Power", getApplicationContext(),_queue);
+        HttpRequest CheckUsers = new HttpRequest(BASE_URL + "/plug/Power", getApplicationContext(),_queue);
         try{
             CheckUsers.start();
             CheckUsers.join();
@@ -1181,6 +1186,30 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             );
         }
 
+    }
+
+    private void askIP()
+    {
+        AlertDialog.Builder ask = new AlertDialog.Builder(this);
+
+        ask.setTitle("Wattapp's IP:");
+        ask.setMessage("Default: 0.0.0.0");
+
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        ask.setView(input);
+
+        ask.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                BASE_URL = "http://"+input.getText().toString()+":3000";
+                PLUGS_URL =BASE_URL+"/plug/";
+                SELECTED_URL = BASE_URL+"/plug/%/selected/";
+                PLUG_URL = BASE_URL+"/plug/%";
+                ChangeEnergyURL = PLUGS_URL+"energy/";
+                // Do something with value!
+            }
+        });
+        ask.show();
     }
 
 
