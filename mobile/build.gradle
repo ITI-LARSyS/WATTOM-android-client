@@ -2,10 +2,9 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '25.0.0'
     defaultConfig {
         applicationId "com.example.filipe.socketcontroller"
-        minSdkVersion 21
+        minSdkVersion 18
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
@@ -31,4 +30,6 @@ dependencies {
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support:design:24.2.1'
+    compile 'com.android.support:mediarouter-v7:24.2.1'
+    compile 'com.android.support:support-vector-drawable:24.2.1'
 }
