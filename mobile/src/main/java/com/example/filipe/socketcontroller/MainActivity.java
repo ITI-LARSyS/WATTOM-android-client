@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // - Indica que já iniciou
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        //Log.i(TAG,messageEvent.toString());
+        Log.i(TAG,messageEvent.toString());
         String merda = messageEvent.getPath();
         String data = merda.replace("acc", "");
         String [] horas = data.split("/");
@@ -1202,15 +1202,22 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         ask.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 BASE_URL = "http://"+input.getText().toString()+":3000";
+               // Log.e("BASE_URL",BASE_URL);
                 PLUGS_URL =BASE_URL+"/plug/";
+               // Log.e("PLUGS_URL",PLUGS_URL);
                 SELECTED_URL = BASE_URL+"/plug/%/selected/";
+               // Log.e("SELECTED_URL",SELECTED_URL);
                 PLUG_URL = BASE_URL+"/plug/%";
+//                Log.e("PLUG_URL",PLUG_URL);
                 ChangeEnergyURL = PLUGS_URL+"energy/";
+//                Log.e("ChangeEnergyURL",ChangeEnergyURL);
                 // Do something with value!
             }
         });
         ask.show();
     }
+    
+    public static String getBaseURL() { return BASE_URL; }
 
 
 }

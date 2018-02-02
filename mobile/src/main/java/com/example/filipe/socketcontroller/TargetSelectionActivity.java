@@ -57,8 +57,8 @@ public class TargetSelectionActivity extends AppCompatActivity implements  Messa
     private double _last_acc_y = 0;
 
     //plugs url for notifying good correlation
-    private  String SELECTED_URL = "http://192.168.8.113:3000/plug/%/selected/";
-    private  String PLUG_URL = "http://192.168.8.113:3000/plug/%";
+    private  String SELECTED_URL = MainActivity.getBaseURL()+"/plug/%/selected/";
+    private  String PLUG_URL = MainActivity.getBaseURL()+"/plug/%";
 
     //handlers and receivers for the targets
     private ArrayList<PlugMotionHandler> _handlers = new ArrayList<PlugMotionHandler>();

@@ -20,7 +20,7 @@ public class PlugMotionHandler extends Thread{
 
     private static final String TAG = "PlugMotionHandler";
     private static final int N_LEDS = 12;
-    private  String _server_url = "http://192.168.8.113:3000/plug/3";
+    private  String _server_url = MainActivity.getBaseURL()+"/plug/3";
    // private  String _server_url = "http://192.168.1.6:3000/plug/3";
 
     private static final String TARGET = "target";
