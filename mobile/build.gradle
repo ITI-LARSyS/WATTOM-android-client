@@ -21,15 +21,15 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     wearApp project(':wear')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.google.android.gms:play-services:9.8.0'
-    compile 'org.apache.commons:commons-math3:3.6.1'
-    compile 'com.android.volley:volley:1.0.0'
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:design:24.2.1'
-    compile 'com.android.support:mediarouter-v7:24.2.1'
-    compile 'com.android.support:support-vector-drawable:24.2.1'
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:24.2.1'
+    implementation 'com.google.android.gms:play-services:9.8.0'
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+    implementation 'com.android.volley:volley:1.0.0'
+    implementation 'com.android.support:multidex:1.0.1'
+    implementation 'com.android.support:design:24.2.1'
+    implementation 'com.android.support:mediarouter-v7:24.2.1'
+    implementation 'com.android.support:support-vector-drawable:24.2.1'
 }

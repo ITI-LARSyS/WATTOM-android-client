@@ -2,6 +2,9 @@ package com.example.filipe.socketcontroller;
 
 import android.accounts.AccountManager;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -1190,31 +1193,47 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private void askIP()
     {
+	   final SharedPreferences prefs = getSharedPreferences("config", Context.MODE_PRIVATE);
+	   final String oldIP = prefs.getString("IP",null);    
+    
         AlertDialog.Builder ask = new AlertDialog.Builder(this);
 
-        ask.setTitle("Wattapp's IP:");
-        ask.setMessage("Default: 0.0.0.0");
+        ask.setTitle("Wattapp's IP");
+        ask.setMessage("(click 'Cancel' to keep "+oldIP+")");
 
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
         ask.setView(input);
+        ask.setCancelable(false);
 
-        ask.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                BASE_URL = "http://"+input.getText().toString()+":3000";
-               // Log.e("BASE_URL",BASE_URL);
-                PLUGS_URL =BASE_URL+"/plug/";
-               // Log.e("PLUGS_URL",PLUGS_URL);
-                SELECTED_URL = BASE_URL+"/plug/%/selected/";
-               // Log.e("SELECTED_URL",SELECTED_URL);
-                PLUG_URL = BASE_URL+"/plug/%";
-//                Log.e("PLUG_URL",PLUG_URL);
-                ChangeEnergyURL = PLUGS_URL+"energy/";
-//                Log.e("ChangeEnergyURL",ChangeEnergyURL);
-                // Do something with value!
+        ask.setPositiveButton("OK", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int whichButton) 
+            {
+            	String newIP = input.getText().toString();
+            	SharedPreferences.Editor editor = prefs.edit();
+            	editor.putString("IP",newIP);
+            	editor.apply();
+               setIP(newIP);
             }
         });
+        ask.setNegativeButton("Cancel",new DialogInterface.OnClickListener() 
+        {
+        	public void onClick(DialogInterface dialog, int whichButton) 
+        	{
+			setIP(oldIP);
+          }
+        });
         ask.show();
+    }
+    
+    public void setIP(String ip)
+    {
+		BASE_URL = "http://"+ip+":3000";
+		PLUGS_URL =BASE_URL+"/plug/";
+		SELECTED_URL = BASE_URL+"/plug/%/selected/";
+		PLUG_URL = BASE_URL+"/plug/%";
+		ChangeEnergyURL = PLUGS_URL+"energy/";
     }
     
     public static String getBaseURL() { return BASE_URL; }
