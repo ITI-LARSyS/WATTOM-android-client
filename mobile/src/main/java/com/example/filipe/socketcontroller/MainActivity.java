@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -303,7 +304,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 double z = Double.parseDouble(tokens[1])*-1;
                 _last_acc_x = x;            // updatre the global variables to be used elsewhere in the code
                 _last_acc_y = z;
+
                 Log.i(TAG,"got data from watch x "+x+","+z);
+                Toast.makeText(this, "got data from watch x "+x+","+z, Toast.LENGTH_LONG).show();
             } catch (NumberFormatException e) {
                 //Log.e(TAG, "format exception data " + data);
             }
@@ -350,6 +353,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _correlationRunning = false;
         //saveFile();
         _client.disconnect();
+        Toast.makeText(this, "Disconnected from Wear!", Toast.LENGTH_LONG).show();
     }
 
     //Guarda todos os dados do utilizador
@@ -411,6 +415,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         //_angle       = 0;
         //_pointing    = _condition.getText().toString();
         //SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
+
+        Toast.makeText(this, "Study started!",Toast.LENGTH_LONG).show();
         IsOn = false;
 
         TimerTask hourlyTask = new TimerTask () {
@@ -667,6 +673,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         _client.connect();
+        Toast.makeText(this, "Connected to Wear!", Toast.LENGTH_LONG).show();
     }
 
     private void SelectedTime(int hour, int min){
