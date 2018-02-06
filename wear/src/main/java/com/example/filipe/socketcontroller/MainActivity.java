@@ -107,6 +107,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     PowerManager.WakeLock cpuWakeLock;
     private PieChart mPieChart;
 
+    private PushThread pushThread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -284,18 +286,28 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void handleSensorClick(View v){
 
-        if(v.getId() == R.id.start_sensor_btn && !_sensor_running) {
+        if(v.getId() == R.id.start_sensor_btn && !_sensor_running) 
+        {
             _factor = _leftHanded.isChecked()?-1:1;
             _startSensorBtn.setText("Stop Sensor");
             _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
             Log.i(TAG, "Aqui starting sensor");
             _sensor_running = true;
-            new PushThread().start();
-        }else{
+            pushThread = new PushThread();
+            pushThread.start();
+        }
+        else
+        {
             //cpuWakeLock.release();
             _startSensorBtn.setText("Start Sensor");
             _sensorManager.unregisterListener(this);
             _sensor_running = false;
+            try
+            {
+                pushThread.join();
+            }
+            catch (InterruptedException e)
+            { e.printStackTrace(); }
         }
     }
 

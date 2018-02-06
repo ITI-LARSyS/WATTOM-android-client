@@ -1208,32 +1208,32 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         ask.setPositiveButton("OK", new DialogInterface.OnClickListener()
         {
-            public void onClick(DialogInterface dialog, int whichButton) 
-            {
-            	String newIP = input.getText().toString();
-            	SharedPreferences.Editor editor = prefs.edit();
-            	editor.putString("IP",newIP);
-            	editor.apply();
-               setIP(newIP);
-            }
+            	public void onClick(DialogInterface dialog, int whichButton) 
+            	{
+	            	String newIP = input.getText().toString();
+	            	SharedPreferences.Editor editor = prefs.edit();
+	            	editor.putString("IP",newIP);
+	            	editor.apply();
+	             setIP(newIP);
+ 	}
         });
         ask.setNegativeButton("Cancel",new DialogInterface.OnClickListener() 
         {
         	public void onClick(DialogInterface dialog, int whichButton) 
         	{
-			setIP(oldIP);
-          }
+		setIP(oldIP);
+         	}
         });
         ask.show();
     }
     
     public void setIP(String ip)
     {
-		BASE_URL = "http://"+ip+":3000";
-		PLUGS_URL =BASE_URL+"/plug/";
-		SELECTED_URL = BASE_URL+"/plug/%/selected/";
-		PLUG_URL = BASE_URL+"/plug/%";
-		ChangeEnergyURL = PLUGS_URL+"energy/";
+	BASE_URL = "http://"+ip+":3000";
+	PLUGS_URL =BASE_URL+"/plug/";
+	SELECTED_URL = BASE_URL+"/plug/%/selected/";
+	PLUG_URL = BASE_URL+"/plug/%";
+	ChangeEnergyURL = PLUGS_URL+"energy/";
     }
     
     public static String getBaseURL() { return BASE_URL; }
