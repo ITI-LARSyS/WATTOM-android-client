@@ -549,7 +549,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // - E iniciam as tarefas de cada um dos dispositivos
     // - Comeca a coordenar o movimento e a guardar os dados
     public void firstStartup(String url){
-        _corrHandler = new CorrelationHandler();
+       // _corrHandler = new CorrelationHandler();
         _handlers = new ArrayList<>();
         _aggregators = new ArrayList<>();
 
@@ -704,6 +704,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _correlationRunning = true;
                 _started = true;
                 _updating = false;
+                _corrHandler = new CorrelationHandler();
                 _corrHandler.start();
 
                 new RefreshData().start();
