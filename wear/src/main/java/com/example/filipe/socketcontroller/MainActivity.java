@@ -335,11 +335,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     public void onResult(NodeApi.GetConnectedNodesResult nodes) {
                         for (Node node : nodes.getNodes()) {
                             _phone = node;
+                            toast("Connected successfully with pairing Android device!");
                         }
                         Log.i(TAG,"watch connected");
                     }
                 });
-            toast("Connected successfully!");
     }
 
     @Override

@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     public static final int WINDOW_SIZE = 40;  // terá qde ser 80
 
     // communication with the watch
-    GoogleApiClient _client;
+    private static GoogleApiClient _client;
 
     //View stuff
     private TextView _counter;
@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.i(TAG,messageEvent.toString());
-        toast("Message received!");
+        Log.d("onMessageReceived","MESSAGE RECEIVED! SUCCESS!");
         String merda = messageEvent.getPath();
         String data = merda.replace("acc", "");
         String [] horas = data.split("/");
@@ -389,11 +389,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     public void onResult(NodeApi.GetConnectedNodesResult nodes) {
                         for (Node node : nodes.getNodes()) {
                             _wear = node;
+                            toast("Connected with Wear device successfully!");
                         }
                         //Log.i(TAG,"watch connected");
                     }
                 });
-          toast("Connected successfully!");
+
     }
 
     /*
