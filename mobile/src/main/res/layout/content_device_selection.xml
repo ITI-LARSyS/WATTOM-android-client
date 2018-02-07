@@ -71,6 +71,7 @@
             />
 
         <Button
+            android:id="@+id/btnStartStudy"
             android:layout_marginTop="30dp"
             android:text="Start Study"
             android:layout_width="wrap_content"

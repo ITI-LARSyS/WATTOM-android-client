@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -173,6 +174,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private boolean isScheduleMode;
     private String Device_Name;
 
+    private Button btnStartStudy;
+
 
     //Ao iniciar a aplicacao
     // - Atribui cada elemento da interface uma variavel
@@ -223,6 +226,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     debug_view.setVisibility(View.VISIBLE);
             }
         });
+
+        btnStartStudy = (Button) findViewById(R.id.btnStartStudy);
 
         _client = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -306,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _last_acc_y = z;
 
                 Log.i(TAG,"got data from watch x "+x+","+z);
-                Toast.makeText(this, "got data from watch x "+x+","+z, Toast.LENGTH_LONG).show();
+                toast("got data from watch x "+x+","+z);
             } catch (NumberFormatException e) {
                 //Log.e(TAG, "format exception data " + data);
             }
@@ -353,7 +358,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _correlationRunning = false;
         //saveFile();
         _client.disconnect();
-        Toast.makeText(this, "Disconnected from Wear!", Toast.LENGTH_LONG).show();
     }
 
     //Guarda todos os dados do utilizador
@@ -388,6 +392,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         //Log.i(TAG,"watch connected");
                     }
                 });
+          toast("Connected to Wear successfully!");
     }
 
     /*
@@ -416,7 +421,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         //_pointing    = _condition.getText().toString();
         //SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
 
-        Toast.makeText(this, "Study started!",Toast.LENGTH_LONG).show();
+        btnStartStudy.setVisibility(View.GONE);
+        toast("Study started!");
+
         IsOn = false;
 
         TimerTask hourlyTask = new TimerTask () {
@@ -595,6 +602,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "Connection to Google API client was failed");
+        toast("Connection Failed! ("+connectionResult.toString()+")");
     }
 
 
@@ -667,13 +675,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     //conecta com o relogio
     @Override
-    public void onStart() {
+    public void onStart() 
+    {
         super.onStart();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         _client.connect();
-        Toast.makeText(this, "Connected to Wear!", Toast.LENGTH_LONG).show();
     }
 
     private void SelectedTime(int hour, int min){
@@ -1051,6 +1059,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
             enviaNome.start();
             enviaNome.join();
+            toast("You have been removed as a person!");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1067,6 +1076,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
             enviaNome.start();
             enviaNome.join();
+            toast("You have been added as a person!");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1144,11 +1154,17 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
             //Log.i(TAG,"-------");
             //Log.i(TAG,"TARGET: "+_target);
-        } catch (JSONException e) {
+        } 
+        catch (JSONException e) 
+        {
+            Log.d("GETPLUGSDATA","Message ignored!");
+            //e.printStackTrace();
+        } 
+        catch(InterruptedException e)
+        {
             e.printStackTrace();
-        } catch(InterruptedException e){
-            e.printStackTrace();
-        }catch (Exception e){
+        }
+        catch (Exception e){
             e.printStackTrace();
         }
     }
@@ -1196,43 +1212,46 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     }
             );
         }
-
+        else
+        {
+            toast("Failed to send message!");
+        }
     }
 
     private void askIP()
     {
-	   final SharedPreferences prefs = getSharedPreferences("config", Context.MODE_PRIVATE);
-	   final String oldIP = prefs.getString("IP",null);    
-    
-        AlertDialog.Builder ask = new AlertDialog.Builder(this);
+	final SharedPreferences prefs = getSharedPreferences("config", Context.MODE_PRIVATE);
+	final String oldIP = prefs.getString("IP",null);    
 
-        ask.setTitle("Wattapp's IP");
-        ask.setMessage("(click 'Cancel' to keep "+oldIP+")");
+	AlertDialog.Builder ask = new AlertDialog.Builder(this);
 
-        // Set an EditText view to get user input
-        final EditText input = new EditText(this);
-        ask.setView(input);
-        ask.setCancelable(false);
+	ask.setTitle("Wattapp's IP");
+	ask.setMessage("(Previous IP: "+oldIP+")");
 
-        ask.setPositiveButton("OK", new DialogInterface.OnClickListener()
-        {
-            	public void onClick(DialogInterface dialog, int whichButton) 
-            	{
-	            	String newIP = input.getText().toString();
-	            	SharedPreferences.Editor editor = prefs.edit();
-	            	editor.putString("IP",newIP);
-	            	editor.apply();
-	             setIP(newIP);
- 	}
-        });
-        ask.setNegativeButton("Cancel",new DialogInterface.OnClickListener() 
-        {
-        	public void onClick(DialogInterface dialog, int whichButton) 
-        	{
-		setIP(oldIP);
-         	}
-        });
-        ask.show();
+	// Set an EditText view to get user input
+	final EditText input = new EditText(this);
+	ask.setView(input);
+	ask.setCancelable(false);
+
+	ask.setPositiveButton("Set new IP", new DialogInterface.OnClickListener()
+	{
+		public void onClick(DialogInterface dialog, int whichButton) 
+		{
+			String newIP = input.getText().toString();
+			SharedPreferences.Editor editor = prefs.edit();
+			editor.putString("IP",newIP);
+			editor.apply();
+			setIP(newIP);
+		}
+	});
+	ask.setNegativeButton("Keep previous IP",new DialogInterface.OnClickListener() 
+	{
+		public void onClick(DialogInterface dialog, int whichButton) 
+		{
+			setIP(oldIP);
+		}
+	});
+	ask.show();
     }
     
     public void setIP(String ip)
@@ -1245,6 +1264,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
     
     public static String getBaseURL() { return BASE_URL; }
+
+    public void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
 
 
 }
