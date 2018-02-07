@@ -246,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.i(TAG,messageEvent.toString());
+        toast("Message received!");
         String merda = messageEvent.getPath();
         String data = merda.replace("acc", "");
         String [] horas = data.split("/");
@@ -311,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _last_acc_y = z;
 
                 Log.i(TAG,"got data from watch x "+x+","+z);
-                toast("got data from watch x "+x+","+z);
+                //toast("got data from watch x "+x+","+z);
             } catch (NumberFormatException e) {
                 //Log.e(TAG, "format exception data " + data);
             }
@@ -392,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         //Log.i(TAG,"watch connected");
                     }
                 });
-          toast("Connected to Wear successfully!");
+          toast("Connected successfully!");
     }
 
     /*
@@ -1149,7 +1150,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
                     // Log.i(TAG, "plug "+_plug_names.get(i));
                 }catch (JSONException e){
-                    //Log.wtf(TAG," não devia dar prob aqui");
+            		Log.d("GETPLUGSDATA","Message ignored!");
                 }
             }
             //Log.i(TAG,"-------");
@@ -1242,6 +1243,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 			editor.putString("IP",newIP);
 			editor.apply();
 			setIP(newIP);
+			toast("You chose to set new IP ("+newIP+")");
 		}
 	});
 	ask.setNegativeButton("Keep previous IP",new DialogInterface.OnClickListener() 
@@ -1249,6 +1251,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 		public void onClick(DialogInterface dialog, int whichButton) 
 		{
 			setIP(oldIP);
+			toast("You chose to keep previous IP ("+oldIP+")");
 		}
 	});
 	ask.show();
@@ -1265,7 +1268,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     
     public static String getBaseURL() { return BASE_URL; }
 
-    public void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
+    private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
 
 
 }

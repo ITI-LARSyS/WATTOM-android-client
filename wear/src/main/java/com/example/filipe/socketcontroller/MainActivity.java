@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -338,6 +339,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         Log.i(TAG,"watch connected");
                     }
                 });
+            toast("Connected successfully!");
     }
 
     @Override
@@ -346,8 +348,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) 
+    {
+        toast("Connection failed! ("+connectionResult.toString()+")");
     }
 
     private void sendMessage(String key){
@@ -369,6 +372,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         }
                     }
             );
+        }
+        else
+        {
+            Log.d("SENDMESSAGE","Failed to send a message!");
         }
 
     }
@@ -395,6 +402,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         try{
+            toast("Message received!");
             String [] valores = messageEvent.getPath().split("-");
             if(valores.length > 1){
                 mPieChart.clearChart();
@@ -433,6 +441,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
 
-
+    private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
 
 }
