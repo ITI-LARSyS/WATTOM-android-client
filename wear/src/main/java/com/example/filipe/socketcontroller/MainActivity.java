@@ -41,6 +41,7 @@ import com.google.android.gms.wearable.Wearable;
 
 import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
+import org.w3c.dom.Text;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -113,6 +114,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private WearableActionDrawer actDrawer;
     private Menu actMenu;
     private MenuInflater actMenuInflater;
+
+    private MenuItem itemToggleSensor;
+    private TextView textSensorState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -253,45 +257,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
+    public void onAccuracyChanged(Sensor sensor, int i) { }
 
-    }
 
-    public void handleSensorClick(View v){
-
-        if(v.getId() == R.id.start_sensor_btn && !_sensor_running)
-        {
-            _factor = _leftHanded.isChecked()?-1:1;
-            _startSensorBtn.setText("Stop Sensor");
-            _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
-            Log.i(TAG, "Aqui starting sensor");
-            _sensor_running = true;
-            pushThread = new PushThread();
-            pushThread.start();
-        }
-        else
-        {
-            //cpuWakeLock.release();
-            _startSensorBtn.setText("Start Sensor");
-            _sensorManager.unregisterListener(this);
-            _sensor_running = false;
-            try
-            {
-                pushThread.join();
-            }
-            catch (InterruptedException e)
-            { e.printStackTrace(); }
-        }
-    }
-
-    public void handleSensorClick(MenuItem item){
-
+    public void handleSensorClick(MenuItem item)
+    {
         if(!_sensor_running)
         {
+            itemToggleSensor.setTitle(R.string.STOP_SENSOR);
+            textSensorState.setText(R.string.SENSOR_ON);
+
             _factor = _leftHanded.isChecked()?-1:1;
-            _startSensorBtn.setText("Stop Sensor");
             _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
-            Log.i(TAG, "Aqui starting sensor");
             _sensor_running = true;
             pushThread = new PushThread();
             pushThread.start();
@@ -299,7 +276,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         else
         {
             //cpuWakeLock.release();
-            _startSensorBtn.setText("Start Sensor");
+            itemToggleSensor.setTitle(R.string.START_SENSOR);
+            textSensorState.setText(R.string.SENSOR_OFF);
+
             _sensorManager.unregisterListener(this);
             _sensor_running = false;
             try
@@ -312,6 +291,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
     public void handleQuitClick(View v){
+        cpuWakeLock.release();
+        _sensorManager.unregisterListener(this);
+        _sensor_running = false;
+        this.finish();
+
+    }
+
+    public void handleQuitClick(MenuItem item){
         cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
@@ -476,7 +463,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             _z_acc          = (TextView) view.findViewById(R.id.z_text_field);
             _tms            = (TextView) view.findViewById(R.id.tms_text_field);
             _startSensorBtn = (Button) view.findViewById(R.id.start_sensor_btn);
-            _leftHanded     = (CheckBox) view.findViewById(R.id.left_handed);
+            _leftHanded     = (CheckBox) view.findViewById(R.id.checkLeftHanded);
             _buttonSchedule = (Button) view.findViewById(R.id.buttonSchedule);
             _buttonStart    = (Button) view.findViewById(R.id.buttonStart);
             _buttonEnd      = (Button) view.findViewById(R.id.buttonEnd);
@@ -488,6 +475,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             chooseStartTime = (LinearLayout) view.findViewById(R.id.PrimeiroTempo);
             chooseEndTime   = (LinearLayout) view.findViewById(R.id.UltimoTempo);
             mPieChart = (PieChart) view.findViewById(R.id.piechart);
+
+            itemToggleSensor = (MenuItem) actMenu.findItem(R.id.item_toggle_sensor);
+            textSensorState = (TextView) findViewById(R.id.textSensorState);
 
             /* Respetivas configurações dos elementos de cada view */
 

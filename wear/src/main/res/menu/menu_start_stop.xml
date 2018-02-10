@@ -4,6 +4,13 @@
     <item
         android:id="@+id/item_toggle_sensor"
         android:icon="@android:drawable/ic_media_play"
-        android:title="Start Sensor"
+        android:title="@string/START_SENSOR"
         android:onClick="handleSensorClick"/>
+
+    <item
+        android:id="@+id/item_quit"
+        android:icon="@android:drawable/btn_dialog"
+        android:onClick="handleQuitClick"
+        android:title="@string/QUIT"/>
+
 </menu>

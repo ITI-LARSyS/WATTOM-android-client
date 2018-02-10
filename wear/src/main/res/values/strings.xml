@@ -15,7 +15,10 @@
     <string name="BTN_SET_SCHEDULE_START">Set Schedule start</string>
     <string name="BTN_SET_SCHEDULE_END">Set Schedule end</string>
 
-    <string name="BTN_START_SENSOR">Start sensor</string>
-    <string name="CHECKBOX_LEFT_HANDED">Left-handed mode</string>
-    <string name="BTN_QUIT">Quit</string>
+    <string name="START_SENSOR">Enable sensor</string>
+    <string name="STOP_SENSOR">Disable sensor</string>
+    <string name="SENSOR_ON">Sensor: ON</string>
+    <string name="SENSOR_OFF">Sensor: OFF</string>
+    <string name="LEFT_HANDED">Left-handed mode</string>
+    <string name="QUIT">Quit</string>
 </resources>

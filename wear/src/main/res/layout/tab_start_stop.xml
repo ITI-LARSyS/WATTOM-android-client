@@ -4,32 +4,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:weightSum="1">
 
-        <Button
-            android:id="@+id/start_sensor_btn"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/textSensorState"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="handleSensorClick"
-            android:text="@string/BTN_START_SENSOR" />
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="50dp"
+            android:layout_marginStart="55dp"
+            android:text="@string/SENSOR_OFF"/>
 
         <CheckBox
-            android:id="@+id/left_handed"
-            android:layout_width="wrap_content"
+            android:id="@+id/checkLeftHanded"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/CHECKBOX_LEFT_HANDED" />
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/textSensorState"
+            android:layout_marginTop="10dp"
+            android:text="@string/LEFT_HANDED"/>
 
-        <Button
-            android:id="@+id/button3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="handleQuitClick"
-            android:text="@string/BTN_QUIT" />
+    </RelativeLayout>
 
-    </LinearLayout>
+
 
 </ScrollView>
