@@ -128,12 +128,15 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
 
+        // Possibilita a navegação pelos tabs presentes no TabAdapter
         WearableNavigationDrawer mWearableNavigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
         mWearableNavigationDrawer.setAdapter(new TabAdapter(this));
 
+        // Desenha o tab predefinido
         Tab initialTab = new Tab(WattappTabs.DEFAULT);
         draw(initialTab);
 
+        // Providencia ações específicas (caso seja o caso) para um dado tab
         WearableActionDrawer mWearableActionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
         mWearableActionDrawer.lockDrawerClosed();
         mWearableActionDrawer.setOnMenuItemClickListener(
@@ -414,6 +417,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
 
+    /* Separador da aplicação (com respetivo layout) */
     private class Tab extends Fragment
     {
         private WattappTabs choice;
@@ -433,6 +437,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         @Override
         public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
         {
+        	/* São atualizados os IDs dos elementos de cada view */
             _x_acc          = (TextView) view.findViewById(R.id.x_text_field);
             _y_acc          = (TextView) view.findViewById(R.id.y_text_field);
             _z_acc          = (TextView) view.findViewById(R.id.z_text_field);
@@ -450,6 +455,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             chooseStartTime = (LinearLayout) view.findViewById(R.id.PrimeiroTempo);
             chooseEndTime   = (LinearLayout) view.findViewById(R.id.UltimoTempo);
             mPieChart = (PieChart) view.findViewById(R.id.piechart);
+
+            /* Respetivas configurações dos elementos de cada view */
 
             if(InitialTime != null)
             {
@@ -477,11 +484,15 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 });
             }
 
-            if(chooseStartTime != null) chooseStartTime.setVisibility(LinearLayout.GONE);
-            if(chooseEndTime != null) chooseEndTime.setVisibility(LinearLayout.GONE);
+            if(chooseStartTime != null)
+            { chooseStartTime.setVisibility(LinearLayout.GONE); }
+
+            if(chooseEndTime != null) 
+            { chooseEndTime.setVisibility(LinearLayout.GONE); }
         }
     }
 
+    /* Fornece acesso aos tabs do enum */
     private final class TabAdapter extends WearableNavigationDrawer.WearableNavigationDrawerAdapter
     {
         private final Context context;
@@ -501,8 +512,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         @Override
         public void onItemSelected(int index)
         {
+        	// Busca o tab ao enum (correspondente ao índice)
             WattappTabs chosenTab = WattappTabs.values()[index];
 
+            // Se for um tab diferente do atual
             if (chosenTab != currentTab)
             {
                 Tab newTab = new Tab(chosenTab);
@@ -517,11 +530,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         { return WattappTabs.values().length; }
     }
 
+    /* Desenha o novo tab */
     private void draw(Tab newTab)
     {
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, newTab)
-                .commit();
+    	// Substitui o elemento 'fragment_container' pela view do tab
+        	getFragmentManager()
+		.beginTransaction()
+		.replace(R.id.fragment_container, newTab)
+		.commit();
     }
 }
