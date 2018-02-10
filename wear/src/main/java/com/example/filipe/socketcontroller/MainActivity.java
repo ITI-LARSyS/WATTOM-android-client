@@ -17,6 +17,8 @@ import android.support.wearable.view.drawer.WearableActionDrawer;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -106,6 +108,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private PushThread pushThread;
 
+
+    private WearableNavigationDrawer navDrawer;
+    private WearableActionDrawer actDrawer;
+    private Menu actMenu;
+    private MenuInflater actMenuInflater;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,26 +135,17 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
 
+        actDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
+        actMenu = actDrawer.getMenu();
+        actMenuInflater = getMenuInflater();
+
         // Possibilita a navegação pelos tabs presentes no TabAdapter
-        WearableNavigationDrawer mWearableNavigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
-        mWearableNavigationDrawer.setAdapter(new TabAdapter(this));
+        navDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
+        navDrawer.setAdapter(new TabAdapter(this));
 
         // Desenha o tab predefinido
         Tab initialTab = new Tab(WattappTabs.DEFAULT);
         draw(initialTab);
-
-        // Providencia ações específicas (caso seja o caso) para um dado tab
-        WearableActionDrawer mWearableActionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
-        mWearableActionDrawer.lockDrawerClosed();
-        mWearableActionDrawer.setOnMenuItemClickListener(
-                new WearableActionDrawer.OnMenuItemClickListener()
-                {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem)
-                    {
-                        return true;
-                    }
-                });
     }
 
     @Override
@@ -261,6 +260,33 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     public void handleSensorClick(View v){
 
         if(v.getId() == R.id.start_sensor_btn && !_sensor_running)
+        {
+            _factor = _leftHanded.isChecked()?-1:1;
+            _startSensorBtn.setText("Stop Sensor");
+            _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
+            Log.i(TAG, "Aqui starting sensor");
+            _sensor_running = true;
+            pushThread = new PushThread();
+            pushThread.start();
+        }
+        else
+        {
+            //cpuWakeLock.release();
+            _startSensorBtn.setText("Start Sensor");
+            _sensorManager.unregisterListener(this);
+            _sensor_running = false;
+            try
+            {
+                pushThread.join();
+            }
+            catch (InterruptedException e)
+            { e.printStackTrace(); }
+        }
+    }
+
+    public void handleSensorClick(MenuItem item){
+
+        if(!_sensor_running)
         {
             _factor = _leftHanded.isChecked()?-1:1;
             _startSensorBtn.setText("Stop Sensor");
@@ -431,7 +457,15 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)
-        { return inflater.inflate(choice.layout, container, false); }
+        {
+            if(choice.menu != -1)
+            {
+                actMenu.clear();
+                actMenuInflater.inflate(choice.menu,actMenu);
+            }
+
+            return inflater.inflate(choice.layout, container, false);
+        }
 
         @Override
         public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
@@ -521,6 +555,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 draw(newTab);
 
                 currentTab = chosenTab;
+
+                if(chosenTab.menu != -1)
+                { actDrawer.unlockDrawer(); }
+                else
+                { actDrawer.lockDrawerClosed(); }
             }
         }
 
