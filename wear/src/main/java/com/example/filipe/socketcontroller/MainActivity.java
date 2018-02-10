@@ -418,10 +418,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
             toast("Sensor has been turned off");
         }
+        actDrawer.closeDrawer();
     }
 
     public void handleQuitClick(MenuItem item)
     {
+        actDrawer.closeDrawer();
         cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
@@ -453,6 +455,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 break;
         }
         sendMessage(time);
+        actDrawer.closeDrawer();
     }
 
     /* ******************************************************************************** */
