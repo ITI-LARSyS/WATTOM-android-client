@@ -41,84 +41,113 @@ import com.google.android.gms.wearable.Wearable;
 
 import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
-import org.w3c.dom.Text;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-
+public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+{
     private static final String TAG = "Main Activity Watch";
+
+    /* ***** */
+    /* ????? */
+    /* ***** */
     private TextView _x_acc;
     private TextView _y_acc;
     private TextView _z_acc;
     private TextView _tms;
-    private CheckBox _leftHanded;
-    private SensorManager _sensorManager;
-    private Sensor _sensor;
-
-    private Timer timer;
-    private TimerTask checkSecond;
-
-
-    //Done by Pedro to implement the schedule service
-    private Button _buttonStart;
-    private Button _buttonEnd;
-    private Button _buttonSchedule;
-    private TextView _StartTime;
-    private TextView _EndTime;
-    private TextView _consumo;
-    private int seconds;
-
-
     private int Primeiroconsumo;
     private int consumo;
     private int primeiro;
     private int consumoTotal;
     private int count = 0;
-    private TimePicker InitialTime;
-    private TimePicker EndTime;
-    private LinearLayout chooseStartTime;
-    private LinearLayout chooseEndTime;
     private boolean changedStart;
     private boolean changedEnd;
-    private String [] ChartColor = new String[4];
+    private Timer timer;
+    private TimerTask checkSecond;
+    //Done by Pedro to implement the schedule service
+    private Button _buttonStart;
+    private Button _buttonEnd;
+    private int seconds;
 
-    private GoogleApiClient _client;
-
-    private boolean _sensor_running = false;
-
-    private Node _phone; // the connected device to send the message to
-    //private int _count=0;
-
-    public static final String WEAR_ACC_SERVICE = "acc";
-
+    /* **************** */
+    /* BACK-END (GERAL) */
+    /* **************** */
+    private PowerManager.WakeLock cpuWakeLock;
+    private PushThread pushThread;
     private long _last_push;
     private long _sampling_diff = 40;        // alterei o sampling rate aqui
+
+    /* ***************** */
+    /* BACK-END (SENSOR) */
+    /* ***************** */
+    private float[] _rotationMatrix = new float[16];
+    private float x;
+    private float z;
     //private float _orientationVals[]={0,0,0};
-    float[] _rotationMatrix = new float[16];
-    float x;
-    float z;
-    private int _factor;
-    private int vez = 0;
+    private boolean _sensor_running = false;
+    private SensorManager _sensorManager;
+    private Sensor _sensor;
 
-    PowerManager.WakeLock cpuWakeLock;
-    private PieChart mPieChart;
+    /* ****************** */
+    /* BACK-END (CONEXÃO) */
+    /* ****************** */
+    private GoogleApiClient _client;
+    private Node _phone; // the connected device to send the message to
+    //private int _count=0;
+    public static final String WEAR_ACC_SERVICE = "acc";
 
-    private PushThread pushThread;
-
-
+    /* **************** */
+    /* NAVEGAÇÃO E AÇÃO */
+    /* **************** */
     private WearableNavigationDrawer navDrawer;
     private WearableActionDrawer actDrawer;
     private Menu actMenu;
     private MenuInflater actMenuInflater;
+    private static final int NONE = -1;
 
+    /* ************** */
+    /* START/STOP TAB */
+    /* ************** */
     private MenuItem itemToggleSensor;
     private TextView textSensorState;
+    private int _factor;
+    private CheckBox _leftHanded;
+
+    /* ************ */
+    /* SCHEDULE TAB */
+    /* ************ */
+    private Button _buttonSchedule;
+    private TextView _StartTime;
+    private TextView _EndTime;
+    private static final int SELECT_TIME_START = 0;
+    private static final int SELECT_TIME_END = 1;
+    private static final int TIME_CONFIRMED = 2;
+    private int scheduleState = 0;
+    private TimePicker InitialTime;
+    private TimePicker EndTime;
+    private LinearLayout chooseStartTime;
+    private LinearLayout chooseEndTime;
+
+    /* ********** */
+    /* STATS1 TAB */
+    /* ********** */
+    private PieChart mPieChart;
+    private String [] ChartColor = new String[4];
+    private TextView _consumo;
+
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+
+    /* ****************** */
+    /* ANDROID LIFE-CYCLE */
+    /* ****************** */
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.general_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -153,8 +182,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) { }
+
     @Override
     public void onConnectionSuspended(int i) { }
+
+    @Override
+    public void onStart()
+    { super.onStart(); }
 
     @Override
     protected void onStop()
@@ -186,12 +220,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         cpuWakeLock.acquire();
 
        // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
     }
 
     @Override
@@ -244,7 +272,101 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     //Log.i(TAG,"sending data form watch");
     }
 
-    public void ShowStartPicker(View v)
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+
+    /* *********************** */
+    /* COMUNICAÇÃO WEAR-MOBILE */
+    /* *********************** */
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Wearable.NodeApi.getConnectedNodes(_client)
+                .setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>()
+                {
+                    @Override
+                    public void onResult(NodeApi.GetConnectedNodesResult nodes)
+                    {
+                        for (Node node : nodes.getNodes())
+                        { _phone = node; }
+                        Log.i(TAG,"watch connected");
+                    }
+                });
+        toast("Connected successfully!");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+    { toast("Connection failed! ("+connectionResult.toString()+")"); }
+
+    private void sendMessage(String key)
+    {
+        if (_phone != null && _client!= null && _client.isConnected())
+        {
+            //   Log.d(TAG, "-- " + _client.isConnected());
+            Wearable.MessageApi.sendMessage(
+                    _client, _phone.getId(), WEAR_ACC_SERVICE + "" + key, null).setResultCallback(
+                    new ResultCallback<MessageApi.SendMessageResult>()
+                    {
+                        @Override
+                        public void onResult(MessageApi.SendMessageResult sendMessageResult)
+                        {
+                            if (!sendMessageResult.getStatus().isSuccess())
+                            {
+                                Log.e(TAG, "Failed to send message with status code: "
+                                        + sendMessageResult.getStatus().getStatusCode());
+                            }
+                            else
+                            {
+                                //  Log.i(TAG,"status "+sendMessageResult.getStatus().isSuccess());
+                            }
+                        }
+                    }
+            );
+        }
+        else
+        { Log.d("SENDMESSAGE","Failed to send a message!"); }
+    }
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent)
+    {
+        try
+        {
+            toast("Message received!");
+            String [] valores = messageEvent.getPath().split("-");
+            if(valores.length > 1)
+            {
+                mPieChart.clearChart();
+                int tamanho = (valores.length - 1 )/ 2;
+                for(int i = 0; i < tamanho; i++)
+                {
+                    mPieChart.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[mPieChart.getChildCount()])));
+                }
+                mPieChart.startAnimation();
+            }
+            else
+            {
+                String power = messageEvent.getPath();
+                _consumo.setText(power);
+            }
+        }
+        catch(Exception e)
+        {
+            Log.i("Error",messageEvent.getPath());
+            e.printStackTrace();
+        }
+    }
+
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+
+    /* ** */
+    /* UI */
+    /* ** */
+
+    public void showStartPicker(View v)
     {
         if(chooseStartTime.getVisibility() == LinearLayout.GONE)
         { chooseStartTime.setVisibility(LinearLayout.VISIBLE); }
@@ -252,7 +374,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         { chooseStartTime.setVisibility(LinearLayout.GONE); }
     }
 
-    public void ShowEndPicker(View v)
+    public void showEndPicker(View v)
     {
         if(chooseEndTime.getVisibility() == LinearLayout.GONE)
         { chooseEndTime.setVisibility(LinearLayout.VISIBLE); }
@@ -297,120 +419,37 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         this.finish();
     }
 
-
-    //
-    // WEAR COMMUNICATION STUFF
-    //
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Wearable.NodeApi.getConnectedNodes(_client)
-                .setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>()
-                {
-                    @Override
-                    public void onResult(NodeApi.GetConnectedNodesResult nodes)
-                    {
-                        for (Node node : nodes.getNodes())
-                        { _phone = node; }
-                        Log.i(TAG,"watch connected");
-                    }
-                });
-            toast("Connected successfully!");
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+    public void handleScheduleButton(View v)
     {
-        toast("Connection failed! ("+connectionResult.toString()+")");
+        String time = _StartTime.getText().toString()+"/";
+        time += _EndTime.getText().toString();
+        switch(scheduleState)
+        {
+            case SELECT_TIME_START:
+                _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_START);
+                scheduleState++;
+                break;
+            case SELECT_TIME_END:
+                _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_END);
+                scheduleState++;
+                break;
+            case TIME_CONFIRMED:
+                _buttonSchedule.setText(R.string.SET_SCHEDULE);
+                scheduleState = SELECT_TIME_START;
+                break;
+            default:
+                break;
+        }
+        sendMessage(time);
     }
 
-    private void sendMessage(String key)
-    {
-        if (_phone != null && _client!= null && _client.isConnected())
-        {
-            //   Log.d(TAG, "-- " + _client.isConnected());
-            Wearable.MessageApi.sendMessage(
-                    _client, _phone.getId(), WEAR_ACC_SERVICE + "" + key, null).setResultCallback(
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
 
-                    new ResultCallback<MessageApi.SendMessageResult>()
-                    {
-                        @Override
-                        public void onResult(MessageApi.SendMessageResult sendMessageResult)
-                        {
-
-                            if (!sendMessageResult.getStatus().isSuccess())
-                            {
-                                Log.e(TAG, "Failed to send message with status code: "
-                                        + sendMessageResult.getStatus().getStatusCode());
-                            }
-                            else
-                            {
-                              //  Log.i(TAG,"status "+sendMessageResult.getStatus().isSuccess());
-                            }
-                        }
-                    }
-            );
-        }
-        else
-        {
-            Log.d("SENDMESSAGE","Failed to send a message!");
-        }
-    }
-
-    public void Schedule(View v)
-    {
-        if(v.getId() ==  R.id.buttonSchedule)
-        {
-            String StartTime = _StartTime.getText().toString()+"/";
-            StartTime += _EndTime.getText().toString();
-            //Log.i("HOUR",StartTime);
-            if(vez == 0)
-            {
-                _buttonSchedule.setText("Confirm Start");
-                vez++;
-            }
-            else if(vez == 1)
-            {
-                _buttonSchedule.setText("Confirm End");
-                vez++;
-            }
-            else
-            {
-                _buttonSchedule.setText("Set Schedule");
-                vez = 0;
-            }
-            sendMessage(StartTime);
-        }
-    }
-
-    @Override
-    public void onMessageReceived(MessageEvent messageEvent)
-    {
-        try
-        {
-            toast("Message received!");
-            String [] valores = messageEvent.getPath().split("-");
-            if(valores.length > 1)
-            {
-                mPieChart.clearChart();
-                int tamanho = (valores.length - 1 )/ 2;
-                for(int i = 0; i < tamanho; i++)
-                {
-                    mPieChart.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[mPieChart.getChildCount()])));
-                }
-                mPieChart.startAnimation();
-            }
-            else
-            {
-                String power = messageEvent.getPath();
-                _consumo.setText(power);
-            }
-        }
-        catch(Exception e)
-        {
-            Log.i("Error",messageEvent.getPath());
-            e.printStackTrace();
-        }
-    }
+    /* ******* */
+    /* THREADS */
+    /* ******* */
 
     private class PushThread extends Thread
     {
@@ -429,9 +468,25 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         }
     }
 
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+
+    /* *** */
+    /* I/O */
+    /* *** */
 
     private void toast(String s)
     { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
+
+
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+
+    /* ************************** */
+    /* NAVEGAÇÃO E AÇÕES DOS TABS */
+    /* ************************** */
 
     /* Separador da aplicação (com respetivo layout) */
     private class Tab extends Fragment
@@ -449,7 +504,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)
         {
-            if(choice.menu != -1)
+            if(choice.menu != NONE)
             {
                 actMenu.clear();
                 actMenuInflater.inflate(choice.menu,actMenu);
@@ -549,7 +604,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
                 currentTab = chosenTab;
 
-                if(chosenTab.menu != -1)
+                if(chosenTab.menu != NONE)
                 { actDrawer.unlockDrawer(); }
                 else
                 { actDrawer.lockDrawerClosed(); }
@@ -570,4 +625,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             .replace(R.id.fragment_container, newTab)
             .commit();
     }
+
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+    /* ******************************************************************************** */
+
 }

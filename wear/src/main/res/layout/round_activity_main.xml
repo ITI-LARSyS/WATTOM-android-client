@@ -138,7 +138,7 @@
                     android:id="@+id/buttonStart"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="ShowStartPicker"
+                    android:onClick="showStartPicker"
                     android:text="Set start"/>
 
                 <TextView
@@ -173,7 +173,7 @@
                     android:id="@+id/buttonEnd"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="ShowEndPicker"
+                    android:onClick="showEndPicker"
                     android:text="Set End"/>
 
                 <TextView
@@ -204,7 +204,7 @@
                 android:id="@+id/buttonSchedule"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="Schedule"
+                android:onClick="handleScheduleButton"
                 android:text="Set Schedule"/>
 
             <LinearLayout

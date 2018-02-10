@@ -22,8 +22,8 @@
                 android:id="@+id/buttonStart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="ShowStartPicker"
-                android:text="@string/BTN_SET_SCHEDULE_START" />
+                android:onClick="showStartPicker"
+                android:text="@string/SET_SCHEDULE_START" />
 
             <TextView
                 android:id="@+id/HoraInicio"
@@ -58,8 +58,8 @@
                 android:id="@+id/buttonEnd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="ShowEndPicker"
-                android:text="@string/BTN_SET_SCHEDULE_END" />
+                android:onClick="showEndPicker"
+                android:text="@string/SET_SCHEDULE_END" />
 
             <TextView
                 android:id="@+id/HoraFim"
@@ -89,8 +89,8 @@
             android:id="@+id/buttonSchedule"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="Schedule"
-            android:text="@string/BTN_SET_SCHEDULE" />
+            android:onClick="handleScheduleButton"
+            android:text="@string/SET_SCHEDULE" />
 
     </LinearLayout>
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SocketController</string>
-    <string name="hello_round">Hello Round World!</string>
-    <string name="hello_square">Hello Square World!</string>
+
+    <!--- TAB TITLES -->
     <string name="TITLE_STARTSTOP">Start/Stop</string>
     <string name="TITLE_SCHEDULE">Schedule</string>
     <string name="TITLE_STATS1">Stats (Pie Chart)</string>
@@ -10,15 +10,19 @@
     <string name="TITLE_STATS3">Stats (Line Graph)</string>
     <string name="TITLE_LOG">Log</string>
 
+    <!--- START/STOP TAB -->
     <string name="INIT_TIME">00:00</string>
-    <string name="BTN_SET_SCHEDULE">Set Schedule</string>
-    <string name="BTN_SET_SCHEDULE_START">Set Schedule start</string>
-    <string name="BTN_SET_SCHEDULE_END">Set Schedule end</string>
-
     <string name="START_SENSOR">Enable sensor</string>
     <string name="STOP_SENSOR">Disable sensor</string>
     <string name="SENSOR_ON">Sensor: ON</string>
     <string name="SENSOR_OFF">Sensor: OFF</string>
     <string name="LEFT_HANDED">Left-handed mode</string>
     <string name="QUIT">Quit</string>
+
+    <!--- SCHEDULE TAB -->
+    <string name="SET_SCHEDULE">Set Schedule</string>
+    <string name="SET_SCHEDULE_CONFIRM_START">Confirm Start</string>
+    <string name="SET_SCHEDULE_CONFIRM_END">Confirm End</string>
+    <string name="SET_SCHEDULE_START">Set Schedule start</string>
+    <string name="SET_SCHEDULE_END">Set Schedule end</string>
 </resources>
