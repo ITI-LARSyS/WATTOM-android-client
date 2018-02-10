@@ -1,14 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="42dp"
-        android:text="START" />
-</RelativeLayout>
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <Button
+            android:id="@+id/start_sensor_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="handleSensorClick"
+            android:text="@string/BTN_START_SENSOR" />
+
+        <CheckBox
+            android:id="@+id/left_handed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/CHECKBOX_LEFT_HANDED" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="handleQuitClick"
+            android:text="@string/BTN_QUIT" />
+
+    </LinearLayout>
+
+</ScrollView>

@@ -8,8 +8,13 @@
     <string name="TITLE_STATS2">Stats (Bar Graph)</string>
     <string name="TITLE_STATS3">Stats (Line Graph)</string>
     <string name="TITLE_LOG">Log</string>
+
     <string name="INIT_TIME">00:00</string>
     <string name="BTN_SET_SCHEDULE">Set Schedule</string>
     <string name="BTN_SET_SCHEDULE_START">Set Schedule start</string>
     <string name="BTN_SET_SCHEDULE_END">Set Schedule end</string>
+
+    <string name="BTN_START_SENSOR">Start sensor</string>
+    <string name="CHECKBOX_LEFT_HANDED">Left-handed mode</string>
+    <string name="BTN_QUIT">Quit</string>
 </resources>
