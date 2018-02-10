@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.wearable.view.WatchViewStub;
 import android.support.wearable.view.drawer.WearableActionDrawer;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
@@ -261,7 +260,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void handleSensorClick(View v){
 
-        if(v.getId() == R.id.start_sensor_btn && !_sensor_running) 
+        if(v.getId() == R.id.start_sensor_btn && !_sensor_running)
         {
             _factor = _leftHanded.isChecked()?-1:1;
             _startSensorBtn.setText("Stop Sensor");
@@ -322,7 +321,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) 
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
     {
         toast("Connection failed! ("+connectionResult.toString()+")");
     }
@@ -487,7 +486,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             if(chooseStartTime != null)
             { chooseStartTime.setVisibility(LinearLayout.GONE); }
 
-            if(chooseEndTime != null) 
+            if(chooseEndTime != null)
             { chooseEndTime.setVisibility(LinearLayout.GONE); }
         }
     }
