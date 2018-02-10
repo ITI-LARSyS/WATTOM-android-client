@@ -2,4 +2,14 @@
     <string name="app_name">SocketController</string>
     <string name="hello_round">Hello Round World!</string>
     <string name="hello_square">Hello Square World!</string>
+    <string name="TITLE_STARTSTOP">Start/Stop</string>
+    <string name="TITLE_SCHEDULE">Schedule</string>
+    <string name="TITLE_STATS1">Stats (Pie Chart)</string>
+    <string name="TITLE_STATS2">Stats (Bar Graph)</string>
+    <string name="TITLE_STATS3">Stats (Line Graph)</string>
+    <string name="TITLE_LOG">Log</string>
+    <string name="INIT_TIME">00:00</string>
+    <string name="BTN_SET_SCHEDULE">Set Schedule</string>
+    <string name="BTN_SET_SCHEDULE_START">Set Schedule start</string>
+    <string name="BTN_SET_SCHEDULE_END">Set Schedule end</string>
 </resources>

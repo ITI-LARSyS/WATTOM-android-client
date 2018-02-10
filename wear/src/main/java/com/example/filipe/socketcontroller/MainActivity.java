@@ -1,33 +1,30 @@
 package com.example.filipe.socketcontroller;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.TimePickerDialog;
+import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.service.chooser.ChooserTarget;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.wearable.view.GridViewPager;
 import android.support.wearable.view.WatchViewStub;
+import android.support.wearable.view.drawer.WearableActionDrawer;
+import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -44,8 +41,8 @@ import com.google.android.gms.wearable.Wearable;
 import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
 
-import java.util.TimerTask;
 import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -113,8 +110,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
+        setContentView(R.layout.general_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         ChartColor[0] = "#FE6DA8";
@@ -122,49 +118,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         ChartColor[2] = "#CDA67F";
         ChartColor[3] = "#FED70E";
 
-        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
-            @Override
-            public void onLayoutInflated(WatchViewStub stub) {
-                _x_acc          = (TextView) stub.findViewById(R.id.x_text_field);
-                _y_acc          = (TextView) stub.findViewById(R.id.y_text_field);
-                _z_acc          = (TextView) stub.findViewById(R.id.z_text_field);
-                _tms            = (TextView) stub.findViewById(R.id.tms_text_field);
-                _startSensorBtn = (Button) stub.findViewById(R.id.start_sensor_btn);
-                _leftHanded     = (CheckBox) stub.findViewById(R.id.left_handed);
-                _buttonSchedule = (Button) stub.findViewById(R.id.buttonSchedule);
-                _buttonStart    = (Button) stub.findViewById(R.id.buttonStart);
-                _buttonEnd      = (Button) stub.findViewById(R.id.buttonEnd);
-                _StartTime      = (TextView) stub.findViewById(R.id.HoraInicio);
-                _EndTime        = (TextView) stub.findViewById(R.id.HoraFim);
-                _consumo        = (TextView) stub.findViewById(R.id.ConsumoInsert);
-
-                InitialTime         = (TimePicker) stub.findViewById(R.id.InitialPicker);
-                InitialTime.setIs24HourView(true);
-                InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                        _StartTime.setText(hourOfDay+":"+minute);
-                        changedStart = true;
-
-                    }
-                });
-                EndTime         = (TimePicker) stub.findViewById(R.id.EndPicker);
-                EndTime.setIs24HourView(true);
-                EndTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                        _EndTime.setText(hourOfDay+":"+minute);
-                        changedEnd = true;
-                    }
-                });
-
-                chooseStartTime = (LinearLayout) stub.findViewById(R.id.PrimeiroTempo);
-                chooseEndTime   = (LinearLayout) stub.findViewById(R.id.UltimoTempo);
-                chooseStartTime.setVisibility(LinearLayout.GONE);
-                chooseEndTime.setVisibility(LinearLayout.GONE);
-
-                mPieChart = (PieChart) stub.findViewById(R.id.piechart);
-            }
-        });
         seconds = 0;
         Primeiroconsumo=0;
         consumo = 0;
@@ -174,6 +127,24 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
+
+        WearableNavigationDrawer mWearableNavigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
+        mWearableNavigationDrawer.setAdapter(new TabAdapter(this));
+
+        Tab initialTab = new Tab(WattappTabs.DEFAULT);
+        draw(initialTab);
+
+        WearableActionDrawer mWearableActionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
+        mWearableActionDrawer.lockDrawerClosed();
+        mWearableActionDrawer.setOnMenuItemClickListener(
+                new WearableActionDrawer.OnMenuItemClickListener()
+                {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem)
+                    {
+                        return true;
+                    }
+                });
     }
 
     @Override
@@ -335,11 +306,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     public void onResult(NodeApi.GetConnectedNodesResult nodes) {
                         for (Node node : nodes.getNodes()) {
                             _phone = node;
-                            toast("Connected successfully with pairing Android device!");
                         }
                         Log.i(TAG,"watch connected");
                     }
                 });
+            toast("Connected successfully!");
     }
 
     @Override
@@ -443,4 +414,114 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
 
+    private class Tab extends Fragment
+    {
+        private WattappTabs choice;
+
+        public Tab(final WattappTabs choice)
+        {
+            this.choice = choice;
+            final Bundle arguments = new Bundle();
+            arguments.putSerializable("TAB",choice);
+            this.setArguments(arguments);
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)
+        { return inflater.inflate(choice.layout, container, false); }
+
+        @Override
+        public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+        {
+            _x_acc          = (TextView) view.findViewById(R.id.x_text_field);
+            _y_acc          = (TextView) view.findViewById(R.id.y_text_field);
+            _z_acc          = (TextView) view.findViewById(R.id.z_text_field);
+            _tms            = (TextView) view.findViewById(R.id.tms_text_field);
+            _startSensorBtn = (Button) view.findViewById(R.id.start_sensor_btn);
+            _leftHanded     = (CheckBox) view.findViewById(R.id.left_handed);
+            _buttonSchedule = (Button) view.findViewById(R.id.buttonSchedule);
+            _buttonStart    = (Button) view.findViewById(R.id.buttonStart);
+            _buttonEnd      = (Button) view.findViewById(R.id.buttonEnd);
+            _StartTime      = (TextView) view.findViewById(R.id.HoraInicio);
+            _EndTime        = (TextView) view.findViewById(R.id.HoraFim);
+            _consumo        = (TextView) view.findViewById(R.id.ConsumoInsert);
+            InitialTime     = (TimePicker) view.findViewById(R.id.InitialPicker);
+            EndTime         = (TimePicker) view.findViewById(R.id.EndPicker);
+            chooseStartTime = (LinearLayout) view.findViewById(R.id.PrimeiroTempo);
+            chooseEndTime   = (LinearLayout) view.findViewById(R.id.UltimoTempo);
+            mPieChart = (PieChart) view.findViewById(R.id.piechart);
+
+            if(InitialTime != null)
+            {
+                InitialTime.setIs24HourView(true);
+                InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
+                {
+                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
+                    {
+                        _StartTime.setText(hourOfDay + ":" + minute);
+                        changedStart = true;
+                    }
+                });
+            }
+
+            if(EndTime != null)
+            {
+                EndTime.setIs24HourView(true);
+                EndTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
+                {
+                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
+                    {
+                        _EndTime.setText(hourOfDay + ":" + minute);
+                        changedEnd = true;
+                    }
+                });
+            }
+
+            if(chooseStartTime != null) chooseStartTime.setVisibility(LinearLayout.GONE);
+            if(chooseEndTime != null) chooseEndTime.setVisibility(LinearLayout.GONE);
+        }
+    }
+
+    private final class TabAdapter extends WearableNavigationDrawer.WearableNavigationDrawerAdapter
+    {
+        private final Context context;
+        private WattappTabs currentTab = WattappTabs.DEFAULT;
+
+        public TabAdapter(final Context context)
+        { this.context = context; }
+
+        @Override
+        public String getItemText(int index)
+        { return context.getString(WattappTabs.values()[index].title); }
+
+        @Override
+        public Drawable getItemDrawable(int index)
+        { return context.getDrawable(WattappTabs.values()[index].icon); }
+
+        @Override
+        public void onItemSelected(int index)
+        {
+            WattappTabs chosenTab = WattappTabs.values()[index];
+
+            if (chosenTab != currentTab)
+            {
+                Tab newTab = new Tab(chosenTab);
+                draw(newTab);
+
+                currentTab = chosenTab;
+            }
+        }
+
+        @Override
+        public int getCount()
+        { return WattappTabs.values().length; }
+    }
+
+    private void draw(Tab newTab)
+    {
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, newTab)
+                .commit();
+    }
 }

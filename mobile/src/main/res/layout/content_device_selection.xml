@@ -18,14 +18,14 @@
         android:layout_weight="0.5"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="vertical" >
-
+        android:orientation="vertical"
+        >
         <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:orientation="vertical"
-        android:visibility="gone">
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -53,60 +53,61 @@
                 android:text="force_update"
                 android:onClick="handleUpdateClick"/>
 
-        </LinearLayout>
-
-        <LinearLayout
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Participant ID:"/>
+        <EditText
+            android:id="@+id/participant_id"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <Button
+            android:id="@+id/btnStartStudy"
+            android:layout_marginTop="30dp"
+            android:text="Start Study"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="handleStartStudyClick"/>
+
+        <TextView
+            android:layout_marginTop="30dp"
+            android:id="@+id/trial_field"
+            android:layout_width="match_parent"
             android:gravity="center_horizontal"
-            android:orientation="vertical" >
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Participant ID:"/>
-            <EditText
-                android:id="@+id/participant_id"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/btnStartStudy"
-                android:layout_marginTop="30dp"
-                android:text="Start Study"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="handleStartStudyClick"/>
-            <TextView
-                android:layout_marginTop="30dp"
-                android:id="@+id/trial_field"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal"
-                android:layout_height="wrap_content"
-                android:textSize="20pt"
-                android:text="-"/>
+            android:layout_height="wrap_content"
+            android:textSize="20pt"
+            android:text="-"/>
 
 
-            <TextView
-                android:layout_marginTop="30dp"
-                android:id="@+id/counter"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal"
-                android:layout_height="wrap_content"
-                android:textSize="50pt"
-                android:text="-"/>
+        <TextView
+            android:layout_marginTop="30dp"
+            android:id="@+id/counter"
+            android:layout_width="match_parent"
+            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:textSize="50pt"
+            android:text="-"/>
 
-            <TextView
-                android:id="@+id/instructions_field"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="25pt"
-                android:text="-"
-                />
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/instructions_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25pt"
+            android:text="-"
+            />
 
     </LinearLayout>
-    
+
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/debug_view"
         android:layout_width="0dp"
