@@ -303,7 +303,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         if (_phone != null && _client!= null && _client.isConnected())
         {
-            //   Log.d(TAG, "-- " + _client.isConnected());
             Wearable.MessageApi.sendMessage(
                     _client, _phone.getId(), WEAR_ACC_SERVICE + "" + key, null).setResultCallback(
                     new ResultCallback<MessageApi.SendMessageResult>()
@@ -318,14 +317,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                             }
                             else
                             {
-                                //  Log.i(TAG,"status "+sendMessageResult.getStatus().isSuccess());
+                                Log.d("SENDMESSAGE","MESSAGE SENT!");
+                                //Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
                             }
                         }
                     }
             );
         }
         else
-        { Log.d("SENDMESSAGE","Failed to send a message!"); }
+        {
+            Log.d("SENDMESSAGE","Failed to send a message!");
+            Log.d("SENDMESSAGE","client = "+_client);
+            Log.d("SENDMESSAGE","phone = "+_phone);
+            Log.d("SENDMESSAGE","isConnected = "+_client.isConnected());
+        }
     }
 
     @Override
@@ -394,6 +399,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             _sensor_running = true;
             pushThread = new PushThread();
             pushThread.start();
+
+            toast("Sensor has been turned on");
         }
         else
         {
@@ -408,6 +415,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             { pushThread.join(); }
             catch (InterruptedException e)
             { e.printStackTrace(); }
+
+            toast("Sensor has been turned off");
         }
     }
 
@@ -429,14 +438,17 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_START);
                 scheduleState++;
                 break;
+
             case SELECT_TIME_END:
                 _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_END);
                 scheduleState++;
                 break;
+
             case TIME_CONFIRMED:
                 _buttonSchedule.setText(R.string.SET_SCHEDULE);
                 scheduleState = SELECT_TIME_START;
                 break;
+
             default:
                 break;
         }
@@ -477,7 +489,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* *** */
 
     private void toast(String s)
-    { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
+    { Toast.makeText(this, s, Toast.LENGTH_SHORT).show(); }
 
 
     /* ******************************************************************************** */
