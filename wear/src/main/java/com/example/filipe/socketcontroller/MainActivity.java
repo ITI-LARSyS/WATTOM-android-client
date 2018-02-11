@@ -106,6 +106,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private Menu actMenu;
     private MenuInflater actMenuInflater;
     private static final int NONE = -1;
+    private Tab[] tabs;
 
     /* ************** */
     /* START/STOP TAB */
@@ -176,8 +177,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         navDrawer.setAdapter(new TabAdapter(this));
 
         // Desenha o tab predefinido
-        Tab initialTab = new Tab(WattappTabs.DEFAULT);
-        draw(initialTab);
+        tabs = new Tab[WattappTabs.values().length];
+        int initial = WattappTabs.DEFAULT.ordinal();
+        tabs[initial] = new Tab(WattappTabs.DEFAULT);
+        draw(tabs[initial]);
     }
 
     @Override
@@ -394,13 +397,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             itemToggleSensor.setTitle(R.string.STOP_SENSOR);
             textSensorState.setText(R.string.SENSOR_ON);
 
-            _factor = _leftHanded.isChecked()?-1:1;
+            _factor = _leftHanded.isChecked()? -1 : 1;
             _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
             _sensor_running = true;
             pushThread = new PushThread();
             pushThread.start();
-
-            toast("Sensor has been turned on");
         }
         else
         {
@@ -415,15 +416,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             { pushThread.join(); }
             catch (InterruptedException e)
             { e.printStackTrace(); }
-
-            toast("Sensor has been turned off");
         }
-        actDrawer.closeDrawer();
     }
 
     public void handleQuitClick(MenuItem item)
     {
-        actDrawer.closeDrawer();
         cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
@@ -455,7 +452,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 break;
         }
         sendMessage(time);
-        actDrawer.closeDrawer();
     }
 
     /* ******************************************************************************** */
@@ -519,9 +515,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)
         {
+            // Caso tenha um menu de ações
             if(choice.menu != NONE)
             {
+                // São retiradas as ações presentes (de outras tabs)
                 actMenu.clear();
+
+                // O menu de ações é populado com as ações específicas do tab
                 actMenuInflater.inflate(choice.menu,actMenu);
             }
 
@@ -549,8 +549,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             chooseEndTime   = (LinearLayout) view.findViewById(R.id.UltimoTempo);
             mPieChart = (PieChart) view.findViewById(R.id.piechart);
 
-            itemToggleSensor = (MenuItem) actMenu.findItem(R.id.item_toggle_sensor);
-            textSensorState = (TextView) findViewById(R.id.textSensorState);
+            itemToggleSensor = actMenu.findItem(R.id.item_toggle_sensor);
+            textSensorState = (TextView) view.findViewById(R.id.textSensorState);
 
             /* Respetivas configurações dos elementos de cada view */
 
@@ -561,7 +561,16 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 {
                     public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
                     {
-                        _StartTime.setText(hourOfDay + ":" + minute);
+                        String strHour = "";
+                        String strMinute = "";
+
+                        if(hourOfDay < 10) strHour += "0";
+                        strHour += hourOfDay;
+
+                        if(minute < 10) strMinute += "0";
+                        strMinute += minute;
+
+                        _StartTime.setText(strHour + ":" + strMinute);
                         changedStart = true;
                     }
                 });
@@ -574,7 +583,16 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 {
                     public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
                     {
-                        _EndTime.setText(hourOfDay + ":" + minute);
+                        String strHour = "";
+                        String strMinute = "";
+
+                        if(hourOfDay < 10) strHour += "0";
+                        strHour += hourOfDay;
+
+                        if(minute < 10) strMinute += "0";
+                        strMinute += minute;
+
+                        _EndTime.setText(strHour + ":" + strMinute);
                         changedEnd = true;
                     }
                 });
@@ -585,6 +603,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
             if(chooseEndTime != null)
             { chooseEndTime.setVisibility(LinearLayout.GONE); }
+
+            if(textSensorState != null)
+            {
+                if (_sensor_running)
+                { textSensorState.setText(R.string.SENSOR_ON); }
+            }
+
         }
     }
 
@@ -594,7 +619,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         private final Context context;
         private WattappTabs currentTab = WattappTabs.DEFAULT;
 
-        public TabAdapter(final Context context)
+        TabAdapter(final Context context)
         { this.context = context; }
 
         @Override
@@ -614,13 +639,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             // Se for um tab diferente do atual
             if (chosenTab != currentTab)
             {
-                Tab newTab = new Tab(chosenTab);
-                draw(newTab);
+                // Caso não tenha estado anterior, é criada uma nova instância
+                // (caso contrário, o estado anterior mantém-se)
+                if(tabs[index] == null)
+                { tabs[index] = new Tab(chosenTab); }
+
+                draw(tabs[index]);
 
                 currentTab = chosenTab;
 
+                // Caso tenha menu de ações, é permitido que seja acedido
                 if(chosenTab.menu != NONE)
                 { actDrawer.unlockDrawer(); }
+
+                // Caso contrário, não é permitido que seja acedido
                 else
                 { actDrawer.lockDrawerClosed(); }
             }
