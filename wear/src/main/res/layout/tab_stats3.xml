@@ -5,13 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.eazegraph.lib.charts.PieChart
-        android:id="@+id/piechart"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/textTimestamp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        app:egLegendTextSize="18sp"
-        app:egUsePieRotation="true"
-        app:egValueTextSize="36sp"/>
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="52dp"
+        android:text="Timestamp: "/>
+
+    <TextView
+        android:id="@+id/tms_text_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textTimestamp"
+        android:layout_alignBottom="@+id/textTimestamp"
+        android:layout_toEndOf="@+id/textTimestamp"
+        android:text="--"/>
 
 </RelativeLayout>
