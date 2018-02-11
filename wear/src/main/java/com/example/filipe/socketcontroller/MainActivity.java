@@ -26,6 +26,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -153,6 +154,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         setContentView(R.layout.general_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        actDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
+        actMenu = actDrawer.getMenu();
+        actMenuInflater = getMenuInflater();
+
+        // Possibilita a navegação pelos tabs presentes no TabAdapter
+        navDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
+        navDrawer.setAdapter(new TabAdapter(this));
+
+        // Desenha o tab predefinido
+        tabs = new Tab[WattappTabs.values().length];
+        int initial = WattappTabs.DEFAULT.ordinal();
+        tabs[initial] = new Tab(WattappTabs.DEFAULT);
+        draw(tabs[initial]);
+
         ChartColor[0] = "#FE6DA8";
         ChartColor[1] = "#56B7F1";
         ChartColor[2] = "#CDA67F";
@@ -168,19 +183,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
 
-        actDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
-        actMenu = actDrawer.getMenu();
-        actMenuInflater = getMenuInflater();
 
-        // Possibilita a navegação pelos tabs presentes no TabAdapter
-        navDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
-        navDrawer.setAdapter(new TabAdapter(this));
-
-        // Desenha o tab predefinido
-        tabs = new Tab[WattappTabs.values().length];
-        int initial = WattappTabs.DEFAULT.ordinal();
-        tabs[initial] = new Tab(WattappTabs.DEFAULT);
-        draw(tabs[initial]);
     }
 
     @Override
@@ -293,9 +296,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         for (Node node : nodes.getNodes())
                         { _phone = node; }
                         Log.i(TAG,"watch connected");
+                        toast("Connected successfully!");
                     }
                 });
-        toast("Connected successfully!");
     }
 
     @Override
@@ -320,8 +323,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                             }
                             else
                             {
-                                Log.d("SENDMESSAGE","MESSAGE SENT!");
-                                //Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
+                                Log.d("SENDMESSAGE","MESSAGE SENT - "+key);
+                                Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
                             }
                         }
                     }
@@ -391,6 +394,35 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
     public void handleSensorClick(MenuItem item)
+    {
+        if(!_sensor_running)
+        {
+            itemToggleSensor.setTitle(R.string.STOP_SENSOR);
+            textSensorState.setText(R.string.SENSOR_ON);
+
+            _factor = _leftHanded.isChecked()? -1 : 1;
+            _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
+            _sensor_running = true;
+            pushThread = new PushThread();
+            pushThread.start();
+        }
+        else
+        {
+            //cpuWakeLock.release();
+            itemToggleSensor.setTitle(R.string.START_SENSOR);
+            textSensorState.setText(R.string.SENSOR_OFF);
+
+            _sensorManager.unregisterListener(this);
+            _sensor_running = false;
+
+            try
+            { pushThread.join(); }
+            catch (InterruptedException e)
+            { e.printStackTrace(); }
+        }
+    }
+
+    public void handleSensorClick(View view)
     {
         if(!_sensor_running)
         {
@@ -515,23 +547,27 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)
         {
+            // São retiradas as ações presentes (de outras tabs)
+            actMenu.clear();
+
             // Caso tenha um menu de ações
             if(choice.menu != NONE)
             {
-                // São retiradas as ações presentes (de outras tabs)
-                actMenu.clear();
+                // É permitido que seja acedido
+                actDrawer.unlockDrawer();
 
                 // O menu de ações é populado com as ações específicas do tab
                 actMenuInflater.inflate(choice.menu,actMenu);
             }
+            else
+            {
+                // Não é permitido que seja acedido
+                actDrawer.lockDrawerClosed();
+            }
 
-            return inflater.inflate(choice.layout, container, false);
-        }
+            // Uma View é populada com o layout geral dos tabs
+            final View view = inflater.inflate(R.layout.tabs, container, false);
 
-        @Override
-        public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
-        {
-        	/* São atualizados os IDs dos elementos de cada view */
             _x_acc          = (TextView) view.findViewById(R.id.x_text_field);
             _y_acc          = (TextView) view.findViewById(R.id.y_text_field);
             _z_acc          = (TextView) view.findViewById(R.id.z_text_field);
@@ -547,69 +583,139 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             EndTime         = (TimePicker) view.findViewById(R.id.EndPicker);
             chooseStartTime = (LinearLayout) view.findViewById(R.id.PrimeiroTempo);
             chooseEndTime   = (LinearLayout) view.findViewById(R.id.UltimoTempo);
-            mPieChart = (PieChart) view.findViewById(R.id.piechart);
-
+            mPieChart       = (PieChart) view.findViewById(R.id.piechart);
             itemToggleSensor = actMenu.findItem(R.id.item_toggle_sensor);
             textSensorState = (TextView) view.findViewById(R.id.textSensorState);
 
-            /* Respetivas configurações dos elementos de cada view */
-
-            if(InitialTime != null)
+            InitialTime.setIs24HourView(true);
+            InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
             {
-                InitialTime.setIs24HourView(true);
-                InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
+                public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
                 {
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
-                    {
-                        String strHour = "";
-                        String strMinute = "";
+                    String strHour = "";
+                    String strMinute = "";
 
-                        if(hourOfDay < 10) strHour += "0";
-                        strHour += hourOfDay;
+                    if(hourOfDay < 10) strHour += "0";
+                    strHour += hourOfDay;
 
-                        if(minute < 10) strMinute += "0";
-                        strMinute += minute;
+                    if(minute < 10) strMinute += "0";
+                    strMinute += minute;
 
-                        _StartTime.setText(strHour + ":" + strMinute);
-                        changedStart = true;
-                    }
-                });
-            }
+                    _StartTime.setText(strHour + ":" + strMinute);
+                    changedStart = true;
+                }
+            });
 
-            if(EndTime != null)
+            EndTime.setIs24HourView(true);
+            EndTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
             {
-                EndTime.setIs24HourView(true);
-                EndTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
+                public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
                 {
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
-                    {
-                        String strHour = "";
-                        String strMinute = "";
+                    String strHour = "";
+                    String strMinute = "";
 
-                        if(hourOfDay < 10) strHour += "0";
-                        strHour += hourOfDay;
+                    if(hourOfDay < 10) strHour += "0";
+                    strHour += hourOfDay;
 
-                        if(minute < 10) strMinute += "0";
-                        strMinute += minute;
+                    if(minute < 10) strMinute += "0";
+                    strMinute += minute;
 
-                        _EndTime.setText(strHour + ":" + strMinute);
-                        changedEnd = true;
+                    _EndTime.setText(strHour + ":" + strMinute);
+                    changedEnd = true;
+                }
+            });
+
+            chooseStartTime.setVisibility(LinearLayout.GONE);
+
+            chooseEndTime.setVisibility(LinearLayout.GONE);
+
+            switch(choice.layout) {
+                case R.layout.tab_start_stop:
+
+                    view.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.VISIBLE);
+                    view.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
+
+                    if (_sensor_running) {
+                        textSensorState.setText(R.string.SENSOR_ON);
+                        itemToggleSensor.setTitle(R.string.STOP_SENSOR);
                     }
-                });
+
+                    break;
+
+                case R.layout.tab_schedule:
+
+                    view.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.VISIBLE);
+                    view.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
+
+                    break;
+
+                case R.layout.tab_stats1:
+
+                    view.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.VISIBLE);
+                    view.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
+
+                    break;
+
+                case R.layout.tab_stats2:
+
+                    view.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.VISIBLE);
+                    view.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
+
+                    break;
+
+                case R.layout.tab_stats3:
+
+                    view.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.VISIBLE);
+                    view.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
+
+                    break;
+
+                case R.layout.tab_log:
+
+                    view.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.VISIBLE);
+
+                    break;
+
+                default:
+
+                    Log.d("TAB", "WRONG LAYOUT");
+
+                    view.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
+                    view.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
+
+                    break;
             }
 
-            if(chooseStartTime != null)
-            { chooseStartTime.setVisibility(LinearLayout.GONE); }
-
-            if(chooseEndTime != null)
-            { chooseEndTime.setVisibility(LinearLayout.GONE); }
-
-            if(textSensorState != null)
-            {
-                if (_sensor_running)
-                { textSensorState.setText(R.string.SENSOR_ON); }
-            }
-
+            return view;
         }
     }
 
@@ -647,14 +753,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 draw(tabs[index]);
 
                 currentTab = chosenTab;
-
-                // Caso tenha menu de ações, é permitido que seja acedido
-                if(chosenTab.menu != NONE)
-                { actDrawer.unlockDrawer(); }
-
-                // Caso contrário, não é permitido que seja acedido
-                else
-                { actDrawer.lockDrawerClosed(); }
             }
         }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,91 +7,97 @@
     android:orientation="vertical"
     tools:context="com.example.filipe.socketcontroller.MainActivity">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:weightSum="1">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/buttonStart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="showStartPicker"
-                android:text="@string/SET_SCHEDULE_START" />
-
-            <TextView
-                android:id="@+id/HoraInicio"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/INIT_TIME" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/PrimeiroTempo"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <TimePicker
-                android:id="@+id/InitialPicker"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:timePickerMode="spinner"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/buttonEnd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="showEndPicker"
-                android:text="@string/SET_SCHEDULE_END" />
-
-            <TextView
-                android:id="@+id/HoraFim"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/INIT_TIME" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/UltimoTempo"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <TimePicker
-                android:id="@+id/EndPicker"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:timePickerMode="spinner"/>
-
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/buttonSchedule"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="handleScheduleButton"
-            android:text="@string/SET_SCHEDULE" />
+            android:orientation="vertical"
+            android:weightSum="1">
 
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-</ScrollView>
+                <Button
+                    android:id="@+id/buttonStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="showStartPicker"
+                    android:text="@string/SET_SCHEDULE_START" />
+
+                <TextView
+                    android:id="@+id/HoraInicio"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/INIT_TIME" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/PrimeiroTempo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TimePicker
+                    android:id="@+id/InitialPicker"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:timePickerMode="spinner"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/buttonEnd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="showEndPicker"
+                    android:text="@string/SET_SCHEDULE_END" />
+
+                <TextView
+                    android:id="@+id/HoraFim"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/INIT_TIME" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/UltimoTempo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TimePicker
+                    android:id="@+id/EndPicker"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:timePickerMode="spinner"/>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonSchedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="handleScheduleButton"
+                android:text="@string/SET_SCHEDULE" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

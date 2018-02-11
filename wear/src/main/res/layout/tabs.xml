@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include layout="@layout/tab_start_stop"    android:id="@+id/TAB_START_STOP"/>
+        <include layout="@layout/tab_schedule"      android:id="@+id/TAB_SCHEDULE"/>
+        <include layout="@layout/tab_stats1"        android:id="@+id/TAB_STATS1"/>
+        <include layout="@layout/tab_stats2"        android:id="@+id/TAB_STATS2"/>
+        <include layout="@layout/tab_stats3"        android:id="@+id/TAB_STATS3"/>
+        <include layout="@layout/tab_log"           android:id="@+id/TAB_LOG"/>
+
+    </RelativeLayout>
+
+</ScrollView>
