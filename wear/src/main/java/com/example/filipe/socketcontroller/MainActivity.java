@@ -398,7 +398,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         if(!_sensor_running)
         {
-            itemToggleSensor.setTitle(R.string.STOP_SENSOR);
             textSensorState.setText(R.string.SENSOR_ON);
 
             _factor = _leftHanded.isChecked()? -1 : 1;
@@ -410,36 +409,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         else
         {
             //cpuWakeLock.release();
-            itemToggleSensor.setTitle(R.string.START_SENSOR);
-            textSensorState.setText(R.string.SENSOR_OFF);
-
-            _sensorManager.unregisterListener(this);
-            _sensor_running = false;
-
-            try
-            { pushThread.join(); }
-            catch (InterruptedException e)
-            { e.printStackTrace(); }
-        }
-    }
-
-    public void handleSensorClick(View view)
-    {
-        if(!_sensor_running)
-        {
-            itemToggleSensor.setTitle(R.string.STOP_SENSOR);
-            textSensorState.setText(R.string.SENSOR_ON);
-
-            _factor = _leftHanded.isChecked()? -1 : 1;
-            _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
-            _sensor_running = true;
-            pushThread = new PushThread();
-            pushThread.start();
-        }
-        else
-        {
-            //cpuWakeLock.release();
-            itemToggleSensor.setTitle(R.string.START_SENSOR);
             textSensorState.setText(R.string.SENSOR_OFF);
 
             _sensorManager.unregisterListener(this);
@@ -565,8 +534,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 // Não é permitido que seja acedido
                 actDrawer.lockDrawerClosed();
             }
-
-            itemToggleSensor = actMenu.findItem(R.id.item_toggle_sensor);
 
             // Uma View é populada com o layout geral dos tabs
             if(tabsView == null)

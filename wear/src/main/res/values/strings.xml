@@ -12,8 +12,7 @@
 
     <!--- START/STOP TAB -->
     <string name="INIT_TIME">00:00</string>
-    <string name="START_SENSOR">Enable sensor</string>
-    <string name="STOP_SENSOR">Disable sensor</string>
+    <string name="TOGGLE_SENSOR">Toggle sensor</string>
     <string name="SENSOR_ON">Sensor: ON</string>
     <string name="SENSOR_OFF">Sensor: OFF</string>
     <string name="LEFT_HANDED">Left-handed mode</string>
