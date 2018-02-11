@@ -26,7 +26,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -164,9 +163,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         navDrawer.setAdapter(new TabAdapter(this));
 
         // Desenha o tab predefinido
-        tabs = new Tab[WattappTabs.values().length];
-        int initial = WattappTabs.DEFAULT.ordinal();
-        tabs[initial] = new Tab(WattappTabs.DEFAULT);
+        tabs = new Tab[WattappTabConfig.values().length];
+        int initial = WattappTabConfig.DEFAULT.ordinal();
+        tabs[initial] = new Tab(WattappTabConfig.DEFAULT);
         draw(tabs[initial]);
 
         ChartColor[0] = "#FE6DA8";
@@ -504,9 +503,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* Separador da aplicação (com respetivo layout) */
     private class Tab extends Fragment
     {
-        private WattappTabs choice;
+        private WattappTabConfig choice;
 
-        public Tab(final WattappTabs choice)
+        public Tab(final WattappTabConfig choice)
         {
             this.choice = choice;
             final Bundle arguments = new Bundle();
@@ -691,24 +690,24 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private final class TabAdapter extends WearableNavigationDrawer.WearableNavigationDrawerAdapter
     {
         private final Context context;
-        private WattappTabs currentTab = WattappTabs.DEFAULT;
+        private WattappTabConfig currentTab = WattappTabConfig.DEFAULT;
 
         TabAdapter(final Context context)
         { this.context = context; }
 
         @Override
         public String getItemText(int index)
-        { return context.getString(WattappTabs.values()[index].title); }
+        { return context.getString(WattappTabConfig.values()[index].title); }
 
         @Override
         public Drawable getItemDrawable(int index)
-        { return context.getDrawable(WattappTabs.values()[index].icon); }
+        { return context.getDrawable(WattappTabConfig.values()[index].icon); }
 
         @Override
         public void onItemSelected(int index)
         {
         	// Busca o tab ao enum (correspondente ao índice)
-            WattappTabs chosenTab = WattappTabs.values()[index];
+            WattappTabConfig chosenTab = WattappTabConfig.values()[index];
 
             // Se for um tab diferente do atual
             if (chosenTab != currentTab)
@@ -726,7 +725,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         @Override
         public int getCount()
-        { return WattappTabs.values().length; }
+        { return WattappTabConfig.values().length; }
     }
 
     /* Desenha o novo tab */

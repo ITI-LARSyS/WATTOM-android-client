@@ -1,6 +1,6 @@
 package com.example.filipe.socketcontroller;
 
-public enum WattappTabs
+public enum WattappTabConfig
 {
     STARTSTOP(R.string.TITLE_STARTSTOP, android.R.drawable.ic_media_play,R.layout.tab_start_stop,R.menu.menu_start_stop),
     SCHEDULE(R.string.TITLE_SCHEDULE, android.R.drawable.ic_lock_idle_alarm,R.layout.tab_schedule, -1),
@@ -14,10 +14,10 @@ public enum WattappTabs
     final int layout;
     final int menu;
 
-    public static final WattappTabs DEFAULT = STARTSTOP;
+    public static final WattappTabConfig DEFAULT = STARTSTOP;
     public static final int NONE = -1;
 
-    WattappTabs(final int title, final int icon, final int layout, final int menu)
+    WattappTabConfig(final int title, final int icon, final int layout, final int menu)
     {
         this.title = title;
         this.icon = icon;
