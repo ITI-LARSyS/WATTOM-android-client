@@ -27,7 +27,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="showStartPicker"
-                    android:text="@string/SET_SCHEDULE_START" />
+                    android:text="@string/SET_SCHEDULE_START"/>
 
                 <TextView
                     android:id="@+id/HoraInicio"
