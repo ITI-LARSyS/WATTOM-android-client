@@ -46,6 +46,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.example.filipe.socketcontroller.UI.hide;
+import static com.example.filipe.socketcontroller.UI.isVisible;
 import static com.example.filipe.socketcontroller.UI.unhide;
 
 
@@ -382,18 +383,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void showStartPicker(View v)
     {
-        if(chooseStartTime.getVisibility() == LinearLayout.GONE)
-        { chooseStartTime.setVisibility(LinearLayout.VISIBLE); }
+        if(isVisible(chooseStartTime))
+        { hide(chooseStartTime); }
         else
-        { chooseStartTime.setVisibility(LinearLayout.GONE); }
+        { unhide(chooseStartTime); }
     }
 
     public void showEndPicker(View v)
     {
-        if(chooseEndTime.getVisibility() == LinearLayout.GONE)
-        { chooseEndTime.setVisibility(LinearLayout.VISIBLE); }
+        if(isVisible(chooseEndTime))
+        { hide(chooseEndTime); }
         else
-        { chooseEndTime.setVisibility(LinearLayout.GONE); }
+        { unhide(chooseEndTime); }
     }
 
     public void handleSensorClick(MenuItem item)
@@ -543,15 +544,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             // Uma View é populada com o layout geral dos tabs
             if(globalView == null)
             {
+                // A View global (que contém as outras "subviews") é criada
                 globalView = inflater.inflate(R.layout.tabs, container, false);
 
+                // As "subviews" são armazenadas num vetor
                 tabViews = new View[WattappTabConfig.values().length];
                 for(WattappTabConfig config : WattappTabConfig.values())
                 { tabViews[config.ordinal()] = globalView.findViewById(config.id); }
 
+                // São obtidos os IDs dos elementos da View e os elementos são configurados
                 setupViewElements();
             }
 
+            // É mostrada unicamente a View pretendida (do tab)
+            // (as restantes são escondidas)
             for(int i = 0; i < tabViews.length; i++)
             {
                 if(choice.ordinal() == i) unhide(tabViews[i]);
@@ -595,6 +601,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
                 draw(tabs[index]);
 
+                // O Tab atual agora passa a ser o Tab escolhido
                 currentTab = chosenTab;
             }
         }
