@@ -4,7 +4,7 @@
     <item
         android:id="@+id/item_toggle_sensor"
         android:icon="@android:drawable/ic_media_play"
-        android:title="@string/START_SENSOR"
+        android:title="@string/TOGGLE_SENSOR"
         android:onClick="handleSensorClick"/>
 
     <item

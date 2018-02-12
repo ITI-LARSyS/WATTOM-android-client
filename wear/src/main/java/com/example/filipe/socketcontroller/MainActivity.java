@@ -45,6 +45,9 @@ import org.eazegraph.lib.models.PieModel;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.example.filipe.socketcontroller.UI.hide;
+import static com.example.filipe.socketcontroller.UI.unhide;
+
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
@@ -101,18 +104,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* **************** */
     /* NAVEGAÇÃO E AÇÃO */
     /* **************** */
-    private WearableNavigationDrawer navDrawer;
-    private WearableActionDrawer actDrawer;
-    private Menu actMenu;
-    private MenuInflater actMenuInflater;
+    private WearableNavigationDrawer navigationDrawer;
+    private WearableActionDrawer actionDrawer;
+    private Menu actionMenu;
+    private MenuInflater menuInflater;
     private Tab[] tabs;
     private static final int NONE = -1;
-    private View tabsView;
+    private View globalView;
+    private View[] tabViews;
 
     /* ************** */
     /* START/STOP TAB */
     /* ************** */
-    private MenuItem itemToggleSensor;
     private TextView textSensorState;
     private int _factor;
     private CheckBox _leftHanded;
@@ -154,13 +157,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         setContentView(R.layout.general_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        actDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
-        actMenu = actDrawer.getMenu();
-        actMenuInflater = getMenuInflater();
+        actionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
+        actionMenu = actionDrawer.getMenu();
+        menuInflater = getMenuInflater();
 
         // Possibilita a navegação pelos tabs presentes no TabAdapter
-        navDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
-        navDrawer.setAdapter(new TabAdapter(this));
+        navigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
+        navigationDrawer.setAdapter(new TabAdapter(this));
 
         // Desenha o tab predefinido
         tabs = new Tab[WattappTabConfig.values().length];
@@ -395,6 +398,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void handleSensorClick(MenuItem item)
     {
+        actionDrawer.closeDrawer();
+
         if(!_sensor_running)
         {
             textSensorState.setText(R.string.SENSOR_ON);
@@ -422,6 +427,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void handleQuitClick(MenuItem item)
     {
+        actionDrawer.closeDrawer();
         cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
@@ -517,172 +523,42 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)
         {
             // São retiradas as ações presentes (de outras tabs)
-            actMenu.clear();
+            actionMenu.clear();
 
             // Caso tenha um menu de ações
             if(choice.menu != NONE)
             {
                 // É permitido que seja acedido
-                actDrawer.unlockDrawer();
+                actionDrawer.unlockDrawer();
 
                 // O menu de ações é populado com as ações específicas do tab
-                actMenuInflater.inflate(choice.menu,actMenu);
+                menuInflater.inflate(choice.menu, actionMenu);
             }
             else
             {
                 // Não é permitido que seja acedido
-                actDrawer.lockDrawerClosed();
+                actionDrawer.lockDrawerClosed();
             }
 
             // Uma View é populada com o layout geral dos tabs
-            if(tabsView == null)
+            if(globalView == null)
             {
-                tabsView = inflater.inflate(R.layout.tabs, container, false);
+                globalView = inflater.inflate(R.layout.tabs, container, false);
 
-                _x_acc          = (TextView) tabsView.findViewById(R.id.x_text_field);
-                _y_acc          = (TextView) tabsView.findViewById(R.id.y_text_field);
-                _z_acc          = (TextView) tabsView.findViewById(R.id.z_text_field);
-                _tms            = (TextView) tabsView.findViewById(R.id.tms_text_field);
-                _leftHanded     = (CheckBox) tabsView.findViewById(R.id.checkLeftHanded);
-                _buttonSchedule = (Button) tabsView.findViewById(R.id.buttonSchedule);
-                _buttonStart    = (Button) tabsView.findViewById(R.id.buttonStart);
-                _buttonEnd      = (Button) tabsView.findViewById(R.id.buttonEnd);
-                _StartTime      = (TextView) tabsView.findViewById(R.id.HoraInicio);
-                _EndTime        = (TextView) tabsView.findViewById(R.id.HoraFim);
-                _consumo        = (TextView) tabsView.findViewById(R.id.ConsumoInsert);
-                InitialTime     = (TimePicker) tabsView.findViewById(R.id.InitialPicker);
-                EndTime         = (TimePicker) tabsView.findViewById(R.id.EndPicker);
-                chooseStartTime = (LinearLayout) tabsView.findViewById(R.id.PrimeiroTempo);
-                chooseEndTime   = (LinearLayout) tabsView.findViewById(R.id.UltimoTempo);
-                mPieChart       = (PieChart) tabsView.findViewById(R.id.piechart);
-                textSensorState = (TextView) tabsView.findViewById(R.id.textSensorState);
+                tabViews = new View[WattappTabConfig.values().length];
+                for(WattappTabConfig config : WattappTabConfig.values())
+                { tabViews[config.ordinal()] = globalView.findViewById(config.id); }
 
-                InitialTime.setIs24HourView(true);
-                InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
-                {
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
-                    {
-                        String strHour = "";
-                        String strMinute = "";
-
-                        if(hourOfDay < 10) strHour += "0";
-                        strHour += hourOfDay;
-
-                        if(minute < 10) strMinute += "0";
-                        strMinute += minute;
-
-                        _StartTime.setText(strHour + ":" + strMinute);
-                        changedStart = true;
-                    }
-                });
-
-                EndTime.setIs24HourView(true);
-                EndTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
-                {
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
-                    {
-                        String strHour = "";
-                        String strMinute = "";
-
-                        if(hourOfDay < 10) strHour += "0";
-                        strHour += hourOfDay;
-
-                        if(minute < 10) strMinute += "0";
-                        strMinute += minute;
-
-                        _EndTime.setText(strHour + ":" + strMinute);
-                        changedEnd = true;
-                    }
-                });
-
-                chooseStartTime.setVisibility(LinearLayout.GONE);
-
-                chooseEndTime.setVisibility(LinearLayout.GONE);
+                setupViewElements();
             }
 
-            switch(choice.layout)
+            for(int i = 0; i < tabViews.length; i++)
             {
-                case R.layout.tab_start_stop:
-
-                    tabsView.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.VISIBLE);
-                    tabsView.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
-
-                    break;
-
-                case R.layout.tab_schedule:
-
-                    tabsView.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.VISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
-
-                    break;
-
-                case R.layout.tab_stats1:
-
-                    tabsView.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.VISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
-
-                    break;
-
-                case R.layout.tab_stats2:
-
-                    tabsView.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.VISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
-
-                    break;
-
-                case R.layout.tab_stats3:
-
-                    tabsView.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.VISIBLE);
-                    tabsView.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
-
-                    break;
-
-                case R.layout.tab_log:
-
-                    tabsView.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.VISIBLE);
-
-                    break;
-
-                default:
-
-                    Log.d("TAB", "WRONG LAYOUT");
-
-                    tabsView.findViewById(R.id.TAB_START_STOP).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_SCHEDULE).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS1).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS2).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_STATS3).setVisibility(LinearLayout.INVISIBLE);
-                    tabsView.findViewById(R.id.TAB_LOG).setVisibility(LinearLayout.INVISIBLE);
-
-                    break;
+                if(choice.ordinal() == i) unhide(tabViews[i]);
+                else hide(tabViews[i]);
             }
 
-            return tabsView;
+            return globalView;
         }
     }
 
@@ -729,13 +605,76 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
     /* Desenha o novo tab */
-    public void draw(Tab newTab)
+    private void draw(Tab newTab)
     {
     	// Substitui o elemento 'fragment_container' pela view do tab
         getFragmentManager()
             .beginTransaction()
             .replace(R.id.fragment_container, newTab)
             .commit();
+    }
+
+    private void setupViewElements()
+    {
+        _x_acc          = (TextView) globalView.findViewById(R.id.x_text_field);
+        _y_acc          = (TextView) globalView.findViewById(R.id.y_text_field);
+        _z_acc          = (TextView) globalView.findViewById(R.id.z_text_field);
+        _tms            = (TextView) globalView.findViewById(R.id.tms_text_field);
+        _leftHanded     = (CheckBox) globalView.findViewById(R.id.checkLeftHanded);
+        _buttonSchedule = (Button) globalView.findViewById(R.id.buttonSchedule);
+        _buttonStart    = (Button) globalView.findViewById(R.id.buttonStart);
+        _buttonEnd      = (Button) globalView.findViewById(R.id.buttonEnd);
+        _StartTime      = (TextView) globalView.findViewById(R.id.HoraInicio);
+        _EndTime        = (TextView) globalView.findViewById(R.id.HoraFim);
+        _consumo        = (TextView) globalView.findViewById(R.id.ConsumoInsert);
+        InitialTime     = (TimePicker) globalView.findViewById(R.id.InitialPicker);
+        EndTime         = (TimePicker) globalView.findViewById(R.id.EndPicker);
+        chooseStartTime = (LinearLayout) globalView.findViewById(R.id.PrimeiroTempo);
+        chooseEndTime   = (LinearLayout) globalView.findViewById(R.id.UltimoTempo);
+        mPieChart       = (PieChart) globalView.findViewById(R.id.piechart);
+        textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
+
+        InitialTime.setIs24HourView(true);
+        InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
+        {
+            public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
+            {
+                String strHour = "";
+                String strMinute = "";
+
+                if(hourOfDay < 10) strHour += "0";
+                strHour += hourOfDay;
+
+                if(minute < 10) strMinute += "0";
+                strMinute += minute;
+
+                _StartTime.setText(strHour + ":" + strMinute);
+                changedStart = true;
+            }
+        });
+
+        EndTime.setIs24HourView(true);
+        EndTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
+        {
+            public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
+            {
+                String strHour = "";
+                String strMinute = "";
+
+                if(hourOfDay < 10) strHour += "0";
+                strHour += hourOfDay;
+
+                if(minute < 10) strMinute += "0";
+                strMinute += minute;
+
+                _EndTime.setText(strHour + ":" + strMinute);
+                changedEnd = true;
+            }
+        });
+
+        chooseStartTime.setVisibility(LinearLayout.GONE);
+
+        chooseEndTime.setVisibility(LinearLayout.GONE);
     }
 
     /* ******************************************************************************** */
