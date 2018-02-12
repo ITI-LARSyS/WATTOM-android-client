@@ -47,6 +47,7 @@ import java.util.TimerTask;
 
 import static com.example.filipe.socketcontroller.UI.hide;
 import static com.example.filipe.socketcontroller.UI.isVisible;
+import static com.example.filipe.socketcontroller.UI.toast;
 import static com.example.filipe.socketcontroller.UI.unhide;
 
 
@@ -300,14 +301,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         for (Node node : nodes.getNodes())
                         { _phone = node; }
                         Log.i(TAG,"watch connected");
-                        toast("Connected successfully!");
+                        toast(getApplicationContext(),"Connected successfully!");
                     }
                 });
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
-    { toast("Connection failed! ("+connectionResult.toString()+")"); }
+    { toast(getApplicationContext(),"Connection failed! ("+connectionResult.toString()+")"); }
 
     private void sendMessage(String key)
     {
@@ -348,7 +349,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         try
         {
-            toast("Message received!");
+            toast(getApplicationContext(),"Message received!");
             String [] valores = messageEvent.getPath().split("-");
             if(valores.length > 1)
             {
@@ -486,18 +487,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             }
         }
     }
-
-    /* ******************************************************************************** */
-    /* ******************************************************************************** */
-    /* ******************************************************************************** */
-
-    /* *** */
-    /* I/O */
-    /* *** */
-
-    private void toast(String s)
-    { Toast.makeText(this, s, Toast.LENGTH_SHORT).show(); }
-
 
     /* ******************************************************************************** */
     /* ******************************************************************************** */
