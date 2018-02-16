@@ -640,14 +640,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
         mCubicValueLineChart = (ValueLineChart) globalView.findViewById(R.id.cubiclinechart);
 
-        /*mButton = (Button) globalView.findViewById(R.id.button);
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                testEazeGraph();
-            }
-        });*/
-
         testEazeGraph();
 
         InitialTime.setIs24HourView(true);
