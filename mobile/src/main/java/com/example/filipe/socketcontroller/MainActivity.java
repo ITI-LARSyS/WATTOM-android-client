@@ -448,6 +448,35 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     float eolica = JSONData.getInt("eolica");
                     float biomassa = JSONData.getInt("biomassa");
                     float foto = JSONData.getInt("foto");
+
+                    sendMessage("Energy"
+                            +"-"+"não renovável"
+                            +"-"+(total-termica-hidrica-eolica-biomassa-foto)
+                            +"-"+"térmica"
+                            +"-"+termica
+                            +"-"+"hídrica"
+                            +"-"+hidrica
+                            +"-"+"eólica"
+                            +"-"+eolica
+                            +"-"+"biomassa"
+                            +"-"+biomassa
+                            +"-"+"fotovoltaica"
+                            +"-"+foto
+                    );
+                    String test = "Energy"
+                            +"-"+"não renovável"
+                            +"-"+(total-termica-hidrica-eolica-biomassa-foto)
+                            +"-"+"térmica"
+                            +"-"+termica
+                            +"-"+"hídrica"
+                            +"-"+hidrica
+                            +"-"+"eólica"
+                            +"-"+eolica
+                            +"-"+"biomassa"
+                            +"-"+biomassa
+                            +"-"+"fotovoltaica"
+                            +"-"+foto;
+
                     // falta enviar para o wear (para atualizar o pie chart)
                     float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
                     percentage *= 100;

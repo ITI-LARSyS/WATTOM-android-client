@@ -362,13 +362,34 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             String [] valores = messageEvent.getPath().split("-");
             if(valores.length > 1)
             {
-                piePessoas.clearChart();
-                int tamanho = (valores.length - 1 )/ 2;
-                for(int i = 0; i < tamanho; i++)
+                String event = valores[0];
+                switch(event)
                 {
-                    piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[piePessoas.getChildCount()])));
+                    case "Power":
+                        piePessoas.clearChart();
+                        int nrPessoas = (valores.length - 1 )/ 2;
+                        for(int i = 0; i < nrPessoas; i++)
+                        {
+                            piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[piePessoas.getChildCount()])));
+                        }
+                        piePessoas.startAnimation();
+                        break;
+
+                    case "Energy":
+                        pieEnergias.clearChart();
+                        int tamanho = (valores.length - 1 )/ 2;
+                        for(int i = 0; i < tamanho; i++)
+                        {
+                            pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[piePessoas.getChildCount()])));
+                        }
+                        pieEnergias.startAnimation();
+                        break;
+
+                    default:
+                        Log.d("MESSAGERECEIVED","Error: evento `"+event+"` desconhecido");
+                        break;
                 }
-                piePessoas.startAnimation();
+
             }
             else
             {
