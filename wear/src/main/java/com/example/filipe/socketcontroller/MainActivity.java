@@ -365,7 +365,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
                     {
-                        piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[piePessoas.getChildCount()])));
+                        piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[i % ChartColor.length])));
                     }
                     piePessoas.startAnimation();
                     toast(getApplicationContext(),"Power usage by person has been updated!");
@@ -376,7 +376,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int tamanho = (valores.length - 1 )/ 2;
                     for(int i = 0; i < tamanho; i++)
                     {
-                        pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[i])));
+                        pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[i % ChartColor.length])));
                     }
                     pieEnergias.startAnimation();
                     toast(getApplicationContext(),"Energy data has been updated!");
