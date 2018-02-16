@@ -457,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             +"-"+"Hídrica"
                             +"-"+hidrica
                             +"-"+"Eólica"
-                            +"-"+eolicajjj
+                            +"-"+eolica
                             +"-"+"Biomassa"
                             +"-"+biomassa
                             +"-"+"Fotovoltaica"
