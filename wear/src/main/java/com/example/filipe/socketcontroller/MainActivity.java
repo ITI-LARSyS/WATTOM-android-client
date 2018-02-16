@@ -305,9 +305,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     public void onResult(NodeApi.GetConnectedNodesResult nodes)
                     {
                         for (Node node : nodes.getNodes())
-                        { _phone = node; }
-                        Log.i(TAG,"watch connected");
-                        toast(getApplicationContext(),"Connected successfully!");
+                        {
+                            _phone = node;
+                            toast(getApplicationContext(),"Connected to device `"+node.getDisplayName()+"`!");
+                        }
                     }
                 });
     }
@@ -355,43 +356,40 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         try
         {
-            toast(getApplicationContext(),"Message received!");
             String [] valores = messageEvent.getPath().split("-");
-            if(valores.length > 1)
+            String event = valores[0];
+            switch(event)
             {
-                String event = valores[0];
-                switch(event)
-                {
-                    case "Power":
-                        piePessoas.clearChart();
-                        int nrPessoas = (valores.length - 1 )/ 2;
-                        for(int i = 0; i < nrPessoas; i++)
-                        {
-                            piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[piePessoas.getChildCount()])));
-                        }
-                        piePessoas.startAnimation();
-                        break;
+                case "Power":
+                    piePessoas.clearChart();
+                    int nrPessoas = (valores.length - 1 )/ 2;
+                    for(int i = 0; i < nrPessoas; i++)
+                    {
+                        piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[piePessoas.getChildCount()])));
+                    }
+                    piePessoas.startAnimation();
+                    toast(getApplicationContext(),"Power usage by person has been updated!");
+                    break;
 
-                    case "Energy":
-                        pieEnergias.clearChart();
-                        int tamanho = (valores.length - 1 )/ 2;
-                        for(int i = 0; i < tamanho; i++)
-                        {
-                            pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[i])));
-                        }
-                        pieEnergias.startAnimation();
-                        break;
+                case "Energy":
+                    pieEnergias.clearChart();
+                    int tamanho = (valores.length - 1 )/ 2;
+                    for(int i = 0; i < tamanho; i++)
+                    {
+                        pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[i])));
+                    }
+                    pieEnergias.startAnimation();
+                    toast(getApplicationContext(),"Energy data has been updated!");
+                    break;
 
-                    default:
-                        Log.d("MESSAGERECEIVED","Error: evento `"+event+"` desconhecido");
-                        break;
-                }
+                case "Total power":
+                    _consumo.setText(valores[1]);
+                    toast(getApplicationContext(),"Total consumption has been updated!");
+                    break;
 
-            }
-            else
-            {
-                String power = messageEvent.getPath();
-                _consumo.setText(power);
+                default:
+                    Log.d("MESSAGERECEIVED","Error: evento `"+event+"` desconhecido");
+                    break;
             }
         }
         catch(Exception e)

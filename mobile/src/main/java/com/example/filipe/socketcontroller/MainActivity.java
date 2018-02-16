@@ -450,32 +450,19 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     float foto = JSONData.getInt("foto");
 
                     sendMessage("Energy"
-                            +"-"+"não renovável"
+                            +"-"+"Não renovável"
                             +"-"+(total-termica-hidrica-eolica-biomassa-foto)
-                            +"-"+"térmica"
+                            +"-"+"Térmica"
                             +"-"+termica
-                            +"-"+"hídrica"
+                            +"-"+"Hídrica"
                             +"-"+hidrica
-                            +"-"+"eólica"
-                            +"-"+eolica
-                            +"-"+"biomassa"
+                            +"-"+"Eólica"
+                            +"-"+eolicajjj
+                            +"-"+"Biomassa"
                             +"-"+biomassa
-                            +"-"+"fotovoltaica"
+                            +"-"+"Fotovoltaica"
                             +"-"+foto
                     );
-                    String test = "Energy"
-                            +"-"+"não renovável"
-                            +"-"+(total-termica-hidrica-eolica-biomassa-foto)
-                            +"-"+"térmica"
-                            +"-"+termica
-                            +"-"+"hídrica"
-                            +"-"+hidrica
-                            +"-"+"eólica"
-                            +"-"+eolica
-                            +"-"+"biomassa"
-                            +"-"+biomassa
-                            +"-"+"fotovoltaica"
-                            +"-"+foto;
 
                     // falta enviar para o wear (para atualizar o pie chart)
                     float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
@@ -536,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 }
                             }
                         }
-                        sendMessage(""+powerTotal);
+                        sendMessage("Total power"+"-"+powerTotal);
                     }catch (Exception e) {
                         e.printStackTrace();
                     }
