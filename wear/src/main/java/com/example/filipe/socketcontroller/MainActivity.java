@@ -631,33 +631,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private void setupViewElements()
     {
-        _x_acc          = (TextView) globalView.findViewById(R.id.x_text_field);
-        _y_acc          = (TextView) globalView.findViewById(R.id.y_text_field);
-        _z_acc          = (TextView) globalView.findViewById(R.id.z_text_field);
-        _tms            = (TextView) globalView.findViewById(R.id.tms_text_field);
         _leftHanded     = (CheckBox) globalView.findViewById(R.id.checkLeftHanded);
+        textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
+
         _buttonSchedule = (Button) globalView.findViewById(R.id.buttonSchedule);
         _buttonStart    = (Button) globalView.findViewById(R.id.buttonStart);
         _buttonEnd      = (Button) globalView.findViewById(R.id.buttonEnd);
         _StartTime      = (TextView) globalView.findViewById(R.id.HoraInicio);
         _EndTime        = (TextView) globalView.findViewById(R.id.HoraFim);
-        _consumo        = (TextView) globalView.findViewById(R.id.ConsumoInsert);
-        InitialTime     = (TimePicker) globalView.findViewById(R.id.InitialPicker);
-        EndTime         = (TimePicker) globalView.findViewById(R.id.EndPicker);
         chooseStartTime = (LinearLayout) globalView.findViewById(R.id.PrimeiroTempo);
         chooseEndTime   = (LinearLayout) globalView.findViewById(R.id.UltimoTempo);
-        piePessoas = (PieChart) globalView.findViewById(R.id.piePessoas);
-        pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
-        mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
-        textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
-        mCubicValueLineChart = (ValueLineChart) globalView.findViewById(R.id.cubiclinechart);
-        fitToScreen(piePessoas);
-        fitToScreen(pieEnergias);
-        fitToScreen(mBarChart);
-        fitToScreen(mCubicValueLineChart);
-
-        testEazeGraph();
-
+        InitialTime     = (TimePicker) globalView.findViewById(R.id.InitialPicker);
+        EndTime         = (TimePicker) globalView.findViewById(R.id.EndPicker);
         InitialTime.setIs24HourView(true);
         InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
         {
@@ -676,7 +661,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 changedStart = true;
             }
         });
-
         EndTime.setIs24HourView(true);
         EndTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
         {
@@ -695,10 +679,25 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 changedEnd = true;
             }
         });
-
         chooseStartTime.setVisibility(LinearLayout.GONE);
-
         chooseEndTime.setVisibility(LinearLayout.GONE);
+
+        piePessoas = (PieChart) globalView.findViewById(R.id.piePessoas);
+        pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
+        mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
+        mCubicValueLineChart = (ValueLineChart) globalView.findViewById(R.id.cubiclinechart);
+        fitToScreen(piePessoas);
+        fitToScreen(pieEnergias);
+        fitToScreen(mBarChart);
+        fitToScreen(mCubicValueLineChart);
+
+        _x_acc          = (TextView) globalView.findViewById(R.id.x_text_field);
+        _y_acc          = (TextView) globalView.findViewById(R.id.y_text_field);
+        _z_acc          = (TextView) globalView.findViewById(R.id.z_text_field);
+        _tms            = (TextView) globalView.findViewById(R.id.tms_text_field);
+        _consumo        = (TextView) globalView.findViewById(R.id.ConsumoInsert);
+
+        //testEazeGraph();
     }
 
     /* ******************************************************************************** */
