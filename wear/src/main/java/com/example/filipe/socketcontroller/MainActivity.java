@@ -146,7 +146,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ********** */
     /* STATS1 TAB */
     /* ********** */
-    private PieChart mPieChart;
+    private PieChart piePessoas;
+    private PieChart pieEnergias;
     private String [] ChartColor = new String[4];
     private TextView _consumo;
     private BarChart mBarChart;
@@ -361,13 +362,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             String [] valores = messageEvent.getPath().split("-");
             if(valores.length > 1)
             {
-                mPieChart.clearChart();
+                piePessoas.clearChart();
                 int tamanho = (valores.length - 1 )/ 2;
                 for(int i = 0; i < tamanho; i++)
                 {
-                    mPieChart.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[mPieChart.getChildCount()])));
+                    piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[piePessoas.getChildCount()])));
                 }
-                mPieChart.startAnimation();
+                piePessoas.startAnimation();
             }
             else
             {
@@ -645,11 +646,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         EndTime         = (TimePicker) globalView.findViewById(R.id.EndPicker);
         chooseStartTime = (LinearLayout) globalView.findViewById(R.id.PrimeiroTempo);
         chooseEndTime   = (LinearLayout) globalView.findViewById(R.id.UltimoTempo);
-        mPieChart       = (PieChart) globalView.findViewById(R.id.piechart);
+        piePessoas = (PieChart) globalView.findViewById(R.id.piePessoas);
+        pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
         textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
         mCubicValueLineChart = (ValueLineChart) globalView.findViewById(R.id.cubiclinechart);
-        fitToScreen(mPieChart);
+        fitToScreen(piePessoas);
+        fitToScreen(pieEnergias);
         fitToScreen(mBarChart);
         fitToScreen(mCubicValueLineChart);
 
@@ -704,12 +707,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void testEazeGraph()
     {
-        mPieChart.addPieSlice(new PieModel("Freetime", 15, Color.parseColor("#FE6DA8")));
-        mPieChart.addPieSlice(new PieModel("Sleep", 25, Color.parseColor("#56B7F1")));
-        mPieChart.addPieSlice(new PieModel("Work", 35, Color.parseColor("#CDA67F")));
-        mPieChart.addPieSlice(new PieModel("Eating", 9, Color.parseColor("#FED70E")));
+        piePessoas.addPieSlice(new PieModel("Freetime", 15, Color.parseColor("#FE6DA8")));
+        piePessoas.addPieSlice(new PieModel("Sleep", 25, Color.parseColor("#56B7F1")));
+        piePessoas.addPieSlice(new PieModel("Work", 35, Color.parseColor("#CDA67F")));
+        piePessoas.addPieSlice(new PieModel("Eating", 9, Color.parseColor("#FED70E")));
 
-        mPieChart.startAnimation();
+        piePessoas.startAnimation();
 
 
 

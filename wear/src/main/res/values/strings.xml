@@ -5,9 +5,10 @@
     <!--- TAB TITLES -->
     <string name="TITLE_STARTSTOP">Start/Stop</string>
     <string name="TITLE_SCHEDULE">Schedule</string>
-    <string name="TITLE_STATS1">Stats (Pie Chart)</string>
+    <string name="TITLE_STATS1">Pessoas</string>
     <string name="TITLE_STATS2">Stats (Bar Graph)</string>
     <string name="TITLE_STATS3">Stats (Line Graph)</string>
+    <string name="TITLE_STATS4">Energias</string>
     <string name="TITLE_LOG">Log</string>
 
     <!--- START/STOP TAB -->

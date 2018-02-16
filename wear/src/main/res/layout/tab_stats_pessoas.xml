@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <org.eazegraph.lib.charts.PieChart
-        android:id="@+id/piechart"
+        android:id="@+id/piePessoas"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"

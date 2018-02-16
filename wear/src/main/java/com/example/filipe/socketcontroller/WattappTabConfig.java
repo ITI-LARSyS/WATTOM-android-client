@@ -14,7 +14,7 @@ public enum WattappTabConfig
 
     STATS1(R.string.TITLE_STATS1,
             android.R.drawable.ic_menu_sort_by_size,
-            R.id.tab_stats1,
+            R.id.tab_stats_pessoas,
             -1),
 
     STATS2(R.string.TITLE_STATS2,
@@ -25,6 +25,11 @@ public enum WattappTabConfig
     STATS3(R.string.TITLE_STATS3,
             android.R.drawable.ic_menu_sort_by_size,
             R.id.tab_stats3,
+            -1),
+
+    STATS4(R.string.TITLE_STATS4,
+            android.R.drawable.ic_menu_sort_by_size,
+            R.id.tab_stats_energias,
             -1),
 
     LOG(R.string.TITLE_LOG,
