@@ -148,7 +148,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ********** */
     private PieChart piePessoas;
     private PieChart pieEnergias;
-    private String [] ChartColor = new String[4];
+    private String [] ChartColor;
     private TextView _consumo;
     private BarChart mBarChart;
     private ValueLineChart mCubicValueLineChart;
@@ -182,10 +182,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         tabs[initial] = new Tab(WattappTabConfig.DEFAULT);
         draw(tabs[initial]);
 
-        ChartColor[0] = "#FE6DA8";
-        ChartColor[1] = "#56B7F1";
-        ChartColor[2] = "#CDA67F";
-        ChartColor[3] = "#FED70E";
+        ChartColor = new String[] { "#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF", "#0000FF", "#7F00FF", "#FF00FF", "#FF007F", "#808080" };
 
         seconds = 0;
         Primeiroconsumo=0;
@@ -380,7 +377,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         int tamanho = (valores.length - 1 )/ 2;
                         for(int i = 0; i < tamanho; i++)
                         {
-                            pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[piePessoas.getChildCount()])));
+                            pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[i])));
                         }
                         pieEnergias.startAnimation();
                         break;
