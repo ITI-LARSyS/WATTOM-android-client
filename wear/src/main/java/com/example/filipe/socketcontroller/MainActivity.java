@@ -59,6 +59,7 @@ import static com.example.filipe.socketcontroller.UI.unhide;
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
     private static final String TAG = "Main Activity Watch";
+    private Button mButton;
 
     /* ***** */
     /* ????? */
@@ -638,6 +639,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
         textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
         mCubicValueLineChart = (ValueLineChart) globalView.findViewById(R.id.cubiclinechart);
+
+        /*mButton = (Button) globalView.findViewById(R.id.button);
+        mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testEazeGraph();
+            }
+        });*/
 
         testEazeGraph();
 
