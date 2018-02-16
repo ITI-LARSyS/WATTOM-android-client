@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.drawer.WearableActionDrawer;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,7 +29,6 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -390,6 +390,16 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* UI */
     /* ** */
 
+    public void fitToScreen(View view)
+    {
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
+        params.width = metrics.widthPixels;
+        params.height = metrics.heightPixels;
+        view.setLayoutParams(params);
+    }
+
     public void showStartPicker(View v)
     {
         if(isVisible(chooseStartTime))
@@ -639,6 +649,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
         textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
         mCubicValueLineChart = (ValueLineChart) globalView.findViewById(R.id.cubiclinechart);
+        fitToScreen(mPieChart);
+        fitToScreen(mBarChart);
+        fitToScreen(mCubicValueLineChart);
 
         testEazeGraph();
 
@@ -688,6 +701,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ******************************************************************************** */
     /* ******************************************************************************** */
     /* ******************************************************************************** */
+
     public void testEazeGraph()
     {
         mPieChart.addPieSlice(new PieModel("Freetime", 15, Color.parseColor("#FE6DA8")));

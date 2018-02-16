@@ -444,10 +444,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     JSONData = (JSONObject) aux.get(0);
                     float total = JSONData.getInt("total");
                     float termica = JSONData.getInt("termica");
-                    float percentage = 1 - (termica / total);
+                    float hidrica = JSONData.getInt("hidrica");
+                    float eolica = JSONData.getInt("eolica");
+                    float biomassa = JSONData.getInt("biomassa");
+                    float foto = JSONData.getInt("foto");
+                    // falta enviar para o wear (para atualizar o pie chart)
+                    float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
                     percentage *= 100;
                     renewableEnergy =  Math.round(percentage);
-                    String ChangeEnergy = ChangeEnergyURL+renewableEnergy;
+                    String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
                     ChangeColorByEnergy(ChangeEnergy);
                     new RefreshData().start();
                 }catch(Exception e){
@@ -1221,49 +1226,49 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private void askIP()
     {
-	final SharedPreferences prefs = getSharedPreferences("config", Context.MODE_PRIVATE);
-	final String oldIP = prefs.getString("IP",null);    
+        final SharedPreferences prefs = getSharedPreferences("config", Context.MODE_PRIVATE);
+        final String oldIP = prefs.getString("IP",null);
 
-	AlertDialog.Builder ask = new AlertDialog.Builder(this);
+        AlertDialog.Builder ask = new AlertDialog.Builder(this);
 
-	ask.setTitle("Wattapp's IP");
-	ask.setMessage("(Previous IP: "+oldIP+")");
+        ask.setTitle("Wattapp's IP");
+        ask.setMessage("(Previous IP: "+oldIP+")");
 
-	// Set an EditText view to get user input
-	final EditText input = new EditText(this);
-	ask.setView(input);
-	ask.setCancelable(false);
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        ask.setView(input);
+        ask.setCancelable(false);
 
-	ask.setPositiveButton("Set new IP", new DialogInterface.OnClickListener()
-	{
-		public void onClick(DialogInterface dialog, int whichButton) 
-		{
-			String newIP = input.getText().toString();
-			SharedPreferences.Editor editor = prefs.edit();
-			editor.putString("IP",newIP);
-			editor.apply();
-			setIP(newIP);
-			toast("You chose to set new IP ("+newIP+")");
-		}
-	});
-	ask.setNegativeButton("Keep previous IP",new DialogInterface.OnClickListener() 
-	{
-		public void onClick(DialogInterface dialog, int whichButton) 
-		{
-			setIP(oldIP);
-			toast("You chose to keep previous IP ("+oldIP+")");
-		}
-	});
-	ask.show();
+        ask.setPositiveButton("Set new IP", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int whichButton)
+            {
+                String newIP = input.getText().toString();
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("IP",newIP);
+                editor.apply();
+                setIP(newIP);
+                toast("You chose to set new IP ("+newIP+")");
+            }
+        });
+        ask.setNegativeButton("Keep previous IP",new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int whichButton)
+            {
+                setIP(oldIP);
+                toast("You chose to keep previous IP ("+oldIP+")");
+            }
+        });
+        ask.show();
     }
     
     public void setIP(String ip)
     {
-	BASE_URL = "http://"+ip+":3000";
-	PLUGS_URL =BASE_URL+"/plug/";
-	SELECTED_URL = BASE_URL+"/plug/%/selected/";
-	PLUG_URL = BASE_URL+"/plug/%";
-	ChangeEnergyURL = PLUGS_URL+"energy/";
+        BASE_URL = "http://"+ip+":3000";
+        PLUGS_URL =BASE_URL+"/plug/";
+        SELECTED_URL = BASE_URL+"/plug/%/selected/";
+        PLUG_URL = BASE_URL+"/plug/%";
+        ChangeEnergyURL = PLUGS_URL+"energy/";
     }
     
     public static String getBaseURL() { return BASE_URL; }
