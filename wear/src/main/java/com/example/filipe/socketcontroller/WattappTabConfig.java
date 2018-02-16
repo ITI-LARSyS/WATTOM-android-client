@@ -27,8 +27,8 @@ public enum WattappTabConfig
             R.id.tab_stats3,
             -1),
 
-    STATS4(R.string.TITLE_STATS4,
-            android.R.drawable.ic_menu_sort_by_size,
+    ENERGIAS(R.string.TITLE_STATS4,
+            android.R.drawable.ic_lock_idle_low_battery,
             R.id.tab_stats_energias,
             -1),
 
