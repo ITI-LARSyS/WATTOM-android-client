@@ -143,15 +143,30 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private LinearLayout chooseStartTime;
     private LinearLayout chooseEndTime;
 
-    /* ********** */
-    /* STATS1 TAB */
-    /* ********** */
+    /* ***** */
+    /* STATS */
+    /* ***** */
     private PieChart piePessoas;
     private PieChart pieEnergias;
-    private String [] ChartColor;
     private TextView _consumo;
     private BarChart mBarChart;
-    private ValueLineChart mCubicValueLineChart;
+    private ValueLineChart lineChartPlugs;
+    private static final String[] colors =
+            {
+                    "#FF0000",
+                    "#FF8000",
+                    "#FFFF00",
+                    "#80FF00",
+                    "#00FF00",
+                    "#00FF80",
+                    "#00FFFF",
+                    "#0080FF",
+                    "#0000FF",
+                    "#7F00FF",
+                    "#FF00FF",
+                    "#FF007F", 
+                    "#808080"
+            };
 
     /* ******************************************************************************** */
     /* ******************************************************************************** */
@@ -181,8 +196,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         int initial = WattappTabConfig.DEFAULT.ordinal();
         tabs[initial] = new Tab(WattappTabConfig.DEFAULT);
         draw(tabs[initial]);
-
-        ChartColor = new String[] { "#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF", "#0000FF", "#7F00FF", "#FF00FF", "#FF007F", "#808080" };
 
         seconds = 0;
         Primeiroconsumo=0;
@@ -365,7 +378,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
                     {
-                        piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[i % ChartColor.length])));
+                        piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(colors[i % colors.length])));
                     }
                     piePessoas.startAnimation();
                     toast(getApplicationContext(),"Power usage by person has been updated!");
@@ -376,7 +389,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int tamanho = (valores.length - 1 )/ 2;
                     for(int i = 0; i < tamanho; i++)
                     {
-                        pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(ChartColor[i % ChartColor.length])));
+                        pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(colors[i % colors.length])));
                     }
                     pieEnergias.startAnimation();
                     toast(getApplicationContext(),"Energy data has been updated!");
@@ -647,9 +660,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private void setupViewElements()
     {
+        // Start/Stop
         _leftHanded     = (CheckBox) globalView.findViewById(R.id.checkLeftHanded);
         textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
 
+        // Schedule
         _buttonSchedule = (Button) globalView.findViewById(R.id.buttonSchedule);
         _buttonStart    = (Button) globalView.findViewById(R.id.buttonStart);
         _buttonEnd      = (Button) globalView.findViewById(R.id.buttonEnd);
@@ -698,22 +713,24 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         chooseStartTime.setVisibility(LinearLayout.GONE);
         chooseEndTime.setVisibility(LinearLayout.GONE);
 
+        // Stats
         piePessoas = (PieChart) globalView.findViewById(R.id.piePessoas);
         pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
-        mCubicValueLineChart = (ValueLineChart) globalView.findViewById(R.id.cubiclinechart);
+        lineChartPlugs = (ValueLineChart) globalView.findViewById(R.id.linechartplugs);
         fitToScreen(piePessoas);
         fitToScreen(pieEnergias);
         fitToScreen(mBarChart);
-        fitToScreen(mCubicValueLineChart);
+        fitToScreen(lineChartPlugs);
 
+        // Log
         _x_acc          = (TextView) globalView.findViewById(R.id.x_text_field);
         _y_acc          = (TextView) globalView.findViewById(R.id.y_text_field);
         _z_acc          = (TextView) globalView.findViewById(R.id.z_text_field);
         _tms            = (TextView) globalView.findViewById(R.id.tms_text_field);
         _consumo        = (TextView) globalView.findViewById(R.id.ConsumoInsert);
 
-        //testEazeGraph();
+        testEazeGraph();
     }
 
     /* ******************************************************************************** */
@@ -722,14 +739,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void testEazeGraph()
     {
-        piePessoas.addPieSlice(new PieModel("Freetime", 15, Color.parseColor("#FE6DA8")));
+        /*piePessoas.addPieSlice(new PieModel("Freetime", 15, Color.parseColor("#FE6DA8")));
         piePessoas.addPieSlice(new PieModel("Sleep", 25, Color.parseColor("#56B7F1")));
         piePessoas.addPieSlice(new PieModel("Work", 35, Color.parseColor("#CDA67F")));
         piePessoas.addPieSlice(new PieModel("Eating", 9, Color.parseColor("#FED70E")));
 
-        piePessoas.startAnimation();
-
-
+        piePessoas.startAnimation();*/
 
         mBarChart.addBar(new BarModel(2.3f, 0xFF123456));
         mBarChart.addBar(new BarModel(2.f,  0xFF343456));
@@ -743,8 +758,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         mBarChart.startAnimation();
 
         ValueLineSeries series = new ValueLineSeries();
-        series.setColor(0xFF56B7F1);
-
+        series.setColor(Color.parseColor(colors[0]));
         series.addPoint(new ValueLinePoint("Jan", 2.4f));
         series.addPoint(new ValueLinePoint("Feb", 3.4f));
         series.addPoint(new ValueLinePoint("Mar", .4f));
@@ -757,8 +771,25 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         series.addPoint(new ValueLinePoint("Oct", 3.4f));
         series.addPoint(new ValueLinePoint("Nov", .4f));
         series.addPoint(new ValueLinePoint("Dec", 1.3f));
+        lineChartPlugs.addSeries(series);
 
-        mCubicValueLineChart.addSeries(series);
-        mCubicValueLineChart.startAnimation();
+        ValueLineSeries series2 = new ValueLineSeries();
+        series2.setColor(Color.parseColor(colors[1]));
+        series2.s
+        series2.addPoint(new ValueLinePoint("Jan", 1.4f));
+        series2.addPoint(new ValueLinePoint("Feb", 4.4f));
+        series2.addPoint(new ValueLinePoint("Mar", 5.4f));
+        series2.addPoint(new ValueLinePoint("Apr", 6.2f));
+        series2.addPoint(new ValueLinePoint("Mai", 1.6f));
+        series2.addPoint(new ValueLinePoint("Jun", 9.0f));
+        series2.addPoint(new ValueLinePoint("Jul", 6.5f));
+        series2.addPoint(new ValueLinePoint("Aug", 3.4f));
+        series2.addPoint(new ValueLinePoint("Sep", 1.4f));
+        series2.addPoint(new ValueLinePoint("Oct", 4.4f));
+        series2.addPoint(new ValueLinePoint("Nov", 1.4f));
+        series2.addPoint(new ValueLinePoint("Dec", 2.3f));
+        lineChartPlugs.addSeries(series2);
+
+        lineChartPlugs.startAnimation();
     }
 }

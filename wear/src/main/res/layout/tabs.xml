@@ -12,7 +12,7 @@
         <include layout="@layout/tab_schedule"          android:id="@+id/tab_schedule"/>
         <include layout="@layout/tab_stats_pessoas"     android:id="@+id/tab_stats_pessoas"/>
         <include layout="@layout/tab_stats2"            android:id="@+id/tab_stats2"/>
-        <include layout="@layout/tab_stats3"            android:id="@+id/tab_stats3"/>
+        <include layout="@layout/tab_stats_plugs" android:id="@+id/tab_stats3"/>
         <include layout="@layout/tab_stats_energias"    android:id="@+id/tab_stats_energias"/>
         <include layout="@layout/tab_log"               android:id="@+id/tab_log"/>
 

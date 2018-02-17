@@ -6,15 +6,18 @@
     android:layout_height="match_parent">
 
     <org.eazegraph.lib.charts.ValueLineChart
-        android:id="@+id/cubiclinechart"
+        android:id="@+id/linechartplugs"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"
         app:egUseCubic="true"
-        app:egUseOverlapFill="true"
+        app:egUseOverlapFill="false"
         app:egCurveSmoothness="0.4"
-        app:egIndicatorLineColor="#FE6DA8"
+        app:egIndicatorLineColor="#FFFFFF"
         app:egLegendHeight="40dp"
-        app:egShowStandardValue="true"/>
+        app:egShowStandardValue="true"
+        app:egShowLegendBeneathIndicator="true"
+        app:egShowValueIndicator="true"
+        app:color/>
 
 </RelativeLayout>

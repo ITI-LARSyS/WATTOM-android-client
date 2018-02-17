@@ -7,7 +7,7 @@
     <string name="TITLE_SCHEDULE">Schedule</string>
     <string name="TITLE_STATS1">Power usage by person</string>
     <string name="TITLE_STATS2">Stats (Bar Graph)</string>
-    <string name="TITLE_STATS3">Stats (Line Graph)</string>
+    <string name="TITLE_STATS3">Power usage by plug</string>
     <string name="TITLE_STATS4">Energy</string>
     <string name="TITLE_LOG">Log</string>
 

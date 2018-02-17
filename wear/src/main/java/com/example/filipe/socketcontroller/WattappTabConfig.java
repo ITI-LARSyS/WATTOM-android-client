@@ -12,17 +12,12 @@ public enum WattappTabConfig
             R.id.tab_schedule,
             -1),
 
-    STATS1(R.string.TITLE_STATS1,
+    PESSOAS(R.string.TITLE_STATS1,
             android.R.drawable.ic_menu_sort_by_size,
             R.id.tab_stats_pessoas,
             -1),
 
-    STATS2(R.string.TITLE_STATS2,
-            android.R.drawable.ic_menu_sort_by_size,
-            R.id.tab_stats2,
-            -1),
-
-    STATS3(R.string.TITLE_STATS3,
+    PLUGS(R.string.TITLE_STATS3,
             android.R.drawable.ic_menu_sort_by_size,
             R.id.tab_stats3,
             -1),
@@ -35,6 +30,11 @@ public enum WattappTabConfig
     LOG(R.string.TITLE_LOG,
             android.R.drawable.ic_menu_info_details,
             R.id.tab_log,
+            -1),
+
+    STATS2(R.string.TITLE_STATS2,
+            android.R.drawable.ic_menu_sort_by_size,
+            R.id.tab_stats2,
             -1);
 
     final int title;
