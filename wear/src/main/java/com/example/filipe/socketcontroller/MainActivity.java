@@ -1,7 +1,6 @@
 package com.example.filipe.socketcontroller;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
@@ -15,12 +14,10 @@ import android.support.annotation.Nullable;
 import android.support.wearable.view.drawer.WearableActionDrawer;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -107,7 +104,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private WearableActionDrawer actionDrawer;
     private Menu actionMenu;
     private MenuInflater menuInflater;
-    private Tab[] tabs;
     private static final int NONE = -1;
     private View globalView;
     private View[] tabViews;
@@ -170,25 +166,30 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         // A View global (que contém as outras "subviews") é criada
         globalView = findViewById(R.id.bosta);
+        actionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
+        actionMenu = actionDrawer.getMenu();
+        actionDrawer.lockDrawerClosed();
+        menuInflater = getMenuInflater();
+        // Possibilita a navegação pelos tabs presentes no TabAdapter
+        navigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
+        navigationDrawer.setAdapter(new TabAdapter(this));
+
+        // São obtidos os IDs dos elementos da View e os elementos são configurados
+        setupViewElements();
+
+
 
         // As "subviews" são armazenadas num vetor
         tabViews = new View[WattappTabConfig.values().length];
         for(WattappTabConfig config : WattappTabConfig.values())
         { tabViews[config.ordinal()] = globalView.findViewById(config.id); }
-
-        // São obtidos os IDs dos elementos da View e os elementos são configurados
-        setupViewElements();
-
-        actionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
-        actionMenu = actionDrawer.getMenu();
-        actionDrawer.lockDrawerClosed();
-        menuInflater = getMenuInflater();
-
-        // Possibilita a navegação pelos tabs presentes no TabAdapter
-        navigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
-        navigationDrawer.setAdapter(new TabAdapter(this));
-
         drawTab(WattappTabConfig.DEFAULT);
+
+
+
+
+
+
 
         seconds = 0;
         Primeiroconsumo=0;
@@ -215,8 +216,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     protected void onStop()
     {
         super.onStop();
-        Wearable.MessageApi.removeListener(_client, this);
-        _client.disconnect();
+        new Thread(()->
+        {
+            Wearable.MessageApi.removeListener(_client, this);
+            _client.disconnect();
+        }).start();
     }
 
     @Override
@@ -247,9 +251,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
-
-        //Log.wtf(TAG,event.toString());
+    public void onSensorChanged(SensorEvent event)
+    {
+        new Thread(()->
+        {
+            //Log.wtf(TAG,event.toString());
 
 /*
         SensorManager.getRotationMatrixFromVector(_rotationMatrix,
@@ -274,26 +280,27 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         float z = _orientationVals[2];
         int val =4;*/
 
-       // if(x>val||y>val||z>val) {
-       // float y = event.values[1];
+            // if(x>val||y>val||z>val) {
+            // float y = event.values[1];
 
 
 
 
 
-        //}
-          //  Log.i(TAG,"Sending data");
+            //}
+            //  Log.i(TAG,"Sending data");
 
-          //  float[] data = {x,y};
+            //  float[] data = {x,y};
             x = event.values[0];
-           // _x_acc.setText(x+"");
+            // _x_acc.setText(x+"");
             z = event.values[2];
             z = _factor*z;
-           // _y_acc.setText(z+"");
+            // _y_acc.setText(z+"");
 
 //            Log.i("DEBUG",x+","+z);
 
-    //Log.i(TAG,"sending data form watch");
+            //Log.i(TAG,"sending data form watch");
+        }).start();
     }
 
     /* ******************************************************************************** */
@@ -326,36 +333,39 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private void sendMessage(String key)
     {
-        if (_phone != null && _client!= null && _client.isConnected())
+        new Thread(()->
         {
-            Wearable.MessageApi.sendMessage(
-                    _client, _phone.getId(), WEAR_ACC_SERVICE + "" + key, null).setResultCallback(
-                    new ResultCallback<MessageApi.SendMessageResult>()
-                    {
-                        @Override
-                        public void onResult(MessageApi.SendMessageResult sendMessageResult)
+            if (_phone != null && _client!= null && _client.isConnected())
+            {
+                Wearable.MessageApi.sendMessage(
+                        _client, _phone.getId(), WEAR_ACC_SERVICE + "" + key, null).setResultCallback(
+                        new ResultCallback<MessageApi.SendMessageResult>()
                         {
-                            if (!sendMessageResult.getStatus().isSuccess())
+                            @Override
+                            public void onResult(MessageApi.SendMessageResult sendMessageResult)
                             {
-                                Log.e(TAG, "Failed to send message with status code: "
-                                        + sendMessageResult.getStatus().getStatusCode());
-                            }
-                            else
-                            {
-                                Log.d("SENDMESSAGE","MESSAGE SENT - "+key);
-                                Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
+                                if (!sendMessageResult.getStatus().isSuccess())
+                                {
+                                    Log.e(TAG, "Failed to send message with status code: "
+                                            + sendMessageResult.getStatus().getStatusCode());
+                                }
+                                else
+                                {
+                                    Log.d("SENDMESSAGE","MESSAGE SENT - "+key);
+                                    Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
+                                }
                             }
                         }
-                    }
-            );
-        }
-        else
-        {
-            Log.d("SENDMESSAGE","Failed to send a message!");
-            Log.d("SENDMESSAGE","client = "+_client);
-            Log.d("SENDMESSAGE","phone = "+_phone);
-            Log.d("SENDMESSAGE","isConnected = "+_client.isConnected());
-        }
+                );
+            }
+            else
+            {
+                Log.d("SENDMESSAGE","Failed to send a message!");
+                Log.d("SENDMESSAGE","client = "+_client);
+                Log.d("SENDMESSAGE","phone = "+_phone);
+                Log.d("SENDMESSAGE","isConnected = "+_client.isConnected());
+            }
+        }).start();
     }
 
     @Override
@@ -532,58 +542,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* NAVEGAÇÃO E AÇÕES DOS TABS */
     /* ************************** */
 
-    /* Separador da aplicação (com respetivo layout) */
-    private class Tab extends Fragment
-    {
-        private WattappTabConfig choice;
-
-        public Tab(final WattappTabConfig choice)
-        {
-            this.choice = choice;
-            final Bundle arguments = new Bundle();
-            arguments.putSerializable("TAB",choice);
-            this.setArguments(arguments);
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)
-        {
-            // São retiradas as ações presentes (de outras tabs)
-            actionMenu.clear();
-
-            // Caso tenha um menu de ações
-            if(choice.menu != NONE)
-            {
-                // É permitido que seja acedido
-                actionDrawer.unlockDrawer();
-
-                // O menu de ações é populado com as ações específicas do tab
-                menuInflater.inflate(choice.menu, actionMenu);
-            }
-            else
-            {
-                // Não é permitido que seja acedido
-                actionDrawer.lockDrawerClosed();
-            }
-
-
-            // É mostrada unicamente a View pretendida (do tab)
-            // (as restantes são escondidas)
-            for(int i = 0; i < tabViews.length; i++)
-            {
-                if(choice.ordinal() == i) unhide(tabViews[i]);
-                else hide(tabViews[i]);
-            }
-
-            return globalView;
-        }
-    }
-
     /* Fornece acesso aos tabs do enum */
     private final class TabAdapter extends WearableNavigationDrawer.WearableNavigationDrawerAdapter
     {
         private final Context context;
-        private WattappTabConfig currentTab = WattappTabConfig.DEFAULT;
 
         TabAdapter(final Context context)
         { this.context = context; }
@@ -598,9 +560,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         @Override
         public void onItemSelected(int index)
-        {
-            drawTab(WattappTabConfig.values()[index]);
-        }
+        { drawTab(WattappTabConfig.values()[index]); }
 
         @Override
         public int getCount()
@@ -623,6 +583,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         chooseEndTime   = (LinearLayout) globalView.findViewById(R.id.UltimoTempo);
         InitialTime     = (TimePicker) globalView.findViewById(R.id.InitialPicker);
         EndTime         = (TimePicker) globalView.findViewById(R.id.EndPicker);
+
         InitialTime.setIs24HourView(true);
         InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
         {
@@ -754,6 +715,4 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             else hide(tabViews[i]);
         }
     }
-
-
 }
