@@ -143,8 +143,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ***** */
     /* STATS */
     /* ***** */
-    private PieChart piePessoas;
-    private PieChart pieEnergias;
+    private DynamicPieChart piePessoas;
+    private DynamicPieChart pieEnergias;
     private DynamicPieChart piePlugsAcum;
     //private PlugPieChartValues piePlugsAcumValues;
     private BarChart mBarChart;
@@ -197,8 +197,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
-
-
     }
 
     @Override
@@ -224,23 +222,26 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         super.onResume();
 
-        _client = new GoogleApiClient.Builder(this)
+        new Thread(()->
+        {
+            _client = new GoogleApiClient.Builder(this)
                     .addApi(Wearable.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build();
 
-        _client.connect();
-        Wearable.MessageApi.addListener(_client, this);
+            _client.connect();
+            Wearable.MessageApi.addListener(_client, this);
 
 
-        Log.i(TAG, "On resume called");
+            Log.i(TAG, "On resume called");
 
-        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-        cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        cpuWakeLock.acquire();
+            PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+            cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            cpuWakeLock.acquire();
 
-       // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
+            // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
+        }).start();
     }
 
     @Override
@@ -365,22 +366,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             switch(event)
             {
                 case "Power":
-                    piePessoas.clearChart();
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
                     {
-                        piePessoas.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(colors[i % colors.length])));
+                        piePessoas.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                     }
                     piePessoas.startAnimation();
                     toast(getApplicationContext(),"Power usage by person has been updated!");
                     break;
 
                 case "Energy":
-                    pieEnergias.clearChart();
                     int tamanho = (valores.length - 1 )/ 2;
                     for(int i = 0; i < tamanho; i++)
                     {
-                        pieEnergias.addPieSlice(new PieModel(valores[i*2+1], Float.parseFloat(valores[i*2+2]), Color.parseColor(colors[i % colors.length])));
+                        pieEnergias.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                     }
                     pieEnergias.startAnimation();
                     toast(getApplicationContext(),"Energy data has been updated!");
@@ -701,8 +700,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         chooseEndTime.setVisibility(LinearLayout.GONE);
 
         // Stats
-        piePessoas = (PieChart) globalView.findViewById(R.id.piePessoas);
-        pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
+        piePessoas = (DynamicPieChart) globalView.findViewById(R.id.piePessoas);
+        pieEnergias = (DynamicPieChart) globalView.findViewById(R.id.pieEnergias);
         piePlugsAcum = (DynamicPieChart) globalView.findViewById(R.id.piePlugsAcum);
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
         lineChartPlugs = (DynamicLineChart) globalView.findViewById(R.id.linechartplugs);
@@ -756,12 +755,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         lineChartPlugs.addPoint("plug2.local",4.4f);
         lineChartPlugs.addPoint("plug2.local",5f);
         lineChartPlugs.addPoint("plug1.local",9f);
+        lineChartPlugs.startAnimation();
 
         piePlugsAcum.incValue("plug1.local",30);
         piePlugsAcum.incValue("plug2.local",20);
         piePlugsAcum.incValue("plug3.local",20);
-        piePlugsAcum.incValue("plug4.local",20);
+        piePlugsAcum.incValue("plug1.local",20);
         piePlugsAcum.incValue("plug5.local",20);
+        piePlugsAcum.startAnimation();
     }
 
 
