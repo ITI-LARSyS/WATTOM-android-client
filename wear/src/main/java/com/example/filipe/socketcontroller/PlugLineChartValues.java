@@ -51,5 +51,9 @@ public class PlugLineChartValues extends HashMap<String,ValueLineSeries>
 
         return time;
     }
+    public boolean containsPlug(String plugName)
+    {
+        return containsKey(plugName);
+    }
 
 }

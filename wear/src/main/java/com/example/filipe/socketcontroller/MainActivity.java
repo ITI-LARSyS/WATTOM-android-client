@@ -44,12 +44,7 @@ import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.charts.ValueLineChart;
 import org.eazegraph.lib.models.BarModel;
 import org.eazegraph.lib.models.PieModel;
-import org.eazegraph.lib.models.ValueLinePoint;
-import org.eazegraph.lib.models.ValueLineSeries;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -155,7 +150,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private TextView _consumo;
     private BarChart mBarChart;
     private ValueLineChart lineChartPlugs;
-
+    private PlugLineChartValues lineChartValues;
 
     /* ******************************************************************************** */
     /* ******************************************************************************** */
@@ -387,6 +382,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Total power":
                     _consumo.setText(valores[1]);
                     toast(getApplicationContext(),"Total consumption has been updated!");
+                    break;
+
+                case "Plug consumption":
+                    int nrPlugs = (valores.length - 1 )/ 2;
+                    for(int i = 0; i < nrPlugs; i++)
+                    {
+                        String plugName = valores[i*2+1];
+                        float point = Float.parseFloat(valores[i*2+2]);
+                        if(!lineChartValues.containsPlug(plugName))
+                        {
+                            lineChartValues.addPlug(plugName);
+                        }
+                        lineChartValues.addPoint(plugName,point);
+                    }
                     break;
 
                 default:
@@ -707,6 +716,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
         lineChartPlugs = (ValueLineChart) globalView.findViewById(R.id.linechartplugs);
+        lineChartValues = new PlugLineChartValues(lineChartPlugs);
         fitToScreen(piePessoas);
         fitToScreen(pieEnergias);
         fitToScreen(mBarChart);
@@ -746,7 +756,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         mBarChart.startAnimation();
 
-        PlugLineChartValues lineChartValues = new PlugLineChartValues(lineChartPlugs);
         lineChartValues.addPlug("plug1.local");
         lineChartValues.addPoint("plug1.local",2.4f);
         lineChartValues.addPoint("plug1.local",1f);
