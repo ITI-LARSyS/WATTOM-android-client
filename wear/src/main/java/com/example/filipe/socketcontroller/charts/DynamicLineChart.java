@@ -1,6 +1,8 @@
 package com.example.filipe.socketcontroller.charts;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.util.AttributeSet;
 
 import org.eazegraph.lib.charts.ValueLineChart;
 import org.eazegraph.lib.models.ValueLinePoint;
@@ -11,30 +13,37 @@ import java.util.HashMap;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
 
-public class DynamicLineChart extends HashMap<String,ValueLineSeries>
+public class DynamicLineChart extends ValueLineChart
 {
-    private ValueLineChart chart;
-    public DynamicLineChart(ValueLineChart chart)
+    private HashMap<String,ValueLineSeries> values;
+
+    public DynamicLineChart(Context context, AttributeSet attrs)
     {
-        this.chart = chart;
-        chart.startAnimation();
+        super(context, attrs);
+        values = new HashMap<>();
     }
-    public void addPlug(String plugName)
+    public DynamicLineChart(Context context)
     {
-        put(plugName,new ValueLineSeries());
-        get(plugName).setColor(Color.parseColor(colors[this.size()-1 % colors.length]));
-        chart.addSeries(get(plugName));
+        super(context);
+        values = new HashMap<>();
     }
-    public void removePlug(String plugName)
+
+    public void add(String index)
     {
-        remove(plugName);
+        values.put(index,new ValueLineSeries());
+        values.get(index).setColor(Color.parseColor(colors[values.size()-1 % colors.length]));
+        addSeries(values.get(index));
+    }
+    public void remove(String plugName)
+    {
+        values.remove(plugName);
     }
     public void addPoint(String plugName,float point)
     {
-        if(!containsPlug(plugName))
-        { addPlug(plugName); }
+        if(!contains(plugName))
+        { add(plugName); }
 
-        get(plugName).addPoint(new ValueLinePoint(
+        values.get(plugName).addPoint(new ValueLinePoint(
                 getCurrentTime(),
                 point));
     }
@@ -54,8 +63,8 @@ public class DynamicLineChart extends HashMap<String,ValueLineSeries>
 
         return time;
     }
-    public boolean containsPlug(String plugName)
+    public boolean contains(String index)
     {
-        return containsKey(plugName);
+        return values.containsKey(index);
     }
 }

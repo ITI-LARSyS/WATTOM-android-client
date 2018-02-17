@@ -704,14 +704,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
         piePlugsAcum = (PieChart) globalView.findViewById(R.id.piePlugsAcum);
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
-        ValueLineChart lineChartPlugsView = (ValueLineChart) globalView.findViewById(R.id.linechartplugs);
-        lineChartPlugs = new DynamicLineChart(lineChartPlugsView);
+        lineChartPlugs = (DynamicLineChart) globalView.findViewById(R.id.linechartplugs);
         //piePlugsAcumValues = new PlugPieChartValues(piePlugsAcum);
         fitToScreen(this,piePessoas);
         fitToScreen(this,pieEnergias);
 //        fitToScreen(piePlugsAcum);
         fitToScreen(this,mBarChart);
-        fitToScreen(this,lineChartPlugsView);
+        fitToScreen(this,lineChartPlugs);
 
         // Log
         _x_acc          = (TextView) globalView.findViewById(R.id.x_text_field);
