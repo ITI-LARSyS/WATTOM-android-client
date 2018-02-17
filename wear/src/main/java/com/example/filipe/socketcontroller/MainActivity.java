@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.example.filipe.socketcontroller.charts.DynamicLineChart;
+import com.example.filipe.socketcontroller.charts.DynamicPieChart;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -144,7 +145,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ***** */
     private PieChart piePessoas;
     private PieChart pieEnergias;
-    private PieChart piePlugsAcum;
+    private DynamicPieChart piePlugsAcum;
     //private PlugPieChartValues piePlugsAcumValues;
     private BarChart mBarChart;
     private DynamicLineChart lineChartPlugs;
@@ -702,13 +703,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         // Stats
         piePessoas = (PieChart) globalView.findViewById(R.id.piePessoas);
         pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
-        piePlugsAcum = (PieChart) globalView.findViewById(R.id.piePlugsAcum);
+        piePlugsAcum = (DynamicPieChart) globalView.findViewById(R.id.piePlugsAcum);
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
         lineChartPlugs = (DynamicLineChart) globalView.findViewById(R.id.linechartplugs);
         //piePlugsAcumValues = new PlugPieChartValues(piePlugsAcum);
         fitToScreen(this,piePessoas);
         fitToScreen(this,pieEnergias);
-//        fitToScreen(piePlugsAcum);
+        fitToScreen(this,piePlugsAcum);
         fitToScreen(this,mBarChart);
         fitToScreen(this,lineChartPlugs);
 
@@ -755,6 +756,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         lineChartPlugs.addPoint("plug2.local",4.4f);
         lineChartPlugs.addPoint("plug2.local",5f);
         lineChartPlugs.addPoint("plug1.local",9f);
+
+        piePlugsAcum.incValue("plug1.local",30);
+        piePlugsAcum.incValue("plug2.local",20);
+        piePlugsAcum.incValue("plug3.local",20);
+        piePlugsAcum.incValue("plug4.local",20);
+        piePlugsAcum.incValue("plug5.local",20);
     }
 
 

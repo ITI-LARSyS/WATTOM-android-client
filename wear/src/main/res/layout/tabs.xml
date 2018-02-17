@@ -14,6 +14,7 @@
         <include layout="@layout/tab_stats_bar_test" android:id="@+id/tab_stats2"/>
         <include layout="@layout/tab_stats_line_plugs" android:id="@+id/tab_stats3"/>
         <include layout="@layout/tab_stats_pie_energias" android:id="@+id/tab_stats_energias"/>
+        <include layout="@layout/tab_stats_pie_plugs" android:id="@+id/tab_stats_pie_plugs"/>
         <include layout="@layout/tab_log"               android:id="@+id/tab_log"/>
 
     </RelativeLayout>

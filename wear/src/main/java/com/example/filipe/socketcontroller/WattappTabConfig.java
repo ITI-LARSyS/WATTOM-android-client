@@ -22,6 +22,11 @@ public enum WattappTabConfig
             R.id.tab_stats3,
             -1),
 
+    PLUGSTOTAL(R.string.TITLE_STATS5,
+            android.R.drawable.ic_menu_sort_by_size,
+            R.id.tab_stats_pie_plugs,
+            -1),
+
     ENERGIAS(R.string.TITLE_STATS4,
             android.R.drawable.ic_lock_idle_low_battery,
             R.id.tab_stats_energias,

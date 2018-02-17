@@ -28,10 +28,10 @@ public class DynamicLineChart extends ValueLineChart
         values = new HashMap<>();
     }
 
-    public void add(String index)
+    private void add(String index)
     {
         values.put(index,new ValueLineSeries());
-        values.get(index).setColor(Color.parseColor(colors[values.size()-1 % colors.length]));
+        values.get(index).setColor(Color.parseColor(colors[values.size() % colors.length]));
         addSeries(values.get(index));
     }
     public void remove(String plugName)
