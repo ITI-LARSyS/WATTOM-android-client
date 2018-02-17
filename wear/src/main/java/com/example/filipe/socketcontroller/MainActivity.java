@@ -385,17 +385,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     break;
 
                 case "Plug consumption":
-                    int nrPlugs = (valores.length - 1 )/ 2;
-                    for(int i = 0; i < nrPlugs; i++)
+                    String plugName = valores[1];
+                    float point = Float.parseFloat(valores[2]);
+                    if(!lineChartValues.containsPlug(plugName))
                     {
-                        String plugName = valores[i*2+1];
-                        float point = Float.parseFloat(valores[i*2+2]);
-                        if(!lineChartValues.containsPlug(plugName))
-                        {
-                            lineChartValues.addPlug(plugName);
-                        }
-                        lineChartValues.addPoint(plugName,point);
+                        lineChartValues.addPlug(plugName);
                     }
+                    lineChartValues.addPoint(plugName,point);
                     break;
 
                 default:

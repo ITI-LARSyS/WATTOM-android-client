@@ -511,7 +511,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                     String plug = intPlugs.getString(j);
                                     plugs[j] = Integer.parseInt(plug.substring(0, plug.indexOf(".")).replace("plug", ""));
                                 }
-                                for(int w = 0; w < plugs.length;w++){
+
+                                for(int w = 0; w < plugs.length;w++)
+                                {
                                     String DataURL = BASE_URL + "/plug/"+plugs[w]+"/Power";
                                     HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
                                     request.start();
@@ -519,6 +521,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                     String dado = request.getData();
                                     JSONObject JSONData = new JSONObject(dado);
                                     int power = JSONData.getInt("power");
+                                    sendMessage("Plug consumption"
+                                            +"-"
+                                            +"plug"+plugs[w]+".local"
+                                            +"-"
+                                            +power);
                                     powerTotal += power;
                                 }
                             }
