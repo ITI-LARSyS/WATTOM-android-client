@@ -167,9 +167,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         // A View global (que contém as outras "subviews") é criada
         globalView = findViewById(R.id.bosta);
         actionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
-        actionMenu = actionDrawer.getMenu();
         actionDrawer.lockDrawerClosed();
-        menuInflater = getMenuInflater();
         // Possibilita a navegação pelos tabs presentes no TabAdapter
         navigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
         navigationDrawer.setAdapter(new TabAdapter(this));
@@ -177,19 +175,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         // São obtidos os IDs dos elementos da View e os elementos são configurados
         setupViewElements();
 
-
-
         // As "subviews" são armazenadas num vetor
         tabViews = new View[WattappTabConfig.values().length];
         for(WattappTabConfig config : WattappTabConfig.values())
         { tabViews[config.ordinal()] = globalView.findViewById(config.id); }
         drawTab(WattappTabConfig.DEFAULT);
-
-
-
-
-
-
 
         seconds = 0;
         Primeiroconsumo=0;
@@ -444,14 +434,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         { unhide(chooseEndTime); }
     }
 
-    public void handleSensorClick(MenuItem item)
+    public void handleSensorClick(View v)
     {
         actionDrawer.closeDrawer();
 
         if(!_sensor_running)
         {
-            textSensorState.setText(R.string.SENSOR_ON);
-
             _factor = _leftHanded.isChecked()? -1 : 1;
             _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
             _sensor_running = true;
@@ -461,8 +449,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         else
         {
             //cpuWakeLock.release();
-            textSensorState.setText(R.string.SENSOR_OFF);
-
             _sensorManager.unregisterListener(this);
             _sensor_running = false;
 
@@ -473,7 +459,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         }
     }
 
-    public void handleQuitClick(MenuItem item)
+    public void handleQuitClick(View v)
     {
         actionDrawer.closeDrawer();
         cpuWakeLock.release();
@@ -691,24 +677,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private void drawTab(WattappTabConfig config)
     {
-        // Caso tenha um menu de ações
-        if(config.menu != NONE)
-        {
-            // São retiradas as ações presentes (de outras tabs)
-            actionMenu.clear();
-
-            // É permitido que seja acedido
-            actionDrawer.unlockDrawer();
-
-            // O menu de ações é populado com as ações específicas do tab
-            menuInflater.inflate(config.menu, actionMenu);
-        }
-        else
-        {
-            // Não é permitido que seja acedido
-            actionDrawer.lockDrawerClosed();
-        }
-
         for(int i = 0; i < tabViews.length; i++)
         {
             if(config.ordinal() == i) unhide(tabViews[i]);

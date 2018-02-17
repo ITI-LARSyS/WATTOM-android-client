@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="20dp">
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="10dp">
 
     <LinearLayout
         android:id="@+id/yawacc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="50dp">
+        android:padding="5dp">
 
         <TextView
             android:id="@+id/textView"
@@ -32,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@+id/yawacc">
+        android:padding="5dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -53,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@+id/pitchacc">
+        android:padding="5dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -74,7 +76,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@id/rollacc">
+        android:padding="5dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -90,10 +92,10 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@id/timestamp">
+        android:padding="5dp">
 
         <TextView
             android:id="@+id/ConsumoText"
@@ -110,4 +112,4 @@
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

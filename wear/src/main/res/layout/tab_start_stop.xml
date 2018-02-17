@@ -6,29 +6,50 @@
     android:orientation="vertical"
     android:weightSum="1">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_height="wrap_content"
-            android:layout_width="match_parent">
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="10dp">
 
-                <TextView
-                    android:id="@+id/textSensorState"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginTop="50dp"
-                    android:layout_marginStart="55dp"
-                    android:text="@string/SENSOR_OFF"/>
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:padding="10dp">
+
+                        <TextView
+                            android:id="@+id/textSensorState"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:text="@string/SENSOR"/>
+
+                        <Switch
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:onClick="handleSensorClick"
+                            android:padding="5dp"/>
+                </LinearLayout>
+
 
                 <CheckBox
                     android:id="@+id/checkLeftHanded"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_below="@+id/textSensorState"
-                    android:layout_marginTop="10dp"
+                    android:padding="5dp"
                     android:text="@string/LEFT_HANDED"/>
 
-        </RelativeLayout>
+                <Button
+                    android:id="@+id/quitButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="handleQuitClick"
+                    android:padding="5dp"
+                    android:text="@string/QUIT"/>
+
+        </LinearLayout>
 
 </ScrollView>
