@@ -10,10 +10,10 @@
 
         <include layout="@layout/tab_start_stop"        android:id="@+id/tab_start_stop"/>
         <include layout="@layout/tab_schedule"          android:id="@+id/tab_schedule"/>
-        <include layout="@layout/tab_stats_pessoas"     android:id="@+id/tab_stats_pessoas"/>
-        <include layout="@layout/tab_stats2"            android:id="@+id/tab_stats2"/>
-        <include layout="@layout/tab_stats_plugs" android:id="@+id/tab_stats3"/>
-        <include layout="@layout/tab_stats_energias"    android:id="@+id/tab_stats_energias"/>
+        <include layout="@layout/tab_stats_pie_pessoas" android:id="@+id/tab_stats_pessoas"/>
+        <include layout="@layout/tab_stats_bar_test" android:id="@+id/tab_stats2"/>
+        <include layout="@layout/tab_stats_line_plugs" android:id="@+id/tab_stats3"/>
+        <include layout="@layout/tab_stats_pie_energias" android:id="@+id/tab_stats_energias"/>
         <include layout="@layout/tab_log"               android:id="@+id/tab_log"/>
 
     </RelativeLayout>

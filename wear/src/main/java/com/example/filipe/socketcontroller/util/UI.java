@@ -1,6 +1,8 @@
-package com.example.filipe.socketcontroller;
+package com.example.filipe.socketcontroller.util;
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -35,4 +37,14 @@ public abstract class UI
                     "#FF007F",
                     "#808080"
             };
+    public static void fitToScreen(Activity a, View view)
+    {
+        DisplayMetrics metrics = new DisplayMetrics();
+        a.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
+        params.width = metrics.widthPixels;
+        params.height = metrics.heightPixels;
+        view.setLayoutParams(params);
+    }
+
 }

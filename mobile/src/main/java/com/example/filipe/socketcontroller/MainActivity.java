@@ -111,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private final static String EnergyData = "http://aveiro.m-iti.org/sinais_energy_production/services/today_production_request.php?date=";
 
     private static String PLUGS_URL =BASE_URL+"/plug/";
-    private  String SELECTED_URL = BASE_URL+"/plug/%/selected/";
-    private  String PLUG_URL = BASE_URL+"/plug/%";
+    private static String SELECTED_URL = BASE_URL+"/plug/%/selected/";
+    private static String PLUG_URL = BASE_URL+"/plug/%";
     private int _plug_selected = 0;
     private static String ChangeEnergyURL = PLUGS_URL+"energy/";
     private int renewableEnergy = 0;

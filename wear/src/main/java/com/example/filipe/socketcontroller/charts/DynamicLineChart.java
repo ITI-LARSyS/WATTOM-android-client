@@ -1,4 +1,4 @@
-package com.example.filipe.socketcontroller;
+package com.example.filipe.socketcontroller.charts;
 
 import android.graphics.Color;
 
@@ -9,12 +9,12 @@ import org.eazegraph.lib.models.ValueLineSeries;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import static com.example.filipe.socketcontroller.UI.colors;
+import static com.example.filipe.socketcontroller.util.UI.colors;
 
-public class PlugLineChartValues extends HashMap<String,ValueLineSeries>
+public class DynamicLineChart extends HashMap<String,ValueLineSeries>
 {
     private ValueLineChart chart;
-    public PlugLineChartValues(ValueLineChart chart)
+    public DynamicLineChart(ValueLineChart chart)
     {
         this.chart = chart;
         chart.startAnimation();
@@ -58,5 +58,4 @@ public class PlugLineChartValues extends HashMap<String,ValueLineSeries>
     {
         return containsKey(plugName);
     }
-
 }

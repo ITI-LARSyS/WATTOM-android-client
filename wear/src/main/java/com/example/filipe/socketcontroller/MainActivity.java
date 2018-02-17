@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.example.filipe.socketcontroller.charts.DynamicLineChart;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -48,25 +49,21 @@ import org.eazegraph.lib.models.PieModel;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.example.filipe.socketcontroller.UI.colors;
-import static com.example.filipe.socketcontroller.UI.hide;
-import static com.example.filipe.socketcontroller.UI.isVisible;
-import static com.example.filipe.socketcontroller.UI.toast;
-import static com.example.filipe.socketcontroller.UI.unhide;
+import static com.example.filipe.socketcontroller.util.UI.colors;
+import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
+import static com.example.filipe.socketcontroller.util.UI.hide;
+import static com.example.filipe.socketcontroller.util.UI.isVisible;
+import static com.example.filipe.socketcontroller.util.UI.toast;
+import static com.example.filipe.socketcontroller.util.UI.unhide;
 
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
     private static final String TAG = "Main Activity Watch";
-    private Button mButton;
 
     /* ***** */
     /* ????? */
     /* ***** */
-    private TextView _x_acc;
-    private TextView _y_acc;
-    private TextView _z_acc;
-    private TextView _tms;
     private int Primeiroconsumo;
     private int consumo;
     private int primeiro;
@@ -147,10 +144,19 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ***** */
     private PieChart piePessoas;
     private PieChart pieEnergias;
-    private TextView _consumo;
+    private PieChart piePlugsAcum;
+    //private PlugPieChartValues piePlugsAcumValues;
     private BarChart mBarChart;
-    private ValueLineChart lineChartPlugs;
-    private PlugLineChartValues lineChartValues;
+    private DynamicLineChart lineChartPlugs;
+
+    /* *** */
+    /* LOG */
+    /* *** */
+    private TextView _x_acc;
+    private TextView _y_acc;
+    private TextView _z_acc;
+    private TextView _tms;
+    private TextView _consumo;
 
     /* ******************************************************************************** */
     /* ******************************************************************************** */
@@ -387,7 +393,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Plug consumption":
                     String plugName = valores[1];
                     float point = Float.parseFloat(valores[2]);
-                    lineChartValues.addPoint(plugName,point);
+                    lineChartPlugs.addPoint(plugName,point);
                     break;
 
                 default:
@@ -409,16 +415,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ** */
     /* UI */
     /* ** */
-
-    public void fitToScreen(View view)
-    {
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-        params.width = metrics.widthPixels;
-        params.height = metrics.heightPixels;
-        view.setLayoutParams(params);
-    }
 
     public void showStartPicker(View v)
     {
@@ -706,13 +702,16 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         // Stats
         piePessoas = (PieChart) globalView.findViewById(R.id.piePessoas);
         pieEnergias = (PieChart) globalView.findViewById(R.id.pieEnergias);
+        piePlugsAcum = (PieChart) globalView.findViewById(R.id.piePlugsAcum);
         mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
-        lineChartPlugs = (ValueLineChart) globalView.findViewById(R.id.linechartplugs);
-        lineChartValues = new PlugLineChartValues(lineChartPlugs);
-        fitToScreen(piePessoas);
-        fitToScreen(pieEnergias);
-        fitToScreen(mBarChart);
-        fitToScreen(lineChartPlugs);
+        ValueLineChart lineChartPlugsView = (ValueLineChart) globalView.findViewById(R.id.linechartplugs);
+        lineChartPlugs = new DynamicLineChart(lineChartPlugsView);
+        //piePlugsAcumValues = new PlugPieChartValues(piePlugsAcum);
+        fitToScreen(this,piePessoas);
+        fitToScreen(this,pieEnergias);
+//        fitToScreen(piePlugsAcum);
+        fitToScreen(this,mBarChart);
+        fitToScreen(this,lineChartPlugsView);
 
         // Log
         _x_acc          = (TextView) globalView.findViewById(R.id.x_text_field);
@@ -748,14 +747,16 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         mBarChart.startAnimation();
 
-        lineChartValues.addPoint("plug1.local",2.4f);
-        lineChartValues.addPoint("plug1.local",1f);
-        lineChartValues.addPoint("plug1.local",4.4f);
-        lineChartValues.addPoint("plug1.local",4.4f);
-        lineChartValues.addPoint("plug1.local",4.4f);
-        lineChartValues.addPoint("plug1.local",4.4f);
-        lineChartValues.addPoint("plug2.local",4.4f);
-        lineChartValues.addPoint("plug2.local",5f);
-        lineChartValues.addPoint("plug1.local",9f);
+        lineChartPlugs.addPoint("plug1.local",2.4f);
+        lineChartPlugs.addPoint("plug1.local",1f);
+        lineChartPlugs.addPoint("plug1.local",4.4f);
+        lineChartPlugs.addPoint("plug1.local",4.4f);
+        lineChartPlugs.addPoint("plug1.local",4.4f);
+        lineChartPlugs.addPoint("plug1.local",4.4f);
+        lineChartPlugs.addPoint("plug2.local",4.4f);
+        lineChartPlugs.addPoint("plug2.local",5f);
+        lineChartPlugs.addPoint("plug1.local",9f);
     }
+
+
 }
