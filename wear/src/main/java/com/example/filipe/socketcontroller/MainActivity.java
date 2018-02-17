@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.example.filipe.socketcontroller.UI.colors;
 import static com.example.filipe.socketcontroller.UI.hide;
 import static com.example.filipe.socketcontroller.UI.isVisible;
 import static com.example.filipe.socketcontroller.UI.toast;
@@ -154,22 +155,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private TextView _consumo;
     private BarChart mBarChart;
     private ValueLineChart lineChartPlugs;
-    private static final String[] colors =
-            {
-                    "#FF0000",
-                    "#FF8000",
-                    "#FFFF00",
-                    "#80FF00",
-                    "#00FF00",
-                    "#00FF80",
-                    "#00FFFF",
-                    "#0080FF",
-                    "#0000FF",
-                    "#7F00FF",
-                    "#FF00FF",
-                    "#FF007F", 
-                    "#808080"
-            };
+
 
     /* ******************************************************************************** */
     /* ******************************************************************************** */
@@ -760,19 +746,17 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         mBarChart.startAnimation();
 
-        Map<String,ValueLineSeries> values = new HashMap<>();
-        values.put("plug1.local",new ValueLineSeries());
-        values.get("plug1.local").setColor(Color.parseColor(colors[0]));
-        values.get("plug1.local").addPoint(new ValueLinePoint(2.4f));
-        values.get("plug1.local").addPoint(new ValueLinePoint(3.4f));
-        values.get("plug1.local").addPoint(new ValueLinePoint(1.4f));
-        lineChartPlugs.addSeries(values.get("plug1.local"));
-        values.put("plug2.local",new ValueLineSeries());
-        values.get("plug2.local").setColor(Color.parseColor(colors[1]));
-        lineChartPlugs.addSeries(values.get("plug2.local"));
-        values.get("plug2.local").addPoint(new ValueLinePoint(1.4f));
-        values.get("plug2.local").addPoint(new ValueLinePoint(2.4f));
-        values.get("plug2.local").addPoint(new ValueLinePoint(9.4f));
-        lineChartPlugs.startAnimation();
+        PlugLineChartValues lineChartValues = new PlugLineChartValues(lineChartPlugs);
+        lineChartValues.addPlug("plug1.local");
+        lineChartValues.addPoint("plug1.local",2.4f);
+        lineChartValues.addPoint("plug1.local",1f);
+        lineChartValues.addPoint("plug1.local",4.4f);
+        lineChartValues.addPoint("plug1.local",4.4f);
+        lineChartValues.addPoint("plug1.local",4.4f);
+        lineChartValues.addPoint("plug1.local",4.4f);
+        lineChartValues.addPlug("plug2.local");
+        lineChartValues.addPoint("plug2.local",4.4f);
+        lineChartValues.addPoint("plug2.local",5f);
+        lineChartValues.addPoint("plug1.local",9f);
     }
 }
