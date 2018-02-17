@@ -22,7 +22,7 @@ public class PlugLineChartValues extends HashMap<String,ValueLineSeries>
     public void addPlug(String plugName)
     {
         put(plugName,new ValueLineSeries());
-        get(plugName).setColor(Color.parseColor(colors[this.size()-1]));
+        get(plugName).setColor(Color.parseColor(colors[this.size()-1 % colors.length]));
         chart.addSeries(get(plugName));
     }
     public void removePlug(String plugName)

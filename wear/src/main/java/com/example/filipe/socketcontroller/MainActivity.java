@@ -748,14 +748,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         mBarChart.startAnimation();
 
-        lineChartValues.addPlug("plug1.local");
         lineChartValues.addPoint("plug1.local",2.4f);
         lineChartValues.addPoint("plug1.local",1f);
         lineChartValues.addPoint("plug1.local",4.4f);
         lineChartValues.addPoint("plug1.local",4.4f);
         lineChartValues.addPoint("plug1.local",4.4f);
         lineChartValues.addPoint("plug1.local",4.4f);
-        lineChartValues.addPlug("plug2.local");
         lineChartValues.addPoint("plug2.local",4.4f);
         lineChartValues.addPoint("plug2.local",5f);
         lineChartValues.addPoint("plug1.local",9f);
