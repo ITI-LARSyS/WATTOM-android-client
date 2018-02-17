@@ -14,10 +14,12 @@
         android:layout_height="match_parent"
         android:fillViewport="true">
 
+        <!---
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" /> -->
+        <include layout="@layout/tabs" android:id="@+id/bosta"/>
 
     </android.support.v4.widget.NestedScrollView>
 

@@ -1,39 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:weightSum="1">
 
-        <ScrollView
-            android:layout_height="match_parent"
+        <RelativeLayout
+            android:layout_height="wrap_content"
             android:layout_width="match_parent">
 
-                <RelativeLayout
-                    android:layout_height="match_parent"
-                    android:layout_width="match_parent">
+                <TextView
+                    android:id="@+id/textSensorState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="50dp"
+                    android:layout_marginStart="55dp"
+                    android:text="@string/SENSOR_OFF"/>
 
-                        <TextView
-                            android:id="@+id/textSensorState"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_alignParentTop="true"
-                            android:layout_marginTop="50dp"
-                            android:layout_marginStart="55dp"
-                            android:text="@string/SENSOR_OFF"/>
+                <CheckBox
+                    android:id="@+id/checkLeftHanded"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textSensorState"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/LEFT_HANDED"/>
 
-                        <CheckBox
-                            android:id="@+id/checkLeftHanded"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_below="@+id/textSensorState"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/LEFT_HANDED"/>
+        </RelativeLayout>
 
-                </RelativeLayout>
-
-        </ScrollView>
-</RelativeLayout>
+</ScrollView>

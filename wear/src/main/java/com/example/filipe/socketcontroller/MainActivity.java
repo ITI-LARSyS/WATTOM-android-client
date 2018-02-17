@@ -3,7 +3,6 @@ package com.example.filipe.socketcontroller;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -15,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.drawer.WearableActionDrawer;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,15 +40,11 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import org.eazegraph.lib.charts.BarChart;
-import org.eazegraph.lib.charts.PieChart;
-import org.eazegraph.lib.charts.ValueLineChart;
 import org.eazegraph.lib.models.BarModel;
-import org.eazegraph.lib.models.PieModel;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.example.filipe.socketcontroller.util.UI.colors;
 import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
 import static com.example.filipe.socketcontroller.util.UI.hide;
 import static com.example.filipe.socketcontroller.util.UI.isVisible;
@@ -174,19 +168,27 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         setContentView(R.layout.general_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        // A View global (que contém as outras "subviews") é criada
+        globalView = findViewById(R.id.bosta);
+
+        // As "subviews" são armazenadas num vetor
+        tabViews = new View[WattappTabConfig.values().length];
+        for(WattappTabConfig config : WattappTabConfig.values())
+        { tabViews[config.ordinal()] = globalView.findViewById(config.id); }
+
+        // São obtidos os IDs dos elementos da View e os elementos são configurados
+        setupViewElements();
+
         actionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
         actionMenu = actionDrawer.getMenu();
+        actionDrawer.lockDrawerClosed();
         menuInflater = getMenuInflater();
 
         // Possibilita a navegação pelos tabs presentes no TabAdapter
         navigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
         navigationDrawer.setAdapter(new TabAdapter(this));
 
-        // Desenha o tab predefinido
-        tabs = new Tab[WattappTabConfig.values().length];
-        int initial = WattappTabConfig.DEFAULT.ordinal();
-        tabs[initial] = new Tab(WattappTabConfig.DEFAULT);
-        draw(tabs[initial]);
+        drawTab(WattappTabConfig.DEFAULT);
 
         seconds = 0;
         Primeiroconsumo=0;
@@ -564,20 +566,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 actionDrawer.lockDrawerClosed();
             }
 
-            // Uma View é populada com o layout geral dos tabs
-            if(globalView == null)
-            {
-                // A View global (que contém as outras "subviews") é criada
-                globalView = inflater.inflate(R.layout.tabs, container, false);
-
-                // As "subviews" são armazenadas num vetor
-                tabViews = new View[WattappTabConfig.values().length];
-                for(WattappTabConfig config : WattappTabConfig.values())
-                { tabViews[config.ordinal()] = globalView.findViewById(config.id); }
-
-                // São obtidos os IDs dos elementos da View e os elementos são configurados
-                setupViewElements();
-            }
 
             // É mostrada unicamente a View pretendida (do tab)
             // (as restantes são escondidas)
@@ -611,37 +599,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         @Override
         public void onItemSelected(int index)
         {
-        	// Busca o tab ao enum (correspondente ao índice)
-            WattappTabConfig chosenTab = WattappTabConfig.values()[index];
-
-            // Se for um tab diferente do atual
-            if (chosenTab != currentTab)
-            {
-                // Caso não tenha estado anterior, é criada uma nova instância
-                // (caso contrário, o estado anterior mantém-se)
-                if(tabs[index] == null)
-                { tabs[index] = new Tab(chosenTab); }
-
-                draw(tabs[index]);
-
-                // O Tab atual agora passa a ser o Tab escolhido
-                currentTab = chosenTab;
-            }
+            drawTab(WattappTabConfig.values()[index]);
         }
 
         @Override
         public int getCount()
         { return WattappTabConfig.values().length; }
-    }
-
-    /* Desenha o novo tab */
-    private void draw(Tab newTab)
-    {
-    	// Substitui o elemento 'fragment_container' pela view do tab
-        getFragmentManager()
-            .beginTransaction()
-            .replace(R.id.fragment_container, newTab)
-            .commit();
     }
 
     private void setupViewElements()
@@ -763,6 +726,33 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePlugsAcum.incValue("plug1.local",20);
         piePlugsAcum.incValue("plug5.local",20);
         piePlugsAcum.startAnimation();
+    }
+
+    private void drawTab(WattappTabConfig config)
+    {
+        // Caso tenha um menu de ações
+        if(config.menu != NONE)
+        {
+            // São retiradas as ações presentes (de outras tabs)
+            actionMenu.clear();
+
+            // É permitido que seja acedido
+            actionDrawer.unlockDrawer();
+
+            // O menu de ações é populado com as ações específicas do tab
+            menuInflater.inflate(config.menu, actionMenu);
+        }
+        else
+        {
+            // Não é permitido que seja acedido
+            actionDrawer.lockDrawerClosed();
+        }
+
+        for(int i = 0; i < tabViews.length; i++)
+        {
+            if(config.ordinal() == i) unhide(tabViews[i]);
+            else hide(tabViews[i]);
+        }
     }
 
 
