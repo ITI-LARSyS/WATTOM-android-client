@@ -15,9 +15,6 @@
         app:egCurveSmoothness="0.4"
         app:egIndicatorLineColor="#FFFFFF"
         app:egLegendHeight="40dp"
-        app:egShowStandardValue="true"
-        app:egShowLegendBeneathIndicator="true"
-        app:egShowValueIndicator="true"
-        app:color/>
+        app:egIndicatorTextColor="#FFFFFF"/>
 
 </RelativeLayout>

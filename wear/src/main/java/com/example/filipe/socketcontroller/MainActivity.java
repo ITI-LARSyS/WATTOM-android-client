@@ -47,6 +47,9 @@ import org.eazegraph.lib.models.PieModel;
 import org.eazegraph.lib.models.ValueLinePoint;
 import org.eazegraph.lib.models.ValueLineSeries;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -757,39 +760,19 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         mBarChart.startAnimation();
 
-        ValueLineSeries series = new ValueLineSeries();
-        series.setColor(Color.parseColor(colors[0]));
-        series.addPoint(new ValueLinePoint("Jan", 2.4f));
-        series.addPoint(new ValueLinePoint("Feb", 3.4f));
-        series.addPoint(new ValueLinePoint("Mar", .4f));
-        series.addPoint(new ValueLinePoint("Apr", 1.2f));
-        series.addPoint(new ValueLinePoint("Mai", 2.6f));
-        series.addPoint(new ValueLinePoint("Jun", 1.0f));
-        series.addPoint(new ValueLinePoint("Jul", 3.5f));
-        series.addPoint(new ValueLinePoint("Aug", 2.4f));
-        series.addPoint(new ValueLinePoint("Sep", 2.4f));
-        series.addPoint(new ValueLinePoint("Oct", 3.4f));
-        series.addPoint(new ValueLinePoint("Nov", .4f));
-        series.addPoint(new ValueLinePoint("Dec", 1.3f));
-        lineChartPlugs.addSeries(series);
-
-        ValueLineSeries series2 = new ValueLineSeries();
-        series2.setColor(Color.parseColor(colors[1]));
-        series2.s
-        series2.addPoint(new ValueLinePoint("Jan", 1.4f));
-        series2.addPoint(new ValueLinePoint("Feb", 4.4f));
-        series2.addPoint(new ValueLinePoint("Mar", 5.4f));
-        series2.addPoint(new ValueLinePoint("Apr", 6.2f));
-        series2.addPoint(new ValueLinePoint("Mai", 1.6f));
-        series2.addPoint(new ValueLinePoint("Jun", 9.0f));
-        series2.addPoint(new ValueLinePoint("Jul", 6.5f));
-        series2.addPoint(new ValueLinePoint("Aug", 3.4f));
-        series2.addPoint(new ValueLinePoint("Sep", 1.4f));
-        series2.addPoint(new ValueLinePoint("Oct", 4.4f));
-        series2.addPoint(new ValueLinePoint("Nov", 1.4f));
-        series2.addPoint(new ValueLinePoint("Dec", 2.3f));
-        lineChartPlugs.addSeries(series2);
-
+        Map<String,ValueLineSeries> values = new HashMap<>();
+        values.put("plug1.local",new ValueLineSeries());
+        values.get("plug1.local").setColor(Color.parseColor(colors[0]));
+        values.get("plug1.local").addPoint(new ValueLinePoint(2.4f));
+        values.get("plug1.local").addPoint(new ValueLinePoint(3.4f));
+        values.get("plug1.local").addPoint(new ValueLinePoint(1.4f));
+        lineChartPlugs.addSeries(values.get("plug1.local"));
+        values.put("plug2.local",new ValueLineSeries());
+        values.get("plug2.local").setColor(Color.parseColor(colors[1]));
+        lineChartPlugs.addSeries(values.get("plug2.local"));
+        values.get("plug2.local").addPoint(new ValueLinePoint(1.4f));
+        values.get("plug2.local").addPoint(new ValueLinePoint(2.4f));
+        values.get("plug2.local").addPoint(new ValueLinePoint(9.4f));
         lineChartPlugs.startAnimation();
     }
 }
