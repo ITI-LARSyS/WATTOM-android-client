@@ -31,6 +31,9 @@ public class PlugLineChartValues extends HashMap<String,ValueLineSeries>
     }
     public void addPoint(String plugName,float point)
     {
+        if(!containsPlug(plugName))
+        { addPlug(plugName); }
+
         get(plugName).addPoint(new ValueLinePoint(
                 getCurrentTime(),
                 point));

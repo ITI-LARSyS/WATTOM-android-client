@@ -387,10 +387,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Plug consumption":
                     String plugName = valores[1];
                     float point = Float.parseFloat(valores[2]);
-                    if(!lineChartValues.containsPlug(plugName))
-                    {
-                        lineChartValues.addPlug(plugName);
-                    }
                     lineChartValues.addPoint(plugName,point);
                     break;
 
