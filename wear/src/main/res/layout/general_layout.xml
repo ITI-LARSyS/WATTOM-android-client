@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:fillViewport="true">
 
-        <include layout="@layout/tabs" android:id="@+id/bosta"/>
+        <include layout="@layout/tabs" android:id="@+id/tabs"/>
 
     </android.support.v4.widget.NestedScrollView>
 

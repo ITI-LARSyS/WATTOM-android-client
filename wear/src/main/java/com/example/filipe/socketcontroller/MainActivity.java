@@ -16,7 +16,6 @@ import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -164,21 +163,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         setContentView(R.layout.general_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // A View global (que contém as outras "subviews") é criada
-        globalView = findViewById(R.id.bosta);
-        actionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
-        actionDrawer.lockDrawerClosed();
-        // Possibilita a navegação pelos tabs presentes no TabAdapter
-        navigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
-        navigationDrawer.setAdapter(new TabAdapter(this));
-
         // São obtidos os IDs dos elementos da View e os elementos são configurados
-        setupViewElements();
+        setupView();
 
         // As "subviews" são armazenadas num vetor
         tabViews = new View[WattappTabConfig.values().length];
         for(WattappTabConfig config : WattappTabConfig.values())
-        { tabViews[config.ordinal()] = globalView.findViewById(config.id); }
+        { tabViews[config.ordinal()] = findViewById(config.id); }
         drawTab(WattappTabConfig.DEFAULT);
 
         seconds = 0;
@@ -420,18 +411,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void showStartPicker(View v)
     {
-        if(isVisible(chooseStartTime))
-        { hide(chooseStartTime); }
+        if(isVisible(InitialTime))
+        { hide(InitialTime); }
         else
-        { unhide(chooseStartTime); }
+        { unhide(InitialTime); }
     }
 
     public void showEndPicker(View v)
     {
-        if(isVisible(chooseEndTime))
-        { hide(chooseEndTime); }
+        if(isVisible(EndTime))
+        { hide(EndTime); }
         else
-        { unhide(chooseEndTime); }
+        { unhide(EndTime); }
     }
 
     public void handleSensorClick(View v)
@@ -553,38 +544,34 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         { return WattappTabConfig.values().length; }
     }
 
-    private void setupViewElements()
+    private void setupView()
     {
+        actionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
+        actionDrawer.lockDrawerClosed();
+
+        // Possibilita a navegação pelos tabs presentes no TabAdapter
+        navigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
+        navigationDrawer.setAdapter(new TabAdapter(this));
+
         // Start/Stop
-        _leftHanded     = (CheckBox) globalView.findViewById(R.id.checkLeftHanded);
-        textSensorState = (TextView) globalView.findViewById(R.id.textSensorState);
+        _leftHanded     = (CheckBox) findViewById(R.id.checkLeftHanded);
+        textSensorState = (TextView) findViewById(R.id.textSensorState);
 
         // Schedule
-        _buttonSchedule = (Button) globalView.findViewById(R.id.buttonSchedule);
-        _buttonStart    = (Button) globalView.findViewById(R.id.buttonStart);
-        _buttonEnd      = (Button) globalView.findViewById(R.id.buttonEnd);
-        _StartTime      = (TextView) globalView.findViewById(R.id.HoraInicio);
-        _EndTime        = (TextView) globalView.findViewById(R.id.HoraFim);
-        chooseStartTime = (LinearLayout) globalView.findViewById(R.id.PrimeiroTempo);
-        chooseEndTime   = (LinearLayout) globalView.findViewById(R.id.UltimoTempo);
-        InitialTime     = (TimePicker) globalView.findViewById(R.id.InitialPicker);
-        EndTime         = (TimePicker) globalView.findViewById(R.id.EndPicker);
+        _buttonSchedule = (Button) findViewById(R.id.buttonSchedule);
+        _buttonStart    = (Button) findViewById(R.id.buttonStart);
+        _buttonEnd      = (Button) findViewById(R.id.buttonEnd);
+        _StartTime      = (TextView) findViewById(R.id.HoraInicio);
+        _EndTime        = (TextView) findViewById(R.id.HoraFim);
+        InitialTime     = (TimePicker) findViewById(R.id.InitialPicker);
+        EndTime         = (TimePicker) findViewById(R.id.EndPicker);
 
         InitialTime.setIs24HourView(true);
         InitialTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
         {
             public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
             {
-                String strHour = "";
-                String strMinute = "";
-
-                if(hourOfDay < 10) strHour += "0";
-                strHour += hourOfDay;
-
-                if(minute < 10) strMinute += "0";
-                strMinute += minute;
-
-                _StartTime.setText(strHour + ":" + strMinute);
+                updateTime(_StartTime,hourOfDay,minute);
                 changedStart = true;
             }
         });
@@ -593,50 +580,38 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         {
             public void onTimeChanged(TimePicker view, int hourOfDay, int minute)
             {
-                String strHour = "";
-                String strMinute = "";
-
-                if(hourOfDay < 10) strHour += "0";
-                strHour += hourOfDay;
-
-                if(minute < 10) strMinute += "0";
-                strMinute += minute;
-
-                _EndTime.setText(strHour + ":" + strMinute);
+                updateTime(_EndTime,hourOfDay,minute);
                 changedEnd = true;
             }
         });
-        chooseStartTime.setVisibility(LinearLayout.GONE);
-        chooseEndTime.setVisibility(LinearLayout.GONE);
 
         // Stats
-        piePessoas = (DynamicPieChart) globalView.findViewById(R.id.piePessoas);
-        pieEnergias = (DynamicPieChart) globalView.findViewById(R.id.pieEnergias);
-        piePlugsAcum = (DynamicPieChart) globalView.findViewById(R.id.piePlugsAcum);
-        mBarChart = (BarChart) globalView.findViewById(R.id.barchart);
-        lineChartPlugs = (DynamicLineChart) globalView.findViewById(R.id.linechartplugs);
-        //piePlugsAcumValues = new PlugPieChartValues(piePlugsAcum);
+        piePessoas = (DynamicPieChart) findViewById(R.id.piePessoas);
+        pieEnergias = (DynamicPieChart) findViewById(R.id.pieEnergias);
+        piePlugsAcum = (DynamicPieChart) findViewById(R.id.piePlugsAcum);
+        lineChartPlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
+        mBarChart = (BarChart) findViewById(R.id.barchart);
         fitToScreen(this,piePessoas);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
-        fitToScreen(this,mBarChart);
         fitToScreen(this,lineChartPlugs);
+        fitToScreen(this,mBarChart);
 
         // Log
-        _x_acc          = (TextView) globalView.findViewById(R.id.x_text_field);
-        _y_acc          = (TextView) globalView.findViewById(R.id.y_text_field);
-        _z_acc          = (TextView) globalView.findViewById(R.id.z_text_field);
-        _tms            = (TextView) globalView.findViewById(R.id.tms_text_field);
-        _consumo        = (TextView) globalView.findViewById(R.id.ConsumoInsert);
+        _x_acc          = (TextView) findViewById(R.id.x_text_field);
+        _y_acc          = (TextView) findViewById(R.id.y_text_field);
+        _z_acc          = (TextView) findViewById(R.id.z_text_field);
+        _tms            = (TextView) findViewById(R.id.tms_text_field);
+        _consumo        = (TextView) findViewById(R.id.ConsumoInsert);
 
-        testEazeGraph();
+        fillEazeGraph();
     }
 
     /* ******************************************************************************** */
     /* ******************************************************************************** */
     /* ******************************************************************************** */
 
-    public void testEazeGraph()
+    public void fillEazeGraph()
     {
         piePessoas.setValue("Manel",20);
         piePessoas.setValue("Afonso",40);
@@ -683,5 +658,19 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             if(config.ordinal() == i) unhide(tabViews[i]);
             else hide(tabViews[i]);
         }
+    }
+
+    private void updateTime(TextView text, int hour, int minutes)
+    {
+        String strHour = "";
+        String strMinute = "";
+
+        if(hour < 10) strHour += "0";
+        strHour += hour;
+
+        if(minutes < 10) strMinute += "0";
+        strMinute += minutes;
+
+        text.setText(strHour + ":" + strMinute);
     }
 }

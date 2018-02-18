@@ -29,19 +29,12 @@
             android:text="@string/INIT_TIME" />
 
 
-        <LinearLayout
-            android:id="@+id/PrimeiroTempo"
+        <TimePicker
+            android:id="@+id/InitialPicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center">
-
-            <TimePicker
-                android:id="@+id/InitialPicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:timePickerMode="spinner"/>
-
-        </LinearLayout>
+            android:timePickerMode="spinner"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/buttonEnd"
@@ -56,21 +49,12 @@
             android:layout_height="wrap_content"
             android:text="@string/INIT_TIME" />
 
-
-        <LinearLayout
-            android:id="@+id/UltimoTempo"
+        <TimePicker
+            android:id="@+id/EndPicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center">
-
-            <TimePicker
-                android:id="@+id/EndPicker"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:timePickerMode="spinner"/>
-
-        </LinearLayout>
+            android:timePickerMode="spinner"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/buttonSchedule"

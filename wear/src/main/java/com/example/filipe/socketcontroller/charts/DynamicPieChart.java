@@ -37,9 +37,9 @@ public class DynamicPieChart extends PieChart
         for(Map.Entry<String,PieModel> p : values.entrySet())
         { addPieSlice(p.getValue()); }
     }
-    public void remove(String plugName)
+    public void remove(String key)
     {
-        values.remove(plugName);
+        values.remove(key);
         refresh();
     }
     public void setValue(String key,float value)
