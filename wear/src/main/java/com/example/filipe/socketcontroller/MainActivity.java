@@ -57,14 +57,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private int consumo;
     private int primeiro;
     private int consumoTotal;
-    private int count = 0;
-    private boolean changedStart;
-    private boolean changedEnd;
-    private Timer timer;
-    private TimerTask checkSecond;
-    //Done by Pedro to implement the schedule service
-    private Button _buttonStart;
-    private Button _buttonEnd;
     private int seconds;
 
     /* **************** */
@@ -81,7 +73,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private float[] _rotationMatrix = new float[16];
     private float x;
     private float z;
-    //private float _orientationVals[]={0,0,0};
     private boolean _sensor_running = false;
     private SensorManager _sensorManager;
     private Sensor _sensor;
@@ -91,7 +82,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ****************** */
     private GoogleApiClient _client;
     private Node _phone; // the connected device to send the message to
-    //private int _count=0;
     public static final String WEAR_ACC_SERVICE = "acc";
 
     /* **************** */
@@ -99,7 +89,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* **************** */
     private WearableNavigationDrawer navigationDrawer;
     private WearableActionDrawer actionDrawer;
-    private View[] tabViews;
 
     /* ************** */
     /* START/STOP TAB */
@@ -120,6 +109,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private int scheduleState = 0;
     private TimePicker _pickerInitTime;
     private TimePicker _pickerEndTime;
+    private boolean changedStart;
+    private boolean changedEnd;
+    private Button _buttonStart;
+    private Button _buttonEnd;
 
     /* ***** */
     /* STATS */
