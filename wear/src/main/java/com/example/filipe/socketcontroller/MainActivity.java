@@ -88,7 +88,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* NAVEGAÇÃO E AÇÃO */
     /* **************** */
     private WearableNavigationDrawer navigationDrawer;
-    private WearableActionDrawer actionDrawer;
 
     /* ************** */
     /* START/STOP TAB */
@@ -471,10 +470,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private void setupView()
     {
-        // Impede a drawer de ação de ser aberta (como não são usados menus)
-        actionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
-        actionDrawer.lockDrawerClosed();
-
         // Possibilita a navegação pelos tabs presentes no TabAdapter
         navigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
         navigationDrawer.setAdapter(new TabAdapter(this));

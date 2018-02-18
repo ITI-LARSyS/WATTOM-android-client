@@ -48,6 +48,7 @@ public class DynamicPieChart extends PieChart
         { add(key); }
 
         values.get(key).setValue(value);
+        refresh();
     }
     public void incValue(String key, float value)
     {
@@ -56,6 +57,7 @@ public class DynamicPieChart extends PieChart
 
         float old = values.get(key).getValue();
         values.get(key).setValue(old + value);
+        refresh();
     }
     public boolean contains(String key)
     {
