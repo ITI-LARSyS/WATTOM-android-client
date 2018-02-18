@@ -28,23 +28,32 @@ public class DynamicLineChart extends ValueLineChart
         values = new HashMap<>();
     }
 
-    private void add(String index)
+    private void add(String key)
     {
-        values.put(index,new ValueLineSeries());
-        values.get(index).setColor(Color.parseColor(colors[values.size() % colors.length]));
-        addSeries(values.get(index));
+        values.put(key,new ValueLineSeries());
+        values.get(key).setColor(Color.parseColor(colors[values.size() % colors.length]));
+        addSeries(values.get(key));
     }
-    public void remove(String plugName)
+    public void remove(String key)
     {
-        values.remove(plugName);
+        values.remove(key);
     }
-    public void addPoint(String plugName,float point)
+    public void addPoint(String key,float point)
     {
-        if(!contains(plugName))
-        { add(plugName); }
+        if(!contains(key))
+        { add(key); }
 
-        values.get(plugName).addPoint(new ValueLinePoint(
+        values.get(key).addPoint(new ValueLinePoint(
                 getCurrentTime(),
+                point));
+    }
+    public void addPoint(String key,String legend,float point)
+    {
+        if(!contains(key))
+        { add(key); }
+
+        values.get(key).addPoint(new ValueLinePoint(
+                legend,
                 point));
     }
     private String getCurrentTime()
@@ -63,8 +72,8 @@ public class DynamicLineChart extends ValueLineChart
 
         return time;
     }
-    public boolean contains(String index)
+    public boolean contains(String key)
     {
-        return values.containsKey(index);
+        return values.containsKey(key);
     }
 }

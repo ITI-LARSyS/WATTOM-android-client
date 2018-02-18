@@ -371,7 +371,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
                     {
-                        piePessoas.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
+                        piePessoas.incValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                     }
                     piePessoas.startAnimation();
                     toast(getApplicationContext(),"Power usage by person has been updated!");
@@ -638,12 +638,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void testEazeGraph()
     {
-        /*piePessoas.addPieSlice(new PieModel("Freetime", 15, Color.parseColor("#FE6DA8")));
-        piePessoas.addPieSlice(new PieModel("Sleep", 25, Color.parseColor("#56B7F1")));
-        piePessoas.addPieSlice(new PieModel("Work", 35, Color.parseColor("#CDA67F")));
-        piePessoas.addPieSlice(new PieModel("Eating", 9, Color.parseColor("#FED70E")));
+        piePessoas.setValue("Manel",20);
+        piePessoas.setValue("Afonso",40);
+        piePessoas.setValue("Dionísio",10);
 
-        piePessoas.startAnimation();*/
+        pieEnergias.setValue("Térmica",20);
+        pieEnergias.setValue("Hídrica",10);
+        pieEnergias.setValue("Fotovoltaica",50);
 
         mBarChart.addBar(new BarModel(2.3f, 0xFF123456));
         mBarChart.addBar(new BarModel(2.f,  0xFF343456));
@@ -656,15 +657,15 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         mBarChart.startAnimation();
 
-        lineChartPlugs.addPoint("plug1.local",2.4f);
-        lineChartPlugs.addPoint("plug1.local",1f);
-        lineChartPlugs.addPoint("plug1.local",4.4f);
-        lineChartPlugs.addPoint("plug1.local",4.4f);
-        lineChartPlugs.addPoint("plug1.local",4.4f);
-        lineChartPlugs.addPoint("plug1.local",4.4f);
-        lineChartPlugs.addPoint("plug2.local",4.4f);
-        lineChartPlugs.addPoint("plug2.local",5f);
-        lineChartPlugs.addPoint("plug1.local",9f);
+        lineChartPlugs.addPoint("plug1.local","21:01",2.4f);
+        lineChartPlugs.addPoint("plug1.local","21:02",1f);
+        lineChartPlugs.addPoint("plug1.local","21:03",4.4f);
+        lineChartPlugs.addPoint("plug1.local","21:04",4.4f);
+        lineChartPlugs.addPoint("plug1.local","21:05",4.4f);
+        lineChartPlugs.addPoint("plug1.local","21:06",4.4f);
+        lineChartPlugs.addPoint("plug2.local","21:07",4.4f);
+        lineChartPlugs.addPoint("plug2.local","21:08",5f);
+        lineChartPlugs.addPoint("plug1.local","21:10",9f);
         lineChartPlugs.startAnimation();
 
         piePlugsAcum.incValue("plug1.local",30);
