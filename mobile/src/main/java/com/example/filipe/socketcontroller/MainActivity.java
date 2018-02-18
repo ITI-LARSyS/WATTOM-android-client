@@ -530,7 +530,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 }
                             }
                         }
-                        sendMessage("Total power"+"-"+powerTotal);
+                        sendMessage("Total overall power"+"-"+powerTotal);
                     }catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -1210,7 +1210,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 users.add(User.get("id").toString());
                 powers.add(Float.parseFloat(User.get("power").toString()));
             }
-            String message = "Power";
+            String message = "Person consumption";
             for(int i = 0; i < users.size(); i++){
                 String temp = "-"+users.get(i)+"-"+powers.get(i);
                 message += temp;

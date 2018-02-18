@@ -343,8 +343,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             switch(event)
             {
                 // Mensagem com o consumo atual de cada pessoa
-                // (formato: "Power-Maria-22-Pedro-11-Joao-7")
-                case "Power":
+                // (formato: "Person consumption-Maria-22-Pedro-11-Joao-7")
+                case "Person consumption":
 
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
@@ -352,7 +352,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         piePessoasAcum.incValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                     }
                     piePessoasAcum.startAnimation();
-                    toast(getApplicationContext(),"Power usage by person has been updated!");
+                    toast(getApplicationContext(),"Person consumption has been updated!");
                     break;
 
                 // Mensagem com as percentagens de energias renováveis e não renováveis
@@ -368,24 +368,26 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     break;
 
                 // Mensagem com o consumo geral total
-                // (formato: "Total power-900")
-                case "Total power":
+                // (formato: "Total overall power-900")
+                case "Total overall power":
                     _consumo.setText(valores[1]);
-                    toast(getApplicationContext(),"Total consumption has been updated!");
+                    toast(getApplicationContext(),"Total overall consumption has been updated!");
                     break;
 
                 // Mensagem com o consumo atual de uma plug
-                // (formato: "plug1.local-500")
+                // (formato: "Plug consumption-plug1.local-500")
                 case "Plug consumption":
                     String plugName = valores[1];
                     float value = Float.parseFloat(valores[2]);
                     linePlugs.addPoint(plugName,value);
                     piePlugsAcum.incValue(plugName,value);
+                    toast(getApplicationContext(),"Plug consumption has been updated!");
                     break;
 
                 // Mensagem inválida
                 default:
                     Log.d("MESSAGERECEIVED","Error: evento `"+event+"` desconhecido");
+                    toast(getApplicationContext(),"Invalid message received!");
                     break;
             }
         }
