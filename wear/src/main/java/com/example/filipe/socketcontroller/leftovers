@@ -1,9 +1,0 @@
-public void handleSendReadingsClick(View v)
-{
-    Log.i(TAG, "Sending message");
-    sendMessage("not a message");
-}
-
-
-
-

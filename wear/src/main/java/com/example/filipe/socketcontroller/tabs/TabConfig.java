@@ -2,7 +2,7 @@ package com.example.filipe.socketcontroller.tabs;
 
 import com.example.filipe.socketcontroller.R;
 
-public enum WattappTabConfig
+public enum TabConfig
 {
     STARTSTOP(R.string.TITLE_STARTSTOP,
             android.R.drawable.ic_media_play,
@@ -40,9 +40,9 @@ public enum WattappTabConfig
     public final int icon;
     public final int id;
 
-    public static final WattappTabConfig DEFAULT = STARTSTOP;
+    public static final TabConfig DEFAULT = STARTSTOP;
 
-    WattappTabConfig(final int title, final int icon, final int id)
+    TabConfig(final int title, final int icon, final int id)
     {
         this.title = title;
         this.icon = icon;
