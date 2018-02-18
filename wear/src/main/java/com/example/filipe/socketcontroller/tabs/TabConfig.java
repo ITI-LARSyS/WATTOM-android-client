@@ -13,7 +13,7 @@ public enum TabConfig
             R.id.tab_schedule),
 
     PESSOAS(R.string.TITLE_STATS1,
-            android.R.drawable.ic_menu_sort_by_size,
+            android.R.drawable.ic_menu_myplaces,
             R.id.tab_stats_pessoas),
 
     PLUGS(R.string.TITLE_STATS3,
