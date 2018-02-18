@@ -1,4 +1,6 @@
-package com.example.filipe.socketcontroller;
+package com.example.filipe.socketcontroller.tabs;
+
+import com.example.filipe.socketcontroller.R;
 
 public enum WattappTabConfig
 {
@@ -34,9 +36,9 @@ public enum WattappTabConfig
             android.R.drawable.ic_menu_sort_by_size,
             R.id.tab_stats2);
 
-    final int title;
-    final int icon;
-    final int id;
+    public final int title;
+    public final int icon;
+    public final int id;
 
     public static final WattappTabConfig DEFAULT = STARTSTOP;
 

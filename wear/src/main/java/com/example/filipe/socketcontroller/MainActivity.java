@@ -2,7 +2,6 @@ package com.example.filipe.socketcontroller;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -26,6 +25,8 @@ import android.widget.TimePicker;
 
 import com.example.filipe.socketcontroller.charts.DynamicLineChart;
 import com.example.filipe.socketcontroller.charts.DynamicPieChart;
+import com.example.filipe.socketcontroller.tabs.TabAdapter;
+import com.example.filipe.socketcontroller.tabs.WattappTabConfig;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -43,9 +44,10 @@ import java.util.TimerTask;
 
 import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
 import static com.example.filipe.socketcontroller.util.UI.hide;
-import static com.example.filipe.socketcontroller.util.UI.isVisible;
 import static com.example.filipe.socketcontroller.util.UI.toast;
+import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
 import static com.example.filipe.socketcontroller.util.UI.unhide;
+import static com.example.filipe.socketcontroller.util.UI.updateTime;
 
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -410,25 +412,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ** */
 
     public void showStartPicker(View v)
-    {
-        if(isVisible(InitialTime))
-        { hide(InitialTime); }
-        else
-        { unhide(InitialTime); }
-    }
+    { toggleVisibility(InitialTime); }
 
     public void showEndPicker(View v)
-    {
-        if(isVisible(EndTime))
-        { hide(EndTime); }
-        else
-        { unhide(EndTime); }
-    }
+    { toggleVisibility(EndTime); }
 
     public void handleSensorClick(View v)
     {
-        actionDrawer.closeDrawer();
-
         if(!_sensor_running)
         {
             _factor = _leftHanded.isChecked()? -1 : 1;
@@ -452,7 +442,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void handleQuitClick(View v)
     {
-        actionDrawer.closeDrawer();
         cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
@@ -520,29 +509,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ************************** */
 
     /* Fornece acesso aos tabs do enum */
-    private final class TabAdapter extends WearableNavigationDrawer.WearableNavigationDrawerAdapter
-    {
-        private final Context context;
 
-        TabAdapter(final Context context)
-        { this.context = context; }
-
-        @Override
-        public String getItemText(int index)
-        { return context.getString(WattappTabConfig.values()[index].title); }
-
-        @Override
-        public Drawable getItemDrawable(int index)
-        { return context.getDrawable(WattappTabConfig.values()[index].icon); }
-
-        @Override
-        public void onItemSelected(int index)
-        { drawTab(WattappTabConfig.values()[index]); }
-
-        @Override
-        public int getCount()
-        { return WattappTabConfig.values().length; }
-    }
 
     private void setupView()
     {
@@ -651,7 +618,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePlugsAcum.startAnimation();
     }
 
-    private void drawTab(WattappTabConfig config)
+    public void drawTab(WattappTabConfig config)
     {
         for(int i = 0; i < tabViews.length; i++)
         {
@@ -660,17 +627,5 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         }
     }
 
-    private void updateTime(TextView text, int hour, int minutes)
-    {
-        String strHour = "";
-        String strMinute = "";
 
-        if(hour < 10) strHour += "0";
-        strHour += hour;
-
-        if(minutes < 10) strMinute += "0";
-        strMinute += minutes;
-
-        text.setText(strHour + ":" + strMinute);
-    }
 }

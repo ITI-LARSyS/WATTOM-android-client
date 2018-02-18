@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public abstract class UI
@@ -45,6 +46,24 @@ public abstract class UI
         params.width = metrics.widthPixels;
         params.height = metrics.heightPixels;
         view.setLayoutParams(params);
+    }
+    public static void toggleVisibility(View v)
+    {
+        if(isVisible(v)) hide(v);
+        else unhide(v);
+    }
+    public static void updateTime(TextView text, int hour, int minutes)
+    {
+        String strHour = "";
+        String strMinute = "";
+
+        if(hour < 10) strHour += "0";
+        strHour += hour;
+
+        if(minutes < 10) strMinute += "0";
+        strMinute += minutes;
+
+        text.setText(strHour + ":" + strMinute);
     }
 
 }
