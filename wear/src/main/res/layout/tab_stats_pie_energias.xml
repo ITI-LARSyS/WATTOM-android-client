@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<com.example.filipe.socketcontroller.charts.DynamicPieChart
+    android:id="@+id/pieEnergias"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
-
-    <com.example.filipe.socketcontroller.charts.DynamicPieChart
-        android:id="@+id/pieEnergias"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        app:egLegendTextSize="18sp"
-        app:egUsePieRotation="true"
-        app:egValueTextSize="36sp"/>
-
-</LinearLayout>
+    android:padding="8dp"
+    app:egLegendTextSize="18sp"
+    app:egUsePieRotation="true"
+    app:egValueTextSize="36sp"
+    android:gravity="center"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"/>

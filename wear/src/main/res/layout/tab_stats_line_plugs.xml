@@ -1,21 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.example.filipe.socketcontroller.charts.DynamicLineChart
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/linechartplugs"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
-
-    <com.example.filipe.socketcontroller.charts.DynamicLineChart
-        android:id="@+id/linechartplugs"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        app:egUseCubic="true"
-        app:egUseOverlapFill="false"
-        app:egCurveSmoothness="0.4"
-        app:egIndicatorLineColor="#FFFFFF"
-        app:egLegendHeight="40dp"
-        app:egIndicatorTextColor="#FFFFFF"/>
-
-</LinearLayout>
+    android:padding="8dp"
+    android:gravity="center"
+    app:egUseCubic="true"
+    app:egUseOverlapFill="false"
+    app:egCurveSmoothness="0.4"
+    app:egIndicatorLineColor="#FFFFFF"
+    app:egLegendHeight="40dp"
+    app:egIndicatorTextColor="#FFFFFF"/>

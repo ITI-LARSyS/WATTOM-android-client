@@ -92,7 +92,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ************** */
     /* START/STOP TAB */
     /* ************** */
-    private TextView textSensorState;
     private int _factor;
     private CheckBox _leftHanded;
 
@@ -273,16 +272,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     public void onConnected(@Nullable Bundle bundle)
     {
         Wearable.NodeApi.getConnectedNodes(_client)
-                .setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>()
-                {
-                    @Override
-                    public void onResult(NodeApi.GetConnectedNodesResult nodes)
+                .setResultCallback(nodes -> {
+                    for (Node node : nodes.getNodes())
                     {
-                        for (Node node : nodes.getNodes())
-                        {
-                            _phone = node;
-                            toast(getApplicationContext(),"Connected to mobile device!");
-                        }
+                        _phone = node;
+                        toast(getApplicationContext(),"Connected to mobile device!");
                     }
                 });
     }
@@ -299,21 +293,16 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             {
                 Wearable.MessageApi.sendMessage(
                         _client, _phone.getId(), WEAR_ACC_SERVICE + "" + key, null).setResultCallback(
-                        new ResultCallback<MessageApi.SendMessageResult>()
-                        {
-                            @Override
-                            public void onResult(MessageApi.SendMessageResult sendMessageResult)
+                        sendMessageResult -> {
+                            if (!sendMessageResult.getStatus().isSuccess())
                             {
-                                if (!sendMessageResult.getStatus().isSuccess())
-                                {
-                                    Log.e(TAG, "Failed to send message with status code: "
-                                            + sendMessageResult.getStatus().getStatusCode());
-                                }
-                                else
-                                {
-                                    Log.d("SENDMESSAGE","MESSAGE SENT - "+key);
-                                    Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
-                                }
+                                Log.e(TAG, "Failed to send message with status code: "
+                                        + sendMessageResult.getStatus().getStatusCode());
+                            }
+                            else
+                            {
+                                Log.d("SENDMESSAGE","MESSAGE SENT - "+key);
+                                Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
                             }
                         }
                 );
@@ -480,7 +469,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         /* START/STOP */
         /* ********** */
         _leftHanded     = (CheckBox) findViewById(R.id.checkLeftHanded);
-        textSensorState = (TextView) findViewById(R.id.textSensorState);
 
         /* ******** */
         /* SCHEDULE */
@@ -508,11 +496,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         /* ***** */
         /* STATS */
         /* ***** */
-        piePessoasAcum = (DynamicPieChart) findViewById(R.id.piePessoas);
-        pieEnergias = (DynamicPieChart) findViewById(R.id.pieEnergias);
-        piePlugsAcum = (DynamicPieChart) findViewById(R.id.piePlugsAcum);
-        linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
-        mBarChart = (BarChart) findViewById(R.id.barchart);
+        piePessoasAcum = (DynamicPieChart) findViewById(R.id.tab_stats_pessoas);
+        pieEnergias = (DynamicPieChart) findViewById(R.id.tab_stats_energias);
+        piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_stats_pie_plugs);
+        linePlugs = (DynamicLineChart) findViewById(R.id.tab_stats3);
+        mBarChart = (BarChart) findViewById(R.id.tab_stats2);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
