@@ -496,11 +496,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         /* ***** */
         /* STATS */
         /* ***** */
-        piePessoasAcum = (DynamicPieChart) findViewById(R.id.tab_stats_pessoas);
-        pieEnergias = (DynamicPieChart) findViewById(R.id.tab_stats_energias);
-        piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_stats_pie_plugs);
-        linePlugs = (DynamicLineChart) findViewById(R.id.tab_stats3);
-        mBarChart = (BarChart) findViewById(R.id.tab_stats2);
+        piePessoasAcum = (DynamicPieChart) findViewById(R.id.tab_power_pessoas_total);
+        pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
+        piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
+        linePlugs = (DynamicLineChart) findViewById(R.id.tab_power_plugs_current);
+        mBarChart = (BarChart) findViewById(R.id.tab_stats_bar_test);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
