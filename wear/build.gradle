@@ -26,6 +26,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.github.blackfizz:eazegraph:1.2.2@aar'
     implementation 'com.nineoldandroids:library:2.4.0'
+    implementation 'com.android.support:appcompat-v7:24.2.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.android.support:wearable:2.0.1'
     compile 'com.google.android.gms:play-services-wearable:10.2.4'
     provided 'com.google.android.wearable:wearable:2.0.1'
