@@ -16,7 +16,10 @@ public class TabAdapter extends WearableNavigationDrawer.WearableNavigationDrawe
     private final Context context;
 
     public TabAdapter(final Context context)
-    { this.context = context; }
+    {
+        this.context = context;
+        drawTab(TabConfig.DEFAULT);
+    }
 
     @Override
     public String getItemText(int index)
