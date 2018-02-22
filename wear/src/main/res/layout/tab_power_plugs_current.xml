@@ -11,5 +11,5 @@
     app:egUseOverlapFill="false"
     app:egCurveSmoothness="0.4"
     app:egIndicatorLineColor="#FFFFFF"
-    app:egLegendHeight="40dp"
+    app:egLegendHeight="50dp"
     app:egIndicatorTextColor="#FFFFFF"/>

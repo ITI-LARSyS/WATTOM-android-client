@@ -43,18 +43,14 @@ public class DynamicLineChart extends ValueLineChart
         if(!contains(key))
         { add(key); }
 
-        values.get(key).addPoint(new ValueLinePoint(
-                getCurrentTime(),
-                point));
+        addPoint(key,getCurrentTime(),point);
     }
     public void addPoint(String key,String legend,float point)
     {
         if(!contains(key))
         { add(key); }
 
-        values.get(key).addPoint(new ValueLinePoint(
-                legend,
-                point));
+        values.get(key).addPoint(new ValueLinePoint(legend,point));
     }
     private String getCurrentTime()
     {

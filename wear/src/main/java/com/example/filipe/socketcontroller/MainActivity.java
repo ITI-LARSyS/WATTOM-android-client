@@ -534,14 +534,15 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         mBarChart.startAnimation();
 
         linePlugs.addPoint("plug1.local","21:01",2.4f);
+        linePlugs.addPoint("plug2.local","21:01",4.4f);
+        linePlugs.addPoint("plug2.local","21:02",2.9f);
         linePlugs.addPoint("plug1.local","21:02",1f);
         linePlugs.addPoint("plug1.local","21:03",4.4f);
+        linePlugs.addPoint("plug2.local","21:03",4.0f);
         linePlugs.addPoint("plug1.local","21:04",4.4f);
+        linePlugs.addPoint("plug2.local","21:04",5f);
         linePlugs.addPoint("plug1.local","21:05",4.4f);
-        linePlugs.addPoint("plug1.local","21:06",4.4f);
-        linePlugs.addPoint("plug2.local","21:07",4.4f);
-        linePlugs.addPoint("plug2.local","21:08",5f);
-        linePlugs.addPoint("plug1.local","21:10",9f);
+        linePlugs.addPoint("plug2.local","21:05",4.4f);
         linePlugs.startAnimation();
 
         piePlugsAcum.incValue("plug1.local",30);
