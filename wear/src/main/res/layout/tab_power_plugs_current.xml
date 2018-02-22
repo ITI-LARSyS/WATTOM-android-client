@@ -12,4 +12,5 @@
     app:egCurveSmoothness="0.4"
     app:egIndicatorLineColor="#FFFFFF"
     app:egLegendHeight="50dp"
-    app:egIndicatorTextColor="#FFFFFF"/>
+    app:egIndicatorTextColor="#FFFFFF"
+    android:onClick="handleLineChartClick"/>

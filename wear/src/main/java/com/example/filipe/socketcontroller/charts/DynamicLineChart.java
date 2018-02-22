@@ -3,19 +3,23 @@ package com.example.filipe.socketcontroller.charts;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import org.eazegraph.lib.charts.ValueLineChart;
 import org.eazegraph.lib.models.ValueLinePoint;
 import org.eazegraph.lib.models.ValueLineSeries;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
 
 public class DynamicLineChart extends ValueLineChart
 {
     private HashMap<String,ValueLineSeries> values;
+    private String current = "";
 
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
@@ -32,7 +36,12 @@ public class DynamicLineChart extends ValueLineChart
     {
         values.put(key,new ValueLineSeries());
         values.get(key).setColor(Color.parseColor(colors[(values.size()-1) % colors.length]));
-        addSeries(values.get(key));
+
+        if(current.equals(""))
+        {
+            addSeries(values.get(key));
+            current = key;
+        }
     }
     public void remove(String key)
     {
@@ -72,4 +81,13 @@ public class DynamicLineChart extends ValueLineChart
     {
         return values.containsKey(key);
     }
+    public void switchSeries()
+    {
+        clearChart();
+        List<Object> allKeys = Arrays.asList(values.keySet().toArray());
+        int newIndex = (allKeys.indexOf(current)+1) % values.size();
+        current = (String) allKeys.get(newIndex);
+        addSeries((ValueLineSeries) values.values().toArray()[newIndex]);
+    }
+
 }

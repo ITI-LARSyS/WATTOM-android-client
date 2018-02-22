@@ -553,6 +553,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePlugsAcum.startAnimation();
     }
 
+    public void handleLineChartClick(View v)
+    {
+        linePlugs.switchSeries();
+    }
+
     /* ******************************************************************************** */
     /* ******************************************************************************** */
     /* ******************************************************************************** */
