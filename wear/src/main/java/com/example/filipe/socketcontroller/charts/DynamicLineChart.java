@@ -31,7 +31,7 @@ public class DynamicLineChart extends ValueLineChart
     private void add(String key)
     {
         values.put(key,new ValueLineSeries());
-        values.get(key).setColor(Color.parseColor(colors[values.size() % colors.length]));
+        values.get(key).setColor(Color.parseColor(colors[(values.size()-1) % colors.length]));
         addSeries(values.get(key));
     }
     public void remove(String key)
