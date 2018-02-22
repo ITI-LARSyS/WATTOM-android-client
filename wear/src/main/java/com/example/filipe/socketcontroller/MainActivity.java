@@ -174,11 +174,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     protected void onStop()
     {
         super.onStop();
-        new Thread(()->
-        {
-            Wearable.MessageApi.removeListener(_client, this);
-            _client.disconnect();
-        }).start();
+        cpuWakeLock.release();
+        _sensorManager.unregisterListener(this);
+        _sensor_running = false;
+        Wearable.MessageApi.removeListener(_client, this);
+        _client.disconnect();
+        Log.d("FIM","----FIM----");
     }
 
     @Override
@@ -422,14 +423,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             catch (InterruptedException e)
             { e.printStackTrace(); }
         }
-    }
-
-    public void handleQuitClick(View v)
-    {
-        cpuWakeLock.release();
-        _sensorManager.unregisterListener(this);
-        _sensor_running = false;
-        this.finish();
     }
 
     public void handleScheduleButton(View v)

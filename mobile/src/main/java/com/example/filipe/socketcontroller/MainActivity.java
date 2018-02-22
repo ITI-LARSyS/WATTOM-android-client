@@ -426,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         toast("Study started!");
 
         IsOn = false;
-
+        /*
         TimerTask hourlyTask = new TimerTask () {
             @Override
             public void run () {
@@ -476,7 +476,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
             }
         };
-        hourlyTimer.schedule (hourlyTask, 10 ,1000*60*15/*15min*/);
+        hourlyTimer.schedule (hourlyTask, 10 ,1000*60*15);*/
+        renewableEnergy =  20;
+        String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
+        ChangeColorByEnergy(ChangeEnergy);
+        new RefreshData().start();
         try{
             wait(100);
         }catch (Exception e){
