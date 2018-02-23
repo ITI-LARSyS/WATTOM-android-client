@@ -1,20 +1,12 @@
 package com.example.filipe.socketcontroller;
 
-import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.DialogInterface;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,44 +18,30 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.plus.Account;
-import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
-import com.google.android.gms.wearable.Node;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Date;
-import java.util.Calendar;
-import java.util.concurrent.ExecutionException;
 
+import static com.example.filipe.socketcontroller.util.UI.toast;
 
 public class MainActivity extends AppCompatActivity implements  MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -246,7 +224,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.i(TAG,messageEvent.toString());
-        toast("Message received!");
         String merda = messageEvent.getPath();
         String data = merda.replace("acc", "");
         String [] horas = data.split("/");
@@ -302,6 +279,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 vez = 0;
             }
         }else{
+            if(!_started)
+            {
+                toast(getApplicationContext(),"Started receiving coordinates!");
+                Log.d("SENSOR","Started receiving coordinates!");
+            }
             _started = true;
 
             String[] tokens = data.split("#");
@@ -312,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _last_acc_y = z;
 
                 Log.i(TAG,"got data from watch x "+x+","+z);
+                Log.d("SENSOR","x:"+x+" z:"+z);
                 //toast("got data from watch x "+x+","+z);
             } catch (NumberFormatException e) {
                 //Log.e(TAG, "format exception data " + data);
@@ -389,11 +372,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     public void onResult(NodeApi.GetConnectedNodesResult nodes) {
                         for (Node node : nodes.getNodes()) {
                             _wear = node;
+                            toast(getApplicationContext(),"Connected to `"+node.getDisplayName()+"`!");
                         }
                         //Log.i(TAG,"watch connected");
                     }
                 });
-          toast("Connected successfully!");
     }
 
     /*
@@ -423,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         //SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
 
         btnStartStudy.setVisibility(View.GONE);
-        toast("Study started!");
+        toast(getApplicationContext(),"Study started!");
 
         IsOn = false;
         /*
@@ -478,6 +461,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         };
         hourlyTimer.schedule (hourlyTask, 10 ,1000*60*15);*/
         renewableEnergy =  20;
+        Log.d("STATISTICS","renewableEnergy: "+renewableEnergy);
         String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
         ChangeColorByEnergy(ChangeEnergy);
         new RefreshData().start();
@@ -530,11 +514,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                             +"plug"+plugs[w]+".local"
                                             +"-"
                                             +power);
+                                    Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
                                     powerTotal += power;
                                 }
                             }
                         }
                         sendMessage("Total overall power"+"-"+powerTotal);
+                        Log.d("STATISTICS","Total overall power consumption: "+powerTotal);
                     }catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -635,7 +621,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "Connection to Google API client was failed");
-        toast("Connection Failed! ("+connectionResult.toString()+")");
+        toast(getApplicationContext(),"Connection Failed! ("+connectionResult.toString()+")");
     }
 
 
@@ -1092,7 +1078,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
             enviaNome.start();
             enviaNome.join();
-            toast("You have been removed as a person!");
+            toast(getApplicationContext(),"You have been removed as a person!");
+            Log.d("PLUGS","plug."+_plug_names.get(j)+".local has been turned off by "+Device_Name);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1109,7 +1096,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
             enviaNome.start();
             enviaNome.join();
-            toast("You have been added as a person!");
+            toast(getApplicationContext(),"You have been added as a person!");
+            Log.d("PLUGS","plug."+_plug_names.get(j)+".local has been turned on by "+Device_Name);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1182,7 +1170,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
                     // Log.i(TAG, "plug "+_plug_names.get(i));
                 }catch (JSONException e){
-            		Log.d("GETPLUGSDATA","Message ignored!");
+            		Log.d("PLUGS","No plugs detected!");
                 }
             }
             //Log.i(TAG,"-------");
@@ -1190,7 +1178,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         } 
         catch (JSONException e) 
         {
-            Log.d("GETPLUGSDATA","Message ignored!");
+            Log.d("PLUGS","No plugs detected!");
             //e.printStackTrace();
         } 
         catch(InterruptedException e)
@@ -1218,6 +1206,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             for(int i = 0; i < users.size(); i++){
                 String temp = "-"+users.get(i)+"-"+powers.get(i);
                 message += temp;
+                Log.d("PERSONS","Consumption of "+users.get(i)+": "+powers.get(i));
             }
             sendMessage(message);
         }catch (Exception e){
@@ -1247,7 +1236,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }
         else
         {
-            toast("Failed to send message!");
+            toast(getApplicationContext(),"Failed to send message!");
+            Log.d("ERROR","Failed to send message!");
         }
     }
 
@@ -1275,7 +1265,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 editor.putString("IP",newIP);
                 editor.apply();
                 setIP(newIP);
-                toast("You chose to set new IP ("+newIP+")");
+                toast(getApplicationContext(),"You chose to set new IP ("+newIP+")");
             }
         });
         ask.setNegativeButton("Keep previous IP",new DialogInterface.OnClickListener()
@@ -1283,7 +1273,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             public void onClick(DialogInterface dialog, int whichButton)
             {
                 setIP(oldIP);
-                toast("You chose to keep previous IP ("+oldIP+")");
+                toast(getApplicationContext(),"You chose to keep previous IP ("+oldIP+")");
             }
         });
         ask.show();
@@ -1299,8 +1289,5 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
     
     public static String getBaseURL() { return BASE_URL; }
-
-    private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
-
 
 }

@@ -10,41 +10,31 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.wearable.view.drawer.WearableActionDrawer;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.example.filipe.socketcontroller.charts.DynamicLineChart;
 import com.example.filipe.socketcontroller.charts.DynamicPieChart;
 import com.example.filipe.socketcontroller.tabs.TabAdapter;
-import com.example.filipe.socketcontroller.tabs.TabConfig;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import org.eazegraph.lib.charts.BarChart;
 import org.eazegraph.lib.models.BarModel;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
-import static com.example.filipe.socketcontroller.util.UI.hide;
 import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
-import static com.example.filipe.socketcontroller.util.UI.unhide;
 import static com.example.filipe.socketcontroller.util.UI.updateTime;
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -279,7 +269,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     for (Node node : nodes.getNodes())
                     {
                         _phone = node;
-                        toast(getApplicationContext(),"Connected to mobile device!");
+                        toast(getApplicationContext(),"Connected to `"+node.getDisplayName()+"`!");
                     }
                 });
     }
@@ -342,9 +332,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     for(int i = 0; i < nrPessoas; i++)
                     {
                         piePessoasAcum.incValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
+                        Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
                     piePessoasAcum.startAnimation();
                     toast(getApplicationContext(),"Person consumption has been updated!");
+                    Log.d("PERSONS","Person consumption has been updated!");
                     break;
 
                 // Mensagem com as percentagens de energias renováveis e não renováveis
@@ -354,9 +346,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     for(int i = 0; i < tamanho; i++)
                     {
                         pieEnergias.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
+                        Log.d("ENERGY","Energia "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
                     pieEnergias.startAnimation();
                     toast(getApplicationContext(),"Energy data has been updated!");
+                    Log.d("ENERGY","Energy data has been updated!");
                     break;
 
                 // Mensagem com o consumo geral total
@@ -364,6 +358,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Total overall power":
                     _consumo.setText(valores[1]);
                     toast(getApplicationContext(),"Total overall consumption has been updated!");
+                    Log.d("PLUGS","Total overall consumption (current): "+valores[1]);
                     break;
 
                 // Mensagem com o consumo atual de uma plug
@@ -374,11 +369,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     linePlugs.addPoint(plugName,value);
                     piePlugsAcum.incValue(plugName,value);
                     toast(getApplicationContext(),"Plug consumption has been updated!");
+                    Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;
 
                 // Mensagem inválida
                 default:
-                    Log.d("MESSAGERECEIVED","Error: evento `"+event+"` desconhecido");
+                    Log.d("ERROR","Error: evento `"+event+"` desconhecido");
                     toast(getApplicationContext(),"Invalid message received!");
                     break;
             }
@@ -387,6 +383,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         {
             Log.i("Error",messageEvent.getPath());
             e.printStackTrace();
+            toast(getApplicationContext(),"Invalid message received!");
         }
     }
 
