@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.widget.TextView;
 
 import org.eazegraph.lib.charts.ValueLineChart;
 import org.eazegraph.lib.models.ValueLinePoint;
@@ -20,6 +21,7 @@ public class DynamicLineChart extends ValueLineChart
 {
     private HashMap<String,ValueLineSeries> values;
     private String current = "";
+    private TextView legend;
 
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
@@ -36,6 +38,10 @@ public class DynamicLineChart extends ValueLineChart
         return current;
     }
 
+    public void setLegend(TextView legend)
+    {
+        this.legend = legend;
+    }
     private void add(String key)
     {
         values.put(key,new ValueLineSeries());
@@ -45,6 +51,10 @@ public class DynamicLineChart extends ValueLineChart
         {
             addSeries(values.get(key));
             current = key;
+            if(legend != null)
+            {
+                legend.setText(key);
+            }
         }
     }
     public void remove(String key)
@@ -87,11 +97,18 @@ public class DynamicLineChart extends ValueLineChart
     }
     public void switchSeries()
     {
-        clearChart();
-        List<Object> allKeys = Arrays.asList(values.keySet().toArray());
-        int newIndex = (allKeys.indexOf(current)+1) % values.size();
-        current = (String) allKeys.get(newIndex);
-        addSeries((ValueLineSeries) values.values().toArray()[newIndex]);
+        if(values.size() > 0)
+        {
+            clearChart();
+            List<Object> allKeys = Arrays.asList(values.keySet().toArray());
+            int newIndex = (allKeys.indexOf(current) + 1) % values.size();
+            current = (String) allKeys.get(newIndex);
+            addSeries((ValueLineSeries) values.values().toArray()[newIndex]);
+            if(legend != null)
+            {
+                legend.setText(current);
+            }
+        }
     }
 
 }

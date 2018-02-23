@@ -497,6 +497,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
         textCurSeries = (TextView) findViewById(R.id.textCurSeries);
         textCurSeries.bringToFront();
+        linePlugs.setLegend(textCurSeries);
         mBarChart = (BarChart) findViewById(R.id.tab_stats_bar_test);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
@@ -535,8 +536,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         mBarChart.addBar(new BarModel(0.4f, 0xFF1FF4AC));
         mBarChart.addBar(new BarModel(4.f,  0xFF1BA4E6));
 
-        mBarChart.startAnimation();
-
         linePlugs.addPoint("plug1.local","21:01",2.4f);
         linePlugs.addPoint("plug2.local","21:01",4.4f);
         linePlugs.addPoint("plug2.local","21:02",2.9f);
@@ -547,20 +546,17 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePlugs.addPoint("plug2.local","21:04",5f);
         linePlugs.addPoint("plug1.local","21:05",4.4f);
         linePlugs.addPoint("plug2.local","21:05",4.4f);
-        linePlugs.startAnimation();
 
         piePlugsAcum.incValue("plug1.local",30);
         piePlugsAcum.incValue("plug2.local",20);
         piePlugsAcum.incValue("plug3.local",20);
         piePlugsAcum.incValue("plug1.local",20);
         piePlugsAcum.incValue("plug5.local",20);
-        piePlugsAcum.startAnimation();
     }
 
     public void handleLineChartClick(View v)
     {
         linePlugs.switchSeries();
-        textCurSeries.setText(linePlugs.getCurrentKey());
     }
 
     /* ******************************************************************************** */
