@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.example.filipe.socketcontroller.charts.DynamicLineChart
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/linechartplugs"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp"
     android:gravity="center"
-    app:egUseCubic="true"
-    app:egUseOverlapFill="false"
-    app:egCurveSmoothness="0.4"
-    app:egIndicatorLineColor="#FFFFFF"
-    app:egLegendHeight="50dp"
-    app:egIndicatorTextColor="#FFFFFF"
-    android:onClick="handleLineChartClick"/>
+    android:orientation="vertical">
+
+    <com.example.filipe.socketcontroller.charts.DynamicLineChart
+        android:id="@+id/linechartplugs"
+        app:egUseCubic="true"
+        app:egUseOverlapFill="false"
+        app:egCurveSmoothness="0.4"
+        app:egIndicatorLineColor="#FFFFFF"
+        app:egLegendHeight="30dp"
+        app:egIndicatorTextColor="#FFFFFF"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:paddingTop="20dp"/>
+
+    <TextView
+        android:id="@+id/textCurSeries"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/NOTHING"
+        android:onClick="handleLineChartClick"
+        android:textAlignment="center"
+        />
+
+</LinearLayout>
+

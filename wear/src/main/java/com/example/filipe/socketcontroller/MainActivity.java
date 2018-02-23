@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -120,6 +121,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private DynamicPieChart piePlugsAcum;
     private DynamicPieChart pieEnergias;
     private BarChart mBarChart;
+    private TextView textCurSeries;
 
 
     /* *** */
@@ -492,12 +494,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePessoasAcum = (DynamicPieChart) findViewById(R.id.tab_power_pessoas_total);
         pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
         piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
-        linePlugs = (DynamicLineChart) findViewById(R.id.tab_power_plugs_current);
+        linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
+        textCurSeries = (TextView) findViewById(R.id.textCurSeries);
+        textCurSeries.bringToFront();
         mBarChart = (BarChart) findViewById(R.id.tab_stats_bar_test);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
-        fitToScreen(this,linePlugs);
+        fitToScreen(this,linePlugs,50);
         fitToScreen(this,mBarChart);
 
         /* *** */
@@ -556,6 +560,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     public void handleLineChartClick(View v)
     {
         linePlugs.switchSeries();
+        textCurSeries.setText(linePlugs.getCurrentKey());
     }
 
     /* ******************************************************************************** */

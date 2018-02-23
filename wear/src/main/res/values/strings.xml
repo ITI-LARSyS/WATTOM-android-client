@@ -24,5 +24,6 @@
     <string name="SET_SCHEDULE_CONFIRM_END">Confirm End</string>
     <string name="SET_SCHEDULE_START">Set Schedule start</string>
     <string name="SET_SCHEDULE_END">Set Schedule end</string>
+    <string name="NOTHING">-</string>
 
 </resources>

@@ -31,6 +31,10 @@ public class DynamicLineChart extends ValueLineChart
         super(context);
         values = new HashMap<>();
     }
+    public String getCurrentKey()
+    {
+        return current;
+    }
 
     private void add(String key)
     {

@@ -22,7 +22,7 @@ public enum TabConfig
 
     PLUGSTOTAL(R.string.TITLE_STATS5,
             android.R.drawable.ic_menu_sort_by_size,
-            R.id.tab_power_pessoas_total),
+            R.id.tab_power_plugs_total),
 
     ENERGIAS(R.string.TITLE_STATS4,
             android.R.drawable.ic_lock_idle_low_battery,
