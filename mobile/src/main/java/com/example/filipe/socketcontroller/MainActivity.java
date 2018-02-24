@@ -581,7 +581,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // - E iniciam as tarefas de cada um dos dispositivos
     // - Comeca a coordenar o movimento e a guardar os dados
     public void firstStartup(String url){
-       // _corrHandler = new CorrelationHandler();
+        _corrHandler = new CorrelationHandler();
         _handlers = new ArrayList<>();
         _aggregators = new ArrayList<>();
 
@@ -694,7 +694,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     //conecta com o relogio
     @Override
-    public void onStart() 
+    public void onStart()
     {
         super.onStart();
 
@@ -738,7 +738,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _correlationRunning = true;
                 _started = true;
                 _updating = false;
-                _corrHandler = new CorrelationHandler();
                 _corrHandler.start();
 
                 new RefreshData().start();
@@ -754,6 +753,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }catch(Exception e){
                     e.printStackTrace();
                 }
+                Log.d("PLUGS","plug"+_plug_names.get(i)+".local has been turned off by "+Device_Name);
             }
         }
     }
@@ -1073,13 +1073,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
             selected_request.start();
             selected_request.join();
+            Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
             IsOn = false;
             HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
 
             enviaNome.start();
             enviaNome.join();
             toast(getApplicationContext(),"You have been removed as a person!");
-            Log.d("PLUGS","plug."+_plug_names.get(j)+".local has been turned off by "+Device_Name);
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1097,7 +1098,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.start();
             enviaNome.join();
             toast(getApplicationContext(),"You have been added as a person!");
-            Log.d("PLUGS","plug."+_plug_names.get(j)+".local has been turned on by "+Device_Name);
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1175,12 +1176,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
             //Log.i(TAG,"-------");
             //Log.i(TAG,"TARGET: "+_target);
-        } 
-        catch (JSONException e) 
+        }
+        catch (JSONException e)
         {
             Log.d("PLUGS","No plugs detected!");
             //e.printStackTrace();
-        } 
+        }
         catch(InterruptedException e)
         {
             e.printStackTrace();
@@ -1278,7 +1279,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         });
         ask.show();
     }
-    
+
     public void setIP(String ip)
     {
         BASE_URL = "http://"+ip+":3000";
@@ -1287,7 +1288,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         PLUG_URL = BASE_URL+"/plug/%";
         ChangeEnergyURL = PLUGS_URL+"energy/";
     }
-    
+
     public static String getBaseURL() { return BASE_URL; }
 
 }

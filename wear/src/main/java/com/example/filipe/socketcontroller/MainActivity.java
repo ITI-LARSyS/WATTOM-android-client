@@ -179,33 +179,28 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         super.onResume();
 
-        new Thread(()->
-        {
-            _client = new GoogleApiClient.Builder(this)
-                    .addApi(Wearable.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
+        _client = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
 
-            _client.connect();
-            Wearable.MessageApi.addListener(_client, this);
+        _client.connect();
+        Wearable.MessageApi.addListener(_client, this);
 
 
-            Log.i(TAG, "On resume called");
+        Log.i(TAG, "On resume called");
 
-            PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-            cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            cpuWakeLock.acquire();
+        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+        cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        cpuWakeLock.acquire();
 
-            // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
-        }).start();
+        // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event)
     {
-        new Thread(()->
-        {
             //Log.wtf(TAG,event.toString());
 
 /*
@@ -251,7 +246,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 //            Log.i("DEBUG",x+","+z);
 
             //Log.i(TAG,"sending data form watch");
-        }).start();
     }
 
     /* ******************************************************************************** */
@@ -280,8 +274,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     private void sendMessage(String key)
     {
-        new Thread(()->
-        {
             if (_phone != null && _client!= null && _client.isConnected())
             {
                 Wearable.MessageApi.sendMessage(
@@ -307,7 +299,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 Log.d("SENDMESSAGE","phone = "+_phone);
                 Log.d("SENDMESSAGE","isConnected = "+_client.isConnected());
             }
-        }).start();
     }
 
     @Override
