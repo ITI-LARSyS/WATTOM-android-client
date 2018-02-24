@@ -46,10 +46,10 @@ import static com.example.filipe.socketcontroller.util.UI.toast;
 public class MainActivity extends AppCompatActivity implements  MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private final static String TAG = "DeviceSelection";
-    public static final int WINDOW_SIZE = 40;  // terá qde ser 80
+    private static final int WINDOW_SIZE = 40;  // terá qde ser 80
 
     // communication with the watch
-    GoogleApiClient _client;
+    private GoogleApiClient _client;
 
     //View stuff
     private TextView _counter;
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private final static String EnergyData = "http://aveiro.m-iti.org/sinais_energy_production/services/today_production_request.php?date=";
 
     private static String PLUGS_URL =BASE_URL+"/plug/";
-    private static String SELECTED_URL = BASE_URL+"/plug/%/selected/";
+    private static String SELECTED_URL = PLUGS_URL +"%/selected/";
     private static String PLUG_URL = BASE_URL+"/plug/%";
     private int _plug_selected = 0;
     private static String ChangeEnergyURL = PLUGS_URL+"energy/";
@@ -115,8 +115,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private int _target[];
 
     //for debug
-    boolean _debug_thread = false;
-    SimulationView _simuView;
+    private boolean _debug_thread = false;
+    private SimulationView _simuView;
 
     //for the study
     //private int _participant;
@@ -1069,16 +1069,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void TurnOffAndRemove(int j){
         try{
-            HttpRequest selected_request;
-            selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
+            HttpRequest selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
+            HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
             selected_request.start();
+            enviaNome.start();
             selected_request.join();
+            enviaNome.join();
             Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
             IsOn = false;
-            HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
-
-            enviaNome.start();
-            enviaNome.join();
             toast(getApplicationContext(),"You have been removed as a person!");
 
         }catch (Exception e){
@@ -1089,14 +1087,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void TurnOnAndAdd(int j){
         try{
-            HttpRequest selected_request;
-            selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
-            selected_request.start();
-            selected_request.join();
-            IsOn = true;
+            HttpRequest selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
             HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
+            selected_request.start();
             enviaNome.start();
+            selected_request.join();
             enviaNome.join();
+            Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned on by "+Device_Name);
+            IsOn = true;
             toast(getApplicationContext(),"You have been added as a person!");
 
         }catch (Exception e){
@@ -1282,10 +1280,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void setIP(String ip)
     {
-        BASE_URL = "http://"+ip+":3000";
-        PLUGS_URL =BASE_URL+"/plug/";
-        SELECTED_URL = BASE_URL+"/plug/%/selected/";
-        PLUG_URL = BASE_URL+"/plug/%";
+        BASE_URL        = "http://"+ip+":3000/";
+        PLUGS_URL       = BASE_URL +"plug/";
+        PLUG_URL        = PLUGS_URL +"%/";
+        SELECTED_URL    = PLUG_URL + "selected/";
         ChangeEnergyURL = PLUGS_URL+"energy/";
     }
 

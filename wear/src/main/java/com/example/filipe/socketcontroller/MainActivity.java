@@ -201,6 +201,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     @Override
     public void onSensorChanged(SensorEvent event)
     {
+        new Thread(()->
+        {
             //Log.wtf(TAG,event.toString());
 
 /*
@@ -246,6 +248,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 //            Log.i("DEBUG",x+","+z);
 
             //Log.i(TAG,"sending data form watch");
+        }).start();
     }
 
     /* ******************************************************************************** */
