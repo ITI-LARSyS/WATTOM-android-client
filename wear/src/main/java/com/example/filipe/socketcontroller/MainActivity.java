@@ -545,11 +545,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePlugsAcum.incValue("plug5.local",20);
     }
 
-    public void handleLineChartClick(View v)
-    {
-        linePlugs.switchSeries();
-    }
-
     /* ******************************************************************************** */
     /* ******************************************************************************** */
     /* ******************************************************************************** */

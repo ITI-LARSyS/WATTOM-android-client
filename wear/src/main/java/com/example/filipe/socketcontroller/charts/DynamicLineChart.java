@@ -41,18 +41,23 @@ public class DynamicLineChart extends ValueLineChart
     public void setLegend(TextView legend)
     {
         this.legend = legend;
+        legend.setOnClickListener((v)-> switchSeries());
     }
     private void add(String key)
     {
         values.put(key,new ValueLineSeries());
         values.get(key).setColor(Color.parseColor(colors[(values.size()-1) % colors.length]));
 
-        if(current.equals(""))
+        if(legend == null)
         {
             addSeries(values.get(key));
-            current = key;
-            if(legend != null)
+        }
+        else
+        {
+            if(current.equals(""))
             {
+                addSeries(values.get(key));
+                current = key;
                 legend.setText(key);
             }
         }
@@ -95,7 +100,7 @@ public class DynamicLineChart extends ValueLineChart
     {
         return values.containsKey(key);
     }
-    public void switchSeries()
+    private void switchSeries()
     {
         if(values.size() > 0)
         {
