@@ -1,4 +1,4 @@
-package com.example.filipe.socketcontroller;
+package com.example.filipe.socketcontroller.plugs;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,7 +6,8 @@ import android.util.Log;
 
 
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
+import com.example.filipe.socketcontroller.MainActivity;
+import com.example.filipe.socketcontroller.util.HttpRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;

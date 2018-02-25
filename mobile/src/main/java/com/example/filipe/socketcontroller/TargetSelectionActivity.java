@@ -15,6 +15,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.filipe.socketcontroller.plugs.PlugMotionHandler;
+import com.example.filipe.socketcontroller.util.HttpRequest;
+import com.example.filipe.socketcontroller.util.MotionWearListenerService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;

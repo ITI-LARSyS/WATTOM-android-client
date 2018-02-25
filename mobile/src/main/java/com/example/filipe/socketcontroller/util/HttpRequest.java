@@ -1,4 +1,4 @@
-package com.example.filipe.socketcontroller;
+package com.example.filipe.socketcontroller.util;
 
 import android.content.Context;
 import android.util.Log;

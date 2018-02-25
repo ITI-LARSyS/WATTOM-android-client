@@ -21,6 +21,8 @@ import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.example.filipe.socketcontroller.plugs.PlugMotionHandler;
+import com.example.filipe.socketcontroller.util.HttpRequest;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -77,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     //correlation stuff
     private final PearsonsCorrelation pc = new PearsonsCorrelation();
     private boolean _correlationRunning = false;
-    private long _correlationInterval   = 60;
+    private long _correlationInterval   = 40;
     private CorrelationHandler _corrHandler;// = new CorrelationHandler();
     private  double  _last_acc_x = 0;
     private double _last_acc_y = 0;
@@ -988,7 +990,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
 
                 try {
-                    sleep(_correlationInterval);
+                    Thread.sleep(_correlationInterval);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
