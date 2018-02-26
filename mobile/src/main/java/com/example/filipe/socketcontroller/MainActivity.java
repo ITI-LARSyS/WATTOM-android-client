@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     //correlation stuff
     private final PearsonsCorrelation pc = new PearsonsCorrelation();
     private boolean _correlationRunning = false;
-    private long _correlationInterval   = 40;
+    private long _correlationInterval   = 1;
     private CorrelationHandler _corrHandler;// = new CorrelationHandler();
     private  double  _last_acc_x = 0;
     private double _last_acc_y = 0;
@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 SelectedTime(hourEnd,minEnd);
                 vez++;
             }else {
-                HttpRequest CrazyLights = new HttpRequest(BASE_URL + "/plug/ScheduleMode", getApplicationContext(), _queue);
+                HttpRequest CrazyLights = new HttpRequest(BASE_URL + "plug/ScheduleMode", getApplicationContext(), _queue);
                 try {
                     CrazyLights.start();
                     //CrazyLights.join();
@@ -289,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _started = true;
 
             String[] tokens = data.split("#");
+
             try {
                 double x = Double.parseDouble(tokens[0]);
                 double z = Double.parseDouble(tokens[1])*-1;
@@ -485,7 +486,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             public void run () {
                 if(IsOn){
                     int powerTotal = 0;
-                    HttpRequest Pessoas = new HttpRequest(BASE_URL + "/plug/Persons", getApplicationContext() ,_queue);
+                    HttpRequest Pessoas = new HttpRequest(BASE_URL + "plug/Persons", getApplicationContext() ,_queue);
                     try{
                         Pessoas.start();
                         Pessoas.join();
@@ -504,7 +505,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
                                 for(int w = 0; w < plugs.length;w++)
                                 {
-                                    String DataURL = BASE_URL + "/plug/"+plugs[w]+"/Power";
+                                    String DataURL = BASE_URL + "plug/"+plugs[w]+"/Power";
                                     HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
                                     request.start();
                                     request.join();
@@ -587,7 +588,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _handlers = new ArrayList<>();
         _aggregators = new ArrayList<>();
 
-        _simulationSpeed    = 40;   // alterei aqui
+        _simulationSpeed    = 100;   // alterei aqui
         _acc_data           = new double[_devices_count][2][WINDOW_SIZE];
         _plug_target_data   = new double[_devices_count][2][WINDOW_SIZE];
         _plug_data_indexes  = new int[_devices_count];
@@ -707,7 +708,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private void SelectedTime(int hour, int min){
         HttpRequest showTime;
-        showTime = new HttpRequest(BASE_URL + "/plug/SelectedTime/"+ hour+"-"+min, getApplicationContext(),_queue);
+        showTime = new HttpRequest(BASE_URL + "plug/SelectedTime/"+ hour+"-"+min, getApplicationContext(),_queue);
         try{
             showTime.start();
             //showStartTime.join();
@@ -737,7 +738,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 Thread.sleep(500);
                 firstStartup(_url);
                 Thread.sleep(1000);
-                _correlationRunning = true;
+                //_correlationRunning = true;
                 _started = true;
                 _updating = false;
                 _corrHandler.start();
@@ -749,7 +750,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
             HttpRequest TurnOff;
             for(int i = 0; i < _plug_names.size();i++){
-                TurnOff = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(i)+"/relay/1", getApplicationContext(),_queue);
+                TurnOff = new HttpRequest(BASE_URL + "plug/"+_plug_names.get(i)+"/relay/1", getApplicationContext(),_queue);
                 try{
                     TurnOff.start();
                 }catch(Exception e){
@@ -766,7 +767,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         public void run() {
             try{
                 HttpRequest _request;
-                _request = new HttpRequest(BASE_URL + "/plug", getApplicationContext() ,_queue);
+                _request = new HttpRequest(BASE_URL + "plug", getApplicationContext() ,_queue);
                 _request.start();
                 //Log.i(TAG,"--- RUNNING COLOR REQUEST : target "+_led_target+" ---");
                 _request.join();
@@ -950,8 +951,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         @Override
         public void run(){
 
+            _correlationRunning = true;
             _correlations       = new double[2][_devices_count];
             _correlations_count = new int[_devices_count];
+            Thread toggle;
             while(_correlationRunning){
                 //if(_countingTime)     // check if we are counting time in the current matching process
                 //   checkRunningTime();
@@ -978,6 +981,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
                             toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
                             updateTarget(i,true);
+                            new Thread(()->
+                            {
+                                while(_corrHandler.isAlive());
+                                _corrHandler = new CorrelationHandler();
+                                _corrHandler.start();
+                            }).start();
+                            return;
+
                             //}else{
 //                                Log.i(TAG,"Wrong correlation");
 //                                _target_selection = false;
@@ -1039,7 +1050,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         ChangeColorByEnergy(ChangeEnergy);
                         isScheduleMode = false;
                     }else{
-                        try {
                             if(IsOn){
                                 TurnOffAndRemove(j);
                             }else{
@@ -1047,15 +1057,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             }
                             //HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
                             // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                     }
                     return;
                 }
             }
         }
+
     }
 
     public void ChangeColorByEnergy(String url){
@@ -1071,8 +1078,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void TurnOffAndRemove(int j){
         try{
-            HttpRequest selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
-            HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
+            HttpRequest selected_request = new HttpRequest(BASE_URL + "plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
+            HttpRequest enviaNome = new HttpRequest(BASE_URL + "plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
             selected_request.start();
             enviaNome.start();
             selected_request.join();
@@ -1089,8 +1096,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void TurnOnAndAdd(int j){
         try{
-            HttpRequest selected_request = new HttpRequest(BASE_URL + "/plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
-            HttpRequest enviaNome = new HttpRequest(BASE_URL + "/plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
+            HttpRequest selected_request = new HttpRequest(BASE_URL + "plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
+            HttpRequest enviaNome = new HttpRequest(BASE_URL + "plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
             selected_request.start();
             enviaNome.start();
             selected_request.join();
@@ -1155,7 +1162,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private void getPlugsData(){
         try {
             _plug_names = new ArrayList<>();
-            HttpRequest novo = new HttpRequest(BASE_URL + "/plug/AvailablePlugs", getApplicationContext());
+            HttpRequest novo = new HttpRequest(BASE_URL + "plug/AvailablePlugs", getApplicationContext());
             novo.start();
             novo.join();
             String data = novo.getData();
@@ -1192,7 +1199,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
 
     private void ConsultUsers(){
-        HttpRequest CheckUsers = new HttpRequest(BASE_URL + "/plug/Power", getApplicationContext(),_queue);
+        HttpRequest CheckUsers = new HttpRequest(BASE_URL + "plug/Power", getApplicationContext(),_queue);
         try{
             CheckUsers.start();
             CheckUsers.join();
