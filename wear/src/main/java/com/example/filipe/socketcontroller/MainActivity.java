@@ -56,7 +56,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private PowerManager.WakeLock cpuWakeLock;
     private PushThread pushThread;
     private long _last_push;
-    private long _sampling_diff = 100;        // alterei o sampling rate aqui
+    private long _sampling_diff = 20;        // alterei o sampling rate aqui
 
     /* ***************** */
     /* BACK-END (SENSOR) */
