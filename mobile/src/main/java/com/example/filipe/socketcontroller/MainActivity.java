@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -339,8 +337,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // - retira todos os handlers
     // - Guarda o ficheiro
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         Wearable.MessageApi.removeListener(_client, this);
         //Log.wtf(TAG, " wtf called from main activity");
         stopServices();
@@ -533,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 ConsultUsers();
             }
         };
-        PowerTimer.schedule(checkPower, 10 ,500*60/*0,5min = 30s*/);
+        PowerTimer.schedule(checkPower, 10 ,1000*60/*1 min*/);
     }
 
     // Obriga um handler a fazer um forceUpdate()
@@ -590,14 +588,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _handlers = new ArrayList<>();
         _aggregators = new ArrayList<>();
 
-        _simulationSpeed    = 100;   // alterei aqui
+        _simulationSpeed    = 50;   // alterei aqui
         _acc_data           = new double[_devices_count][2][WINDOW_SIZE];
         _plug_target_data   = new double[_devices_count][2][WINDOW_SIZE];
         _plug_data_indexes  = new int[_devices_count];
 
         for(int i=0;i<_devices_count;i++){
             _handlers.add(new PlugMotionHandler(getApplicationContext(),(int)_simulationSpeed,i,url,_queue));
-            _aggregators.add(new DataAggregator(i,50));
+            _aggregators.add(new DataAggregator(i,_simulationSpeed));
         }
 
         for(int i=0;i<_devices_count;i++) {
@@ -737,9 +735,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _updating = true;
                 _started = false;
                 getPlugsData();
-                Thread.sleep(500);
+                Thread.sleep(0);
                 firstStartup(_url);
-                Thread.sleep(1000);
+                Thread.sleep(0);
                 //_correlationRunning = true;
                 _started = true;
                 _updating = false;
@@ -773,7 +771,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 for(int i=0;i<_handlers.size();i++) {
                     JSONObject json_message = json_array.getJSONObject(i);
                     _handlers.get(i).handlePlugMessage(json_message);
-                    Thread.sleep(100);
+                    Thread.sleep(0);
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -934,7 +932,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         double _correlations[][];
         int _correlations_count[];
-        private Thread _updateThreads[];
+        private Thread _togglers[];
 
         private void updateCorrelations(int index, int[] correlations){
             int temp = correlations[index]+1;
@@ -952,7 +950,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlationRunning = true;
             _correlations       = new double[2][_devices_count];
             _correlations_count = new int[_devices_count];
-            _updateThreads = new Thread[_devices_count];
+            _togglers = new Thread[_devices_count];
             while(_correlationRunning){
                 //if(_countingTime)     // check if we are counting time in the current matching process
                 //   checkRunningTime();
@@ -964,14 +962,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 for(int i=0;(i<_devices_count) && (_plug_data_indexes[_target[i]] == WINDOW_SIZE);i++){
                     _correlations[0][i] = pc.correlation(_plug_target_data[i][0], _acc_data[i][0]);
                     _correlations[1][i] = pc.correlation(_plug_target_data[i][1], _acc_data[i][1]);
-                    if(_correlations[0][i] < 0) _correlations[0][i] = 0;
-                    if(_correlations[1][i] < 0) _correlations[1][i] = 0;
                     Log.d("CORR0",""+_correlations[0][i]);
                     Log.d("CORR1",""+_correlations[1][i]);
                 }
                 for(int i=0;i<_devices_count;i++){
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
-                    if ((_correlations[0][i] >= 0.8 && _correlations[0][i] < 0.9999) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<0.9999)) {  // sometimes at the start we get 1.0 we want to avoid that
+                    if ((_correlations[0][i] >= 0.9 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.9 &&  _correlations[1][i]<1)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
@@ -982,10 +978,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             // Beep to show its the correct match
                            // ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
                             //toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
-                            if(_updateThreads[i] == null)
+                            if(_togglers[i] == null || !_togglers[i].isAlive())
                             {
-                                int finalI = i;
-                                _updateThreads[i] = new Thread(() ->
+                                final  int finalI = i;
+                                _togglers[i] = new Thread(() ->
                                 {
                                     updateTarget(finalI,true);
                                     try {
@@ -994,24 +990,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                         e.printStackTrace();
                                     }
                                 });
-                                _updateThreads[i].start();
-                            }
-                            else
-                            {
-                                if(!_updateThreads[i].isAlive())
-                                {
-                                    int finalI = i;
-                                    _updateThreads[i] = new Thread(() ->
-                                    {
-                                        updateTarget(finalI,true);
-                                        try {
-                                            Thread.sleep(1000);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                    _updateThreads[i].start();
-                                }
+                                _togglers[i].start();
                             }
                             //}else{
 //                                Log.i(TAG,"Wrong correlation");
@@ -1055,6 +1034,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     if(match && led_target == _target[j]){
                         index = j;
                         if(isScheduleMode){
+                            TurnOffAndRemove(j);
+                            new RefreshData().start();
                             TimerTask minTask = new TimerTask () {
                                 @Override
                                 public void run () {
