@@ -1037,7 +1037,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         index = j;
                         if(isScheduleMode){
                             TurnOffAndRemove(j);
-                            new RefreshData().start();
+                            String ChangeEnergy = ChangeEnergyURL+renewableEnergy;
+                            ChangeColorByEnergy(ChangeEnergy);
+                            isScheduleMode = false;
                             TimerTask minTask = new TimerTask () {
                                 @Override
                                 public void run () {
@@ -1053,9 +1055,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 }
                             };
                             minTimer.schedule (minTask, 10 ,1000*60/*1min*/);
-                            String ChangeEnergy = ChangeEnergyURL+renewableEnergy;
-                            ChangeColorByEnergy(ChangeEnergy);
-                            isScheduleMode = false;
                         }else{
                             if(IsOn){
                                 TurnOffAndRemove(j);
