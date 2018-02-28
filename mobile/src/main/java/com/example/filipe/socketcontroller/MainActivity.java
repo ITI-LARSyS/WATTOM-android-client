@@ -38,8 +38,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     //correlation stuff
     private final PearsonsCorrelation pc = new PearsonsCorrelation();
     private boolean _correlationRunning = false;
-    private long _correlationInterval   = 15;
+    private long _correlationInterval   = 50;
     private CorrelationHandler _corrHandler;// = new CorrelationHandler();
     private  double  _last_acc_x = 0;
     private double _last_acc_y = 0;
@@ -412,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         toast(getApplicationContext(),"Study started!");
 
         IsOn = false;
-        /*
+
         TimerTask hourlyTask = new TimerTask () {
             @Override
             public void run () {
@@ -462,7 +464,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
             }
         };
-        hourlyTimer.schedule (hourlyTask, 10 ,1000*60*15);*/
+        hourlyTimer.schedule (hourlyTask, 10 ,1000*60*15);
         renewableEnergy =  20;
         Log.d("STATISTICS","renewableEnergy: "+renewableEnergy);
         String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
@@ -595,7 +597,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         for(int i=0;i<_devices_count;i++){
             _handlers.add(new PlugMotionHandler(getApplicationContext(),(int)_simulationSpeed,i,url,_queue));
-            _aggregators.add(new DataAggregator(i,_simulationSpeed));
+            _aggregators.add(new DataAggregator(i,50));
         }
 
         for(int i=0;i<_devices_count;i++) {
@@ -749,14 +751,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 e.printStackTrace();
             }
             HttpRequest TurnOff;
+            HttpRequest Delete;
             for(int i = 0; i < _plug_names.size();i++){
-                TurnOff = new HttpRequest(BASE_URL + "plug/"+_plug_names.get(i)+"/relay/1", getApplicationContext(),_queue);
-                try{
-                    TurnOff.start();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-                Log.d("PLUGS","plug"+_plug_names.get(i)+".local has been turned off by "+Device_Name);
+                TurnOffAndRemove(i);
             }
         }
     }
@@ -937,6 +934,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         double _correlations[][];
         int _correlations_count[];
+        private Thread _updateThreads[];
 
         private void updateCorrelations(int index, int[] correlations){
             int temp = correlations[index]+1;
@@ -954,6 +952,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlationRunning = true;
             _correlations       = new double[2][_devices_count];
             _correlations_count = new int[_devices_count];
+            _updateThreads = new Thread[_devices_count];
             while(_correlationRunning){
                 //if(_countingTime)     // check if we are counting time in the current matching process
                 //   checkRunningTime();
@@ -965,25 +964,55 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 for(int i=0;(i<_devices_count) && (_plug_data_indexes[_target[i]] == WINDOW_SIZE);i++){
                     _correlations[0][i] = pc.correlation(_plug_target_data[i][0], _acc_data[i][0]);
                     _correlations[1][i] = pc.correlation(_plug_target_data[i][1], _acc_data[i][1]);
-                    Log.d("*CORRELATION0",""+_correlations[0][i]);
-                    Log.d("*CORRELATION1",""+_correlations[0][i]);
+                    if(_correlations[0][i] < 0) _correlations[0][i] = 0;
+                    if(_correlations[1][i] < 0) _correlations[1][i] = 0;
+                    Log.d("CORR0",""+_correlations[0][i]);
+                    Log.d("CORR1",""+_correlations[1][i]);
                 }
                 for(int i=0;i<_devices_count;i++){
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
-                    if ((_correlations[0][i] > 0.7 && _correlations[0][i] < 0.9999) && (_correlations[1][i]>0.7 &&  _correlations[1][i]<0.9999)) {  // sometimes at the start we get 1.0 we want to avoid that
+                    if ((_correlations[0][i] >= 0.8 && _correlations[0][i] < 0.9999) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<0.9999)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
-                        if(_correlations_count[i]==1) {
+                        if(_correlations_count[i] == 1) {
                             _correlations_count[i] = 0;
-                            _correlations[0][i] = 0;
-                            _correlations[1][i] = 0;
                             //if (i == _target[i]){
                             _target_selection = true;
                             // Beep to show its the correct match
-                            ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
-                            toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
-                            updateTarget(i,true);
+                           // ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+                            //toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
+                            if(_updateThreads[i] == null)
+                            {
+                                int finalI = i;
+                                _updateThreads[i] = new Thread(() ->
+                                {
+                                    updateTarget(finalI,true);
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                                _updateThreads[i].start();
+                            }
+                            else
+                            {
+                                if(!_updateThreads[i].isAlive())
+                                {
+                                    int finalI = i;
+                                    _updateThreads[i] = new Thread(() ->
+                                    {
+                                        updateTarget(finalI,true);
+                                        try {
+                                            Thread.sleep(1000);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
+                                    _updateThreads[i].start();
+                                }
+                            }
                             //}else{
 //                                Log.i(TAG,"Wrong correlation");
 //                                _target_selection = false;
@@ -1022,29 +1051,29 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 //            _aquisition_time = System.currentTimeMillis()-_aquisition_time;
 //            _studyResult = _studyResult +"\n"+_participant+","+_target_selection+","+_aquisition_time+","+_angles[_angleCount]+","+_pointing+","+(System.currentTimeMillis());
             //Log.wtf("Corr", "aq time= "+_aquisition_time);
-            for(int j = 0; j<_devices_count;j++){
-                if(match && led_target == _target[j]){
-                    index = j;
-                    if(isScheduleMode){
-                        TimerTask minTask = new TimerTask () {
-                            @Override
-                            public void run () {
-                                Calendar calendar = Calendar.getInstance();
-                                int actualMinute = calendar.get(Calendar.MINUTE);
-                                int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
-                                HttpRequest selected_request;
-                                if(actualMinute == MinScheduleStart && actualHour == HourScheduleStart){
-                                    TurnOnAndAdd(index);
-                                }else if(actualMinute == MinScheduleEnd && actualHour == HourScheduleEnd){
-                                    TurnOffAndRemove(index);
+                for(int j = 0; j<_devices_count;j++){
+                    if(match && led_target == _target[j]){
+                        index = j;
+                        if(isScheduleMode){
+                            TimerTask minTask = new TimerTask () {
+                                @Override
+                                public void run () {
+                                    Calendar calendar = Calendar.getInstance();
+                                    int actualMinute = calendar.get(Calendar.MINUTE);
+                                    int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
+                                    HttpRequest selected_request;
+                                    if(actualMinute == MinScheduleStart && actualHour == HourScheduleStart){
+                                        TurnOnAndAdd(index);
+                                    }else if(actualMinute == MinScheduleEnd && actualHour == HourScheduleEnd){
+                                        TurnOffAndRemove(index);
+                                    }
                                 }
-                            }
-                        };
-                        minTimer.schedule (minTask, 10 ,1000*60/*1min*/);
-                        String ChangeEnergy = ChangeEnergyURL+renewableEnergy;
-                        ChangeColorByEnergy(ChangeEnergy);
-                        isScheduleMode = false;
-                    }else{
+                            };
+                            minTimer.schedule (minTask, 10 ,1000*60/*1min*/);
+                            String ChangeEnergy = ChangeEnergyURL+renewableEnergy;
+                            ChangeColorByEnergy(ChangeEnergy);
+                            isScheduleMode = false;
+                        }else{
                             if(IsOn){
                                 TurnOffAndRemove(j);
                             }else{
@@ -1052,12 +1081,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             }
                             //HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
                             // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
+                        }
+                        return;
                     }
-                    return;
                 }
             }
-        }
-
     }
 
     public void ChangeColorByEnergy(String url){
@@ -1236,7 +1264,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         }
                     }
             );
-            Log.d("MESSAGES",key);
         }
         else
         {
