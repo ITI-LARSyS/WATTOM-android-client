@@ -967,11 +967,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
                 for(int i=0;i<_devices_count;i++){
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
-                    if ((_correlations[0][i] >= 0.9 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.9 &&  _correlations[1][i]<1)) {  // sometimes at the start we get 1.0 we want to avoid that
+                    if ((_correlations[0][i] >= 0.85 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.85 &&  _correlations[1][i]<1)
+                            ||
+                            (_correlations[0][i] <= -0.85 && _correlations[0][i] > -1) && (_correlations[1][i]<=-0.85 &&  _correlations[1][i]>-1)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
-                        if(_correlations_count[i] == 1) {
+                        if(_correlations_count[i] == 3) {
                             _correlations_count[i] = 0;
                             //if (i == _target[i]){
                             _target_selection = true;
