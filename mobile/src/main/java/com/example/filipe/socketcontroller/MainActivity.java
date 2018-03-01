@@ -463,7 +463,32 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
         };
         hourlyTimer.schedule (hourlyTask, 10 ,1000*60*15);
-        renewableEnergy =  20;
+        float total = 110;
+        float termica = 22;
+        float hidrica = 3;
+        float eolica = 19;
+        float biomassa = 8;
+        float foto = 11;
+
+        sendMessage("Energy"
+                +"-"+"Não renovável"
+                +"-"+(total-termica-hidrica-eolica-biomassa-foto)
+                +"-"+"Térmica"
+                +"-"+termica
+                +"-"+"Hídrica"
+                +"-"+hidrica
+                +"-"+"Eólica"
+                +"-"+eolica
+                +"-"+"Biomassa"
+                +"-"+biomassa
+                +"-"+"Fotovoltaica"
+                +"-"+foto
+        );
+
+        // falta enviar para o wear (para atualizar o pie chart)
+        float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
+        percentage *= 100;
+        renewableEnergy =  Math.round(percentage);
         Log.d("STATISTICS","renewableEnergy: "+renewableEnergy);
         String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
         ChangeColorByEnergy(ChangeEnergy);
@@ -967,9 +992,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
                 for(int i=0;i<_devices_count;i++){
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
-                    if ((_correlations[0][i] >= 0.85 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.85 &&  _correlations[1][i]<1)
+                    if ((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)
                             ||
-                            (_correlations[0][i] <= -0.85 && _correlations[0][i] > -1) && (_correlations[1][i]<=-0.85 &&  _correlations[1][i]>-1)) {  // sometimes at the start we get 1.0 we want to avoid that
+                            (_correlations[0][i] <= -0.8 && _correlations[0][i] > -1) && (_correlations[1][i]<=-0.8 &&  _correlations[1][i]>-1)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);

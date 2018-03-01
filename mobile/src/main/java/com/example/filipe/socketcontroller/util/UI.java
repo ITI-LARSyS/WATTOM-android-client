@@ -1,12 +1,18 @@
 package com.example.filipe.socketcontroller.util;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.filipe.socketcontroller.R;
 
 public abstract class UI
 {
@@ -27,16 +33,14 @@ public abstract class UI
                     "#FF0000",
                     "#FF8000",
                     "#FFFF00",
-                    "#80FF00",
                     "#00FF00",
-                    "#00FF80",
                     "#00FFFF",
                     "#0080FF",
                     "#0000FF",
-                    "#7F00FF",
+                    "#8000FF",
                     "#FF00FF",
-                    "#FF007F",
-                    "#808080"
+                    "#705050",
+                    "#FFFFFF"
             };
     public static void fitToScreen(Activity a, View view)
     {
@@ -73,6 +77,22 @@ public abstract class UI
         strMinute += minutes;
 
         text.setText(strHour + ":" + strMinute);
+    }
+    public static void notify(Context c,Class destination,String title, String text)
+    {
+        Intent intent = new Intent(c, destination);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pending = PendingIntent.getActivity(c,0,intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(c)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setContentIntent(pending);
+
+        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(0, mBuilder.build());
     }
 
 }

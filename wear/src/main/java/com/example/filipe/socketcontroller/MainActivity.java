@@ -526,10 +526,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePessoasAcum.setValue("Afonso",40);
         piePessoasAcum.setValue("Dionísio",10);
 
-        pieEnergias.setValue("Térmica",20);
-        pieEnergias.setValue("Hídrica",10);
-        pieEnergias.setValue("Fotovoltaica",50);
-
         mBarChart.addBar(new BarModel(2.3f, 0xFF123456));
         mBarChart.addBar(new BarModel(2.f,  0xFF343456));
         mBarChart.addBar(new BarModel(3.3f, 0xFF563456));
@@ -552,7 +548,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         piePlugsAcum.incValue("plug1.local",30);
         piePlugsAcum.incValue("plug2.local",20);
-        piePlugsAcum.incValue("plug3.local",20);
+        piePlugsAcum.incValue("plug4.local",20);
         piePlugsAcum.incValue("plug1.local",20);
         piePlugsAcum.incValue("plug5.local",20);
     }
