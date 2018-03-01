@@ -37,7 +37,6 @@ import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
 import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
 import static com.example.filipe.socketcontroller.util.UI.updateTime;
-import static com.example.filipe.socketcontroller.util.UI.notify;
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
@@ -152,8 +151,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
-
-       UI.notify(this,MainActivity.class,"AAA","BBB");
     }
 
     @Override
@@ -332,6 +329,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     }
                     piePessoasAcum.startAnimation();
                     toast(getApplicationContext(),"Person consumption has been updated!");
+                    UI.notify(this,MainActivity.class,"Person consumption","Updated data!");
                     Log.d("PERSONS","Person consumption has been updated!");
                     break;
 
@@ -346,6 +344,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     }
                     pieEnergias.startAnimation();
                     toast(getApplicationContext(),"Energy data has been updated!");
+                    UI.notify(this,MainActivity.class,"Energy","Updated data!");
                     Log.d("ENERGY","Energy data has been updated!");
                     break;
 
@@ -354,6 +353,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Total overall power":
                     _consumo.setText(valores[1]);
                     toast(getApplicationContext(),"Total overall consumption has been updated!");
+                    UI.notify(this,MainActivity.class,"Overall power  consumption","Updated data!");
                     Log.d("PLUGS","Total overall consumption (current): "+valores[1]);
                     break;
 
@@ -365,6 +365,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     linePlugs.addPoint(plugName,value);
                     piePlugsAcum.incValue(plugName,value);
                     toast(getApplicationContext(),"Plug consumption has been updated!");
+                    UI.notify(this,MainActivity.class,"Plug consumption","Updated data!");
                     Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;
 
