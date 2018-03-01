@@ -22,6 +22,7 @@ import android.widget.TimePicker;
 import com.example.filipe.socketcontroller.charts.DynamicLineChart;
 import com.example.filipe.socketcontroller.charts.DynamicPieChart;
 import com.example.filipe.socketcontroller.tabs.TabAdapter;
+import com.example.filipe.socketcontroller.util.UI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
@@ -36,6 +37,7 @@ import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
 import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
 import static com.example.filipe.socketcontroller.util.UI.updateTime;
+import static com.example.filipe.socketcontroller.util.UI.notify;
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
@@ -150,6 +152,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
+
+       UI.notify(this,MainActivity.class,"AAA","BBB");
     }
 
     @Override
@@ -241,6 +245,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             // _x_acc.setText(x+"");
             z = event.values[2];
             z = _factor*z;
+            Log.d("XYZ","x:"+event.values[0]+",y:"+event.values[1]+",z:"+event.values[2]);
             // _y_acc.setText(z+"");
 
 //            Log.i("DEBUG",x+","+z);
