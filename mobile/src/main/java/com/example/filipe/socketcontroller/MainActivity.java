@@ -462,37 +462,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
             }
         };
-        hourlyTimer.schedule (hourlyTask, 10 ,1000*60*15);
-        float total = 110;
-        float termica = 22;
-        float hidrica = 3;
-        float eolica = 19;
-        float biomassa = 8;
-        float foto = 11;
+        hourlyTimer.schedule (hourlyTask, 0 ,1000*60*15);
 
-        sendMessage("Energy"
-                +"-"+"Não renovável"
-                +"-"+(total-termica-hidrica-eolica-biomassa-foto)
-                +"-"+"Térmica"
-                +"-"+termica
-                +"-"+"Hídrica"
-                +"-"+hidrica
-                +"-"+"Eólica"
-                +"-"+eolica
-                +"-"+"Biomassa"
-                +"-"+biomassa
-                +"-"+"Fotovoltaica"
-                +"-"+foto
-        );
+        /* */
+        /* */
+        fakeMessages();
+        /* */
+        /* */
 
-        // falta enviar para o wear (para atualizar o pie chart)
-        float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
-        percentage *= 100;
-        renewableEnergy =  Math.round(percentage);
-        Log.d("STATISTICS","renewableEnergy: "+renewableEnergy);
-        String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
-        ChangeColorByEnergy(ChangeEnergy);
-        new RefreshData().start();
         try{
             wait(100);
         }catch (Exception e){
@@ -1327,5 +1304,46 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
 
     public static String getBaseURL() { return BASE_URL; }
+
+    private void fakeMessages()
+    {
+        float total = 110;
+        float termica = 22;
+        float hidrica = 3;
+        float eolica = 19;
+        float biomassa = 8;
+        float foto = 11;
+
+        sendMessage("Energy"
+                +"-"+"Não renovável"
+                +"-"+(total-termica-hidrica-eolica-biomassa-foto)
+                +"-"+"Térmica"
+                +"-"+termica
+                +"-"+"Hídrica"
+                +"-"+hidrica
+                +"-"+"Eólica"
+                +"-"+eolica
+                +"-"+"Biomassa"
+                +"-"+biomassa
+                +"-"+"Fotovoltaica"
+                +"-"+foto
+        );
+
+        // falta enviar para o wear (para atualizar o pie chart)
+        float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
+        percentage *= 100;
+        renewableEnergy =  Math.round(percentage);
+        Log.d("STATISTICS","renewableEnergy: "+renewableEnergy);
+        String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
+        ChangeColorByEnergy(ChangeEnergy);
+        new RefreshData().start();
+
+        /*sendMessage("Person consumption-Maria-22-Pedro-11-Joao-7");
+        sendMessage("Total overall power-90");
+        sendMessage("Plug consumption-plug1.local-52-plug2.local-21");
+        sendMessage("Plug consumption-plug1.local-12-plug2.local-25");
+        sendMessage("Plug consumption-plug1.local-8-plug2.local-19");
+        sendMessage("Plug consumption-plug1.local-42-plug2.local-20");*/
+    }
 
 }

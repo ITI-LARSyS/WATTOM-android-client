@@ -202,6 +202,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     }
 
     @Override
+    public void onStop()
+    {
+        super.onStop();
+        paused = true;
+    }
+
+    @Override
     public void onPause()
     {
         super.onPause();
@@ -517,7 +524,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _tms            = (TextView) findViewById(R.id.tms_text_field);
         _consumo        = (TextView) findViewById(R.id.ConsumoInsert);
 
-        fillEazeGraph();
+       fillEazeGraph();
     }
 
     private void fillEazeGraph()
