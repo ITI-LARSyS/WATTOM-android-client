@@ -90,6 +90,7 @@ public abstract class UI
                 .setContentTitle(title)
                 .setContentText(text)
                 .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setContentIntent(pending);
 
         NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);

@@ -58,6 +58,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private PushThread pushThread;
     private long _last_push;
     private long _sampling_diff = 50;        // alterei o sampling rate aqui
+    private boolean paused = false;
 
     /* ***************** */
     /* BACK-END (SENSOR) */
@@ -164,9 +165,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     { super.onStart(); }
 
     @Override
-    protected void onStop()
+    protected void onDestroy()
     {
-        super.onStop();
+        super.onDestroy();
         cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
@@ -179,6 +180,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     public void onResume()
     {
         super.onResume();
+        paused = false;
 
         _client = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -197,6 +199,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         cpuWakeLock.acquire();
 
         // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        paused = true;
     }
 
     @Override
@@ -328,8 +337,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
                     piePessoasAcum.startAnimation();
-                    toast(getApplicationContext(),"Person consumption has been updated!");
-                    UI.notify(this,MainActivity.class,"Person consumption","Updated data!");
+                    if(!paused) toast(getApplicationContext(),"Person consumption has been updated!");
+                    else UI.notify(this,MainActivity.class,"Person consumption","Updated data!");
                     Log.d("PERSONS","Person consumption has been updated!");
                     break;
 
@@ -343,8 +352,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         Log.d("ENERGY","Energia "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
                     pieEnergias.startAnimation();
-                    toast(getApplicationContext(),"Energy data has been updated!");
-                    UI.notify(this,MainActivity.class,"Energy","Updated data!");
+                    if(!paused) toast(getApplicationContext(),"Energy data has been updated!");
+                    else UI.notify(this,MainActivity.class,"Energy","Updated data!");
                     Log.d("ENERGY","Energy data has been updated!");
                     break;
 
@@ -352,8 +361,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 // (formato: "Total overall power-900")
                 case "Total overall power":
                     _consumo.setText(valores[1]);
-                    toast(getApplicationContext(),"Total overall consumption has been updated!");
-                    UI.notify(this,MainActivity.class,"Overall power  consumption","Updated data!");
+                    if(!paused) toast(getApplicationContext(),"Total overall consumption has been updated!");
+                    else UI.notify(this,MainActivity.class,"Overall power  consumption","Updated data!");
                     Log.d("PLUGS","Total overall consumption (current): "+valores[1]);
                     break;
 
@@ -364,15 +373,15 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     float value = Float.parseFloat(valores[2]);
                     linePlugs.addPoint(plugName,value);
                     piePlugsAcum.incValue(plugName,value);
-                    toast(getApplicationContext(),"Plug consumption has been updated!");
-                    UI.notify(this,MainActivity.class,"Plug consumption","Updated data!");
+                    if(!paused) toast(getApplicationContext(),"Plug consumption has been updated!");
+                    else UI.notify(this,MainActivity.class,"Plug consumption","Updated data!");
                     Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;
 
                 // Mensagem inválida
                 default:
                     Log.d("ERROR","Error: evento `"+event+"` desconhecido");
-                    toast(getApplicationContext(),"Invalid message received!");
+                    if(!paused) toast(getApplicationContext(),"Invalid message received!");
                     break;
             }
         }
@@ -380,7 +389,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         {
             Log.i("Error",messageEvent.getPath());
             e.printStackTrace();
-            toast(getApplicationContext(),"Invalid message received!");
+            if(!paused) toast(getApplicationContext(),"Invalid message received!");
         }
     }
 
