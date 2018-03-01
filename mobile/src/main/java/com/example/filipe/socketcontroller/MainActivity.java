@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -50,15 +51,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private final static String TAG = "DeviceSelection";
     private static final int WINDOW_SIZE = 40;  // terá qde ser 80
 
+    private PowerManager.WakeLock cpuWakeLock;
+
     // communication with the watch
     private GoogleApiClient _client;
 
     //View stuff
     private TextView _counter;
     private EditText _pId;
-
-    private ArrayList<String> users;
-    private ArrayList<Float> powers;
 
     //private UI_Handler _ui_handler = new UI_Handler();
 
@@ -174,9 +174,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        users = new ArrayList <String>();
-        powers = new ArrayList <Float>();
-
         _counter        = (TextView) findViewById(R.id.counter);
         _pId            = (EditText) findViewById(R.id.participant_id);
         _simuView       = (SimulationView) findViewById(R.id.simulation_view);
@@ -218,6 +215,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _client.connect();
         Wearable.MessageApi.addListener(_client, this);
         _queue = Volley.newRequestQueue(getApplicationContext());
+
+        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+        cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     }
 
     // Ao receber uma mensagem:
@@ -339,6 +339,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(cpuWakeLock.isHeld()) cpuWakeLock.release();
         Wearable.MessageApi.removeListener(_client, this);
         //Log.wtf(TAG, " wtf called from main activity");
         stopServices();
@@ -416,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         TimerTask hourlyTask = new TimerTask () {
             @Override
             public void run () {
-                Date dNow = new Date();
+                /*Date dNow = new Date();
                 SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
                 String data = dateFormat.format(dNow);
                 String DataURL = EnergyData+data;
@@ -459,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     new RefreshData().start();
                 }catch(Exception e){
                     e.printStackTrace();
-                }
+                }*/
             }
         };
         hourlyTimer.schedule (hourlyTask, 0 ,1000*60*15);
@@ -618,6 +619,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     protected void onResume() {
         super.onResume();
+        if(cpuWakeLock.isHeld()) cpuWakeLock.release();
 
         //ConsultUsers();
     }
@@ -706,6 +708,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         _client.connect();
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        cpuWakeLock.acquire();
     }
 
     private void SelectedTime(int hour, int min){
@@ -1098,7 +1107,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }catch (Exception e){
             e.printStackTrace();
         }
-        ConsultUsers();
+       // ConsultUsers();
     }
 
     public void TurnOnAndAdd(int j){
@@ -1116,7 +1125,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }catch (Exception e){
             e.printStackTrace();
         }
-        ConsultUsers();
+       // ConsultUsers();
     }
 
 //    private class UI_Handler extends Handler{
@@ -1210,6 +1219,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         try{
             CheckUsers.start();
             CheckUsers.join();
+            ArrayList<String> users = new ArrayList<>();
+            ArrayList<Float> powers = new ArrayList<>();
             String ArrayIdPower = CheckUsers.getData();
             JSONArray IdPower = new JSONArray(ArrayIdPower);
             for(int i = 0; i < IdPower.length(); i++){

@@ -138,7 +138,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.general_layout);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+      //  getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // São obtidos os IDs dos elementos da View e estes são configurados
         setupView();
@@ -152,6 +152,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
+
+        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+        cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     }
 
     @Override
@@ -168,7 +171,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     protected void onDestroy()
     {
         super.onDestroy();
-        cpuWakeLock.release();
+        if(cpuWakeLock.isHeld()) cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
         Wearable.MessageApi.removeListener(_client, this);
@@ -190,13 +193,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         _client.connect();
         Wearable.MessageApi.addListener(_client, this);
+        if(cpuWakeLock.isHeld()) cpuWakeLock.release();
 
 
         Log.i(TAG, "On resume called");
 
-        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-        cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        cpuWakeLock.acquire();
+       // PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+       // cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+       //  cpuWakeLock.acquire();
 
         // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
     }
@@ -206,6 +210,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         super.onStop();
         paused = true;
+        cpuWakeLock.acquire();
     }
 
     @Override

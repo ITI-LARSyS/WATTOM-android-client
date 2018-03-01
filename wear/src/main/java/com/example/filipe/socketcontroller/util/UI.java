@@ -92,7 +92,7 @@ public abstract class UI
                 .setContentIntent(pending);
 
         NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, mBuilder.build());
+        notificationManager.notify(title.hashCode(), mBuilder.build());
     }
 
 }
