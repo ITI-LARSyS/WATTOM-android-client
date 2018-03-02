@@ -4,22 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:padding="16dp"
     android:orientation="horizontal"
+    android:gravity="center"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.filipe.socketcontroller.MainActivity"
     tools:showIn="@layout/activity_device_selection">
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_weight="0.5"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        >
         <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,7 +49,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,52 +60,79 @@
             android:id="@+id/participant_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             />
-
-        <Button
-            android:id="@+id/btnStartStudy"
-            android:layout_marginTop="30dp"
-            android:text="Start Study"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="handleStartStudyClick"/>
-
-        <TextView
-            android:layout_marginTop="30dp"
-            android:id="@+id/trial_field"
-            android:layout_width="match_parent"
-            android:gravity="center_horizontal"
-            android:layout_height="wrap_content"
-            android:textSize="20pt"
-            android:text="-"/>
-
-
-        <TextView
-            android:layout_marginTop="30dp"
-            android:id="@+id/counter"
-            android:layout_width="match_parent"
-            android:gravity="center_horizontal"
-            android:layout_height="wrap_content"
-            android:textSize="50pt"
-            android:text="-"/>
-
-        <TextView
-            android:id="@+id/instructions_field"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="25pt"
-            android:text="-"
-            />
-
     </LinearLayout>
 
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="50dp">
+
+            <Button
+                android:id="@+id/btnStartStudy"
+                android:text="@string/start_study"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:padding="50dp"
+                android:onClick="handleStartStudyClick"/>
+
+            <Button
+                android:id="@+id/btnStopStudy"
+                android:text="@string/stop_study"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:padding="50dp"
+                android:onClick="handleStopStudyClick"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_marginTop="30dp"
+                android:id="@+id/trial_field"
+                android:layout_width="match_parent"
+                android:gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:textSize="20pt"
+                android:text="-"/>
+
+
+            <TextView
+                android:layout_marginTop="30dp"
+                android:id="@+id/counter"
+                android:layout_width="match_parent"
+                android:gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:textSize="50pt"
+                android:text="-"/>
+
+            <TextView
+                android:id="@+id/instructions_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="25pt"
+                android:text="-"
+                />
+
+
+        </LinearLayout>
+
+
     <LinearLayout
         android:id="@+id/debug_view"
         android:layout_width="0dp"
         android:layout_weight="0.5"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:visibility="gone"
         >
         <Button
             android:id="@+id/debug_btn"

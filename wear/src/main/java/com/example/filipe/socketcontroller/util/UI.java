@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -26,7 +28,13 @@ public abstract class UI
     { return view.getVisibility() == RelativeLayout.VISIBLE; }
 
     public static void toast(Context c, String s)
-    { Toast.makeText(c, s, Toast.LENGTH_SHORT).show(); }
+    {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(()->
+        {
+            Toast.makeText(c, s, Toast.LENGTH_SHORT).show();
+        });
+    }
 
     public static final String[] colors =
             {

@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -59,6 +58,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private long _last_push;
     private long _sampling_diff = 50;        // alterei o sampling rate aqui
     private boolean paused = false;
+    private boolean inStudy = false;
 
     /* ***************** */
     /* BACK-END (SENSOR) */
@@ -210,7 +210,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         super.onStop();
         paused = true;
-        cpuWakeLock.acquire();
+        if(inStudy) cpuWakeLock.acquire();
     }
 
     @Override
@@ -388,6 +388,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     if(!paused) toast(getApplicationContext(),"Plug consumption has been updated!");
                     else UI.notify(this,MainActivity.class,"Plug consumption","Updated data!");
                     Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
+                    break;
+
+                case "START":
+                    inStudy = true;
+                    if(!paused) toast(getApplicationContext(),"A new study was started!");
+                    else UI.notify(this,MainActivity.class,"Wattapp","A new study was started!");
+                    break;
+
+                case "STOP":
+                    inStudy = false;
+                    if(!paused) toast(getApplicationContext(),"Study ended!");
+                    else UI.notify(this,MainActivity.class,"Wattapp","Study ended!");
                     break;
 
                 // Mensagem inválida

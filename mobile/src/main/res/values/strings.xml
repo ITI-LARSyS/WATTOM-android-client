@@ -2,4 +2,6 @@
     <string name="app_name">Wattapp</string>
     <string name="title_activity_device_selection">DeviceSelectionActivity</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="start_study">Start New Study</string>
+    <string name="stop_study">Stop Study</string>
 </resources>

@@ -22,6 +22,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.example.filipe.socketcontroller.plugs.PlugMotionHandler;
 import com.example.filipe.socketcontroller.util.HttpRequest;
+import com.example.filipe.socketcontroller.util.UI;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private static final int WINDOW_SIZE = 40;  // terá qde ser 80
 
     private PowerManager.WakeLock cpuWakeLock;
+    private boolean inStudy = false;
 
     // communication with the watch
     private GoogleApiClient _client;
@@ -409,7 +411,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         //_pointing    = _condition.getText().toString();
         //SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
 
-        btnStartStudy.setVisibility(View.GONE);
+        inStudy = true;
+        sendMessage("START");
         toast(getApplicationContext(),"Study started!");
 
         IsOn = false;
@@ -450,6 +453,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             +"-"+"Fotovoltaica"
                             +"-"+foto
                     );
+                   UI.notify(getApplicationContext(),MainActivity.class,"Energy consumption","Updated data!");
 
                     // falta enviar para o wear (para atualizar o pie chart)
                     float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
@@ -523,10 +527,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                     Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
                                     powerTotal += power;
                                 }
+                                UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
                             }
                         }
                         sendMessage("Total overall power"+"-"+powerTotal);
                         Log.d("STATISTICS","Total overall power consumption: "+powerTotal);
+                        UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
                     }catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -535,6 +541,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
         };
         PowerTimer.schedule(checkPower, 10 ,1000*60/*1 min*/);
+    }
+
+    public void handleStopStudyClick(View v)
+    {
+        inStudy = false;
+        sendMessage("STOP");
+        toast(getApplicationContext(),"Study ended!");
+        stopServices();
+        _correlationRunning = false;
     }
 
     // Obriga um handler a fazer um forceUpdate()
@@ -714,7 +729,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     public void onStop()
     {
         super.onStop();
-        cpuWakeLock.acquire();
+        if(inStudy) cpuWakeLock.acquire();
     }
 
     private void SelectedTime(int hour, int min){
@@ -1235,6 +1250,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 Log.d("PERSONS","Consumption of "+users.get(i)+": "+powers.get(i));
             }
             sendMessage(message);
+            UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1339,6 +1355,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 +"-"+"Fotovoltaica"
                 +"-"+foto
         );
+        UI.notify(getApplicationContext(),MainActivity.class,"Energy","Updated data!");
 
         // falta enviar para o wear (para atualizar o pie chart)
         float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
