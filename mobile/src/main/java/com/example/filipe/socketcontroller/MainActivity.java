@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     //correlation stuff
     private final PearsonsCorrelation pc = new PearsonsCorrelation();
     private boolean _correlationRunning = false;
-    private long _correlationInterval   = 50;
+    private long _correlationInterval   = 60;
     private CorrelationHandler _corrHandler;// = new CorrelationHandler();
     private  double  _last_acc_x = 0;
     private double _last_acc_y = 0;
@@ -341,6 +341,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     protected void onDestroy() {
         super.onDestroy();
         if(cpuWakeLock.isHeld()) cpuWakeLock.release();
+        sendMessage("STOP");
         Wearable.MessageApi.removeListener(_client, this);
         //Log.wtf(TAG, " wtf called from main activity");
         stopServices();
@@ -377,8 +378,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     public void onResult(NodeApi.GetConnectedNodesResult nodes) {
                         for (Node node : nodes.getNodes()) {
                             _wear = node;
-                            if(!paused) toast(getApplicationContext(),"Wattapp (Sensor)" + " - " + "Connected to `"+node.getDisplayName()+"`!");
-                            else UI.notify(getApplicationContext(),MainActivity.class,"Wattapp (Sensor)","Connected to `"+node.getDisplayName()+"`!");
+                            toast(getApplicationContext(), "Connected to `"+node.getDisplayName()+"`!");
                         }
                         //Log.i(TAG,"watch connected");
                     }
@@ -549,7 +549,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     {
         inStudy = false;
         sendMessage("STOP");
-        notify("Wattapp","Study ended!");;
+        toast(getApplicationContext(),"Study ended!");
         stopServices();
         _correlationRunning = false;
     }
@@ -608,7 +608,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _handlers = new ArrayList<>();
         _aggregators = new ArrayList<>();
 
-        _simulationSpeed    = 50;   // alterei aqui
+        _simulationSpeed    = 40;   // alterei aqui
         _acc_data           = new double[_devices_count][2][WINDOW_SIZE];
         _plug_target_data   = new double[_devices_count][2][WINDOW_SIZE];
         _plug_data_indexes  = new int[_devices_count];
@@ -1004,9 +1004,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
                 for(int i=0;i<_devices_count;i++){
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
-                    if ((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)
-                            ||
-                            (_correlations[0][i] <= -0.8 && _correlations[0][i] > -1) && (_correlations[1][i]<=-0.8 &&  _correlations[1][i]>-1)) {  // sometimes at the start we get 1.0 we want to avoid that
+                    if ((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);

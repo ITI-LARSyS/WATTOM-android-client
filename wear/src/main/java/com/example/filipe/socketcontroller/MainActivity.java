@@ -56,7 +56,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private PowerManager.WakeLock cpuWakeLock;
     private PushThread pushThread;
     private long _last_push;
-    private long _sampling_diff = 50;        // alterei o sampling rate aqui
+    private long _sampling_diff = 40;        // alterei o sampling rate aqui
     private boolean paused = false;
     private boolean inStudy = false;
 
@@ -286,14 +286,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     for (Node node : nodes.getNodes())
                     {
                         _phone = node;
-                        notify("Wattapp","Connected to `"+node.getDisplayName()+"`!");
+                        toast(getApplicationContext(),"Connected to `"+node.getDisplayName()+"`!");
                     }
                 });
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
-    { notify("Wattapp","Connection failed! ("+connectionResult.toString()+")"); }
+    { toast(getApplicationContext(),"Connection failed! ("+connectionResult.toString()+")"); }
 
     private void sendMessage(String key)
     {
