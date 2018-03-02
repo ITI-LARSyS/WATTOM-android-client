@@ -286,14 +286,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     for (Node node : nodes.getNodes())
                     {
                         _phone = node;
-                        toast(getApplicationContext(),"Connected to `"+node.getDisplayName()+"`!");
+                        notify("Wattapp","Connected to `"+node.getDisplayName()+"`!");
                     }
                 });
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
-    { toast(getApplicationContext(),"Connection failed! ("+connectionResult.toString()+")"); }
+    { notify("Wattapp","Connection failed! ("+connectionResult.toString()+")"); }
 
     private void sendMessage(String key)
     {
@@ -349,8 +349,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
                     piePessoasAcum.startAnimation();
-                    if(!paused) toast(getApplicationContext(),"Person consumption has been updated!");
-                    else UI.notify(this,MainActivity.class,"Person consumption","Updated data!");
+                    notify("Person consumption","Updated data!");
                     Log.d("PERSONS","Person consumption has been updated!");
                     break;
 
@@ -364,8 +363,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         Log.d("ENERGY","Energia "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
                     pieEnergias.startAnimation();
-                    if(!paused) toast(getApplicationContext(),"Energy data has been updated!");
-                    else UI.notify(this,MainActivity.class,"Energy","Updated data!");
+                    notify("Energy","Updated data!");
                     Log.d("ENERGY","Energy data has been updated!");
                     break;
 
@@ -373,8 +371,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 // (formato: "Total overall power-900")
                 case "Total overall power":
                     _consumo.setText(valores[1]);
-                    if(!paused) toast(getApplicationContext(),"Total overall consumption has been updated!");
-                    else UI.notify(this,MainActivity.class,"Overall power  consumption","Updated data!");
+                    notify("Overall power  consumption","Updated data!");
                     Log.d("PLUGS","Total overall consumption (current): "+valores[1]);
                     break;
 
@@ -385,27 +382,24 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     float value = Float.parseFloat(valores[2]);
                     linePlugs.addPoint(plugName,value);
                     piePlugsAcum.incValue(plugName,value);
-                    if(!paused) toast(getApplicationContext(),"Plug consumption has been updated!");
-                    else UI.notify(this,MainActivity.class,"Plug consumption","Updated data!");
+                    notify("Plug consumption","Updated data!");
                     Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;
 
                 case "START":
                     inStudy = true;
-                    if(!paused) toast(getApplicationContext(),"A new study was started!");
-                    else UI.notify(this,MainActivity.class,"Wattapp","A new study was started!");
+                    notify("Wattapp","A new study was started!");
                     break;
 
                 case "STOP":
                     inStudy = false;
-                    if(!paused) toast(getApplicationContext(),"Study ended!");
-                    else UI.notify(this,MainActivity.class,"Wattapp","Study ended!");
+                    notify("Wattapp","Study ended!");
                     break;
 
                 // Mensagem inválida
                 default:
                     Log.d("ERROR","Error: evento `"+event+"` desconhecido");
-                    if(!paused) toast(getApplicationContext(),"Invalid message received!");
+                    notify("Wattapp","Invalid message received!");
                     break;
             }
         }
@@ -413,7 +407,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         {
             Log.i("Error",messageEvent.getPath());
             e.printStackTrace();
-            if(!paused) toast(getApplicationContext(),"Invalid message received!");
+            notify("Wattapp","Invalid message received!");
         }
     }
 
@@ -575,6 +569,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePlugsAcum.incValue("plug4.local",20);
         piePlugsAcum.incValue("plug1.local",20);
         piePlugsAcum.incValue("plug5.local",20);
+    }
+
+    public void notify(String title, String message)
+    {
+        if(!paused) toast(getApplicationContext(),title + " - " + message);
+        else UI.notify(this,MainActivity.class,title,message);
     }
 
     /* ******************************************************************************** */

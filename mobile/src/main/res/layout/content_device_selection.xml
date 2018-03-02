@@ -75,7 +75,8 @@
                 android:id="@+id/btnStartStudy"
                 android:text="@string/start_study"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="0dp"
+                android:layout_weight="0.5"
                 android:padding="50dp"
                 android:onClick="handleStartStudyClick"/>
 
@@ -83,7 +84,8 @@
                 android:id="@+id/btnStopStudy"
                 android:text="@string/stop_study"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="0dp"
+                android:layout_weight="0.5"
                 android:padding="50dp"
                 android:onClick="handleStopStudyClick"/>
 

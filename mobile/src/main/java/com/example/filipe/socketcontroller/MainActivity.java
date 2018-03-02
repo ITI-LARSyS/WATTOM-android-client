@@ -38,10 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -54,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private PowerManager.WakeLock cpuWakeLock;
     private boolean inStudy = false;
+    private boolean paused = false;
 
     // communication with the watch
     private GoogleApiClient _client;
@@ -285,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }else{
             if(!_started)
             {
-                toast(getApplicationContext(),"Started receiving coordinates!");
+                notify("Wattapp (Sensor)","Started receiving coordinates!");
                 Log.d("SENSOR","Started receiving coordinates!");
             }
             _started = true;
@@ -378,7 +377,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     public void onResult(NodeApi.GetConnectedNodesResult nodes) {
                         for (Node node : nodes.getNodes()) {
                             _wear = node;
-                            toast(getApplicationContext(),"Connected to `"+node.getDisplayName()+"`!");
+                            if(!paused) toast(getApplicationContext(),"Wattapp (Sensor)" + " - " + "Connected to `"+node.getDisplayName()+"`!");
+                            else UI.notify(getApplicationContext(),MainActivity.class,"Wattapp (Sensor)","Connected to `"+node.getDisplayName()+"`!");
                         }
                         //Log.i(TAG,"watch connected");
                     }
@@ -453,7 +453,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             +"-"+"Fotovoltaica"
                             +"-"+foto
                     );
-                   UI.notify(getApplicationContext(),MainActivity.class,"Energy consumption","Updated data!");
+                    if(!paused) toast(getApplicationContext(),"Energy consumption" + " - " + "Updated data!");
+                    else UI.notify(this,MainActivity.class,"Energy consumption","Updated data!");
 
                     // falta enviar para o wear (para atualizar o pie chart)
                     float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
@@ -527,12 +528,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                     Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
                                     powerTotal += power;
                                 }
-                                UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
+                                if(!paused) toast(getApplicationContext(),"Plug consumption" + " - " + "Updated data!" );
+                                else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
                             }
                         }
                         sendMessage("Total overall power"+"-"+powerTotal);
-                        Log.d("STATISTICS","Total overall power consumption: "+powerTotal);
-                        UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
+                        if(!paused) toast(getApplicationContext(),"Overall power consumption" + " - " + "Updated data!" );
+                        else UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
                     }catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -547,7 +549,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     {
         inStudy = false;
         sendMessage("STOP");
-        toast(getApplicationContext(),"Study ended!");
+        notify("Wattapp","Study ended!");;
         stopServices();
         _correlationRunning = false;
     }
@@ -635,6 +637,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     protected void onResume() {
         super.onResume();
         if(cpuWakeLock.isHeld()) cpuWakeLock.release();
+        paused = false;
 
         //ConsultUsers();
     }
@@ -643,7 +646,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "Connection to Google API client was failed");
-        toast(getApplicationContext(),"Connection Failed! ("+connectionResult.toString()+")");
+        notify("Wattapp (Connection)","Connection Failed! ("+connectionResult.toString()+")");
     }
 
 
@@ -729,7 +732,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     public void onStop()
     {
         super.onStop();
+        paused = true;
         if(inStudy) cpuWakeLock.acquire();
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        paused = true;
     }
 
     private void SelectedTime(int hour, int min){
@@ -1117,7 +1128,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.join();
             Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
             IsOn = false;
-            toast(getApplicationContext(),"You have been removed as a person!");
+            notify("Wattapp","plug"+"plug"+_plug_names.get(j)+".local has been turned off");
 
         }catch (Exception e){
             e.printStackTrace();
@@ -1135,8 +1146,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.join();
             Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned on by "+Device_Name);
             IsOn = true;
-            toast(getApplicationContext(),"You have been added as a person!");
-
+            notify("Wattapp","plug"+"plug"+_plug_names.get(j)+".local has been turned on");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1250,7 +1260,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 Log.d("PERSONS","Consumption of "+users.get(i)+": "+powers.get(i));
             }
             sendMessage(message);
-            UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
+            if(!paused) toast(getApplicationContext(),"Person consumption" + " - " + "Updated data!" );
+            else UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1278,7 +1289,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }
         else
         {
-            toast(getApplicationContext(),"Failed to send message!");
+            notify("Wattapp (Connection)","Failed to send a message!");
             Log.d("ERROR","Failed to send message!");
         }
     }
@@ -1355,7 +1366,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 +"-"+"Fotovoltaica"
                 +"-"+foto
         );
-        UI.notify(getApplicationContext(),MainActivity.class,"Energy","Updated data!");
+        notify("Energy","Updated data!");
 
         // falta enviar para o wear (para atualizar o pie chart)
         float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
@@ -1372,6 +1383,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         sendMessage("Plug consumption-plug1.local-12-plug2.local-25");
         sendMessage("Plug consumption-plug1.local-8-plug2.local-19");
         sendMessage("Plug consumption-plug1.local-42-plug2.local-20");*/
+    }
+
+    public void notify(String title, String message)
+    {
+        if(!paused) toast(getApplicationContext(),title + " - " + message);
+        else UI.notify(this,MainActivity.class,title,message);
     }
 
 }
