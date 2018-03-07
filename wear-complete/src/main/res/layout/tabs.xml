@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <include layout="@layout/tab_start_stop"            android:id="@+id/tab_start_stop"    />
+        <include layout="@layout/tab_schedule"              android:id="@+id/tab_schedule"              />
+        <include layout="@layout/tab_power_pessoas_total"   android:id="@+id/tab_power_pessoas_total"   />
+        <include layout="@layout/tab_power_plugs_current"   android:id="@+id/tab_power_plugs_current"   />
+        <include layout="@layout/tab_power_plugs_total"     android:id="@+id/tab_power_plugs_total"     />
+        <include layout="@layout/tab_energias"              android:id="@+id/tab_energias"              />
+        <include layout="@layout/tab_log"                   android:id="@+id/tab_log"                   />
+        <include layout="@layout/tab_stats_bar_test"        android:id="@+id/tab_stats_bar_test"        />
+
+</LinearLayout>

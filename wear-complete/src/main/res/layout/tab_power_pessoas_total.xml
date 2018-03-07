@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.example.filipe.socketcontroller.charts.DynamicPieChart
+    android:id="@+id/piePessoas"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:padding="8dp"
+    app:egLegendTextSize="18sp"
+    app:egUsePieRotation="true"
+    app:egValueTextSize="36sp"
+    android:gravity="center"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"/>
