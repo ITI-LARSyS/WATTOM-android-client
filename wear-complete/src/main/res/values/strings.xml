@@ -10,6 +10,7 @@
     <string name="TITLE_STATS3">Current power usage by plug</string>
     <string name="TITLE_STATS4">Energy</string>
     <string name="TITLE_STATS5">Total power usage by plug</string>
+    <string name="TITLE_SIMULATION">Simulation</string>
     <string name="TITLE_LOG">Log</string>
 
     <!--- START/STOP TAB -->

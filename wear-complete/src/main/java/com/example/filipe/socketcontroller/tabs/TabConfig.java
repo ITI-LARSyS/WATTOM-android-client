@@ -32,6 +32,10 @@ public enum TabConfig
             android.R.drawable.ic_menu_info_details,
             R.id.tab_log),
 
+    SIMULATION(R.string.TITLE_SIMULATION,
+            android.R.drawable.ic_menu_slideshow,
+            R.id.tab_simulation),
+
     STATS2(R.string.TITLE_STATS2,
             android.R.drawable.ic_menu_sort_by_size,
             R.id.tab_stats_bar_test);
