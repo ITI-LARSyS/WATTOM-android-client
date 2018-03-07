@@ -10,8 +10,10 @@ import org.eazegraph.lib.charts.ValueLineChart;
 import org.eazegraph.lib.models.ValueLinePoint;
 import org.eazegraph.lib.models.ValueLineSeries;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class DynamicLineChart extends ValueLineChart
     private HashMap<String,ValueLineSeries> values;
     private String current = "";
     private TextView legend;
+    private int currentIndex = 0;
 
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
@@ -43,22 +46,25 @@ public class DynamicLineChart extends ValueLineChart
         this.legend = legend;
         legend.setOnClickListener((v)-> switchSeries());
     }
-    private void add(String key)
+    public void add(String key)
     {
-        values.put(key,new ValueLineSeries());
-        values.get(key).setColor(Color.parseColor(colors[(values.size()-1) % colors.length]));
+        if(!contains(key))
+        {
+            values.put(key, new ValueLineSeries());
+            values.get(key).setColor(Color.parseColor(colors[(values.size() - 1) % colors.length]));
 
-        if(legend == null)
-        {
-            addSeries(values.get(key));
-        }
-        else
-        {
-            if(current.equals(""))
+            if (legend == null)
             {
                 addSeries(values.get(key));
-                current = key;
-                legend.setText(key);
+            }
+            else
+            {
+                if (current.equals(""))
+                {
+                    addSeries(values.get(key));
+                    current = key;
+                    legend.setText(key);
+                }
             }
         }
     }
@@ -68,9 +74,7 @@ public class DynamicLineChart extends ValueLineChart
     }
     public void addPoint(String key,float point)
     {
-        if(!contains(key))
-        { add(key); }
-
+        add(key);
         addPoint(key,getCurrentTime(),point);
     }
     public void addPoint(String key,String legend,float point)
@@ -100,19 +104,33 @@ public class DynamicLineChart extends ValueLineChart
     {
         return values.containsKey(key);
     }
-    private void switchSeries()
+    public void switchSeries()
     {
-        if(values.size() > 0)
+        if(values.size() > 1)
+        {
+            currentIndex = (currentIndex + 1) % values.size();
+            switchSeries(currentIndex);
+        }
+    }
+    public void switchSeries(int index)
+    {
+        if(index <= values.size())
         {
             clearChart();
-            List<Object> allKeys = Arrays.asList(values.keySet().toArray());
-            int newIndex = (allKeys.indexOf(current) + 1) % values.size();
-            current = (String) allKeys.get(newIndex);
-            addSeries((ValueLineSeries) values.values().toArray()[newIndex]);
+            addSeries((ValueLineSeries) values.values().toArray()[index]);
             if(legend != null)
             {
-                legend.setText(current);
+                legend.setText((String)values.keySet().toArray()[index]);
             }
+        }
+    }
+
+    public void switchSeries(String key)
+    {
+        int index = new ArrayList<>(values.keySet()).indexOf(key);
+        if(index != -1)
+        {
+            switchSeries(index);
         }
     }
 

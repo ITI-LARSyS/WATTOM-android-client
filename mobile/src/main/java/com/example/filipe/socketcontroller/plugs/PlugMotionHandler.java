@@ -235,7 +235,7 @@ public class PlugMotionHandler extends Thread{
                     e.printStackTrace();
                 }
             }else{
-               // Log.i(TAG,"------readjusting-------");
+                Log.i(TAG,"------readjusting-------");
                 compensation = getPlugData();
                 counter = Math.round((compensation*(_resolution/N_LEDS))/_velocity)*2;
                 limit = _resolution/N_LEDS;

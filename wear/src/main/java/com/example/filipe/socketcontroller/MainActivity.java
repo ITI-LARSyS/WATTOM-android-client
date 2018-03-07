@@ -21,6 +21,7 @@ import android.widget.TimePicker;
 import com.example.filipe.socketcontroller.charts.DynamicLineChart;
 import com.example.filipe.socketcontroller.charts.DynamicPieChart;
 import com.example.filipe.socketcontroller.tabs.TabAdapter;
+import com.example.filipe.socketcontroller.tabs.TabConfig;
 import com.example.filipe.socketcontroller.util.UI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -386,6 +387,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;
 
+                case "Plug start":
+                    String plug = valores[1];
+                    navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
+                    linePlugs.add(plug);
+                    linePlugs.switchSeries(plug);
+                    break;
+
                 case "START":
                     inStudy = true;
                     notify("Wattapp","A new study was started!");
@@ -600,5 +608,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 { e.printStackTrace(); }
             }
         }
+    }
+
+    public void ola(View v)
+    {
+        navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
+        linePlugs.add("plug3.local");
+        linePlugs.switchSeries("plug3.local");
     }
 }

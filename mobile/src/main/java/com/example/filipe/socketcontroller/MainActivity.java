@@ -3,6 +3,7 @@ package com.example.filipe.socketcontroller;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -168,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
         askIP();
 
         setContentView(R.layout.activity_device_selection);
@@ -405,7 +405,28 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // - Retira a condicao
     // - O URL especifico
     // E inicia a thread StartUp
-    public void handleStartStudyClick(View v){
+    public void handleStartStudyClick(View v)
+    {
+        start();
+        ((TextView)v).setText(R.string.stop_study);
+        v.setOnClickListener((x)-> handleStopStudyClick(x));
+    }
+
+    public void handleStopStudyClick(View v)
+    {
+        stop();
+        ((TextView)v).setText(R.string.start_study);
+        v.setOnClickListener((x)-> handleStartStudyClick(x));
+    }
+
+    public void handleRestartStudyClick(View v)
+    {
+        startActivity(new Intent(this,SplashActivity.class));
+        this.finish();
+    }
+
+    public void start()
+    {
         //_participant = Integer.parseInt(_pId.getText().toString());
         //_angle       = 0;
         //_pointing    = _condition.getText().toString();
@@ -460,8 +481,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
                     percentage *= 100;
                     renewableEnergy =  Math.round(percentage);
-                    String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
-                    ChangeColorByEnergy(ChangeEnergy);
+                    ChangeColorByEnergy(renewableEnergy);
                     new RefreshData().start();
                 }catch(Exception e){
                     e.printStackTrace();
@@ -545,13 +565,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         PowerTimer.schedule(checkPower, 10 ,1000*60/*1 min*/);
     }
 
-    public void handleStopStudyClick(View v)
+    public void stop()
     {
         inStudy = false;
         sendMessage("STOP");
         toast(getApplicationContext(),"Study ended!");
         stopServices();
         _correlationRunning = false;
+        startActivity(new Intent(this,MainActivity.class));
+        this.finish();
     }
 
     // Obriga um handler a fazer um forceUpdate()
@@ -901,7 +923,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     push(_plug_data_indexes[_led_target], _plug_target_data[_led_target], _handlers.get(_led_target).getPosition()[0], _handlers.get(_led_target).getPosition()[1]);
                     push(_plug_data_indexes[_led_target], _acc_data[_led_target], _last_acc_x,_last_acc_y);
 
-                    if((_led_target ==_target[0])&&_debug_thread) {     // used to print the simulation on the screen
+                    if((_led_target ==_target[0])) {     // used to print the simulation on the screen
                         _simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1],(float)_last_acc_x,(float)_last_acc_y);
                     }
                 }
@@ -1004,7 +1026,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
                 for(int i=0;i<_devices_count;i++){
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
-                    if ((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)) {  // sometimes at the start we get 1.0 we want to avoid that
+                    if (((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)))
+                    {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
@@ -1072,8 +1095,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         index = j;
                         if(isScheduleMode){
                             TurnOffAndRemove(j);
-                            String ChangeEnergy = ChangeEnergyURL+renewableEnergy;
-                            ChangeColorByEnergy(ChangeEnergy);
+                            ChangeColorByEnergy(renewableEnergy);
                             isScheduleMode = false;
                             TimerTask minTask = new TimerTask () {
                                 @Override
@@ -1105,8 +1127,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
     }
 
-    public void ChangeColorByEnergy(String url){
-        HttpRequest novo = new HttpRequest(url, getApplicationContext() ,_queue);
+    public void ChangeColorByEnergy(int percent){
+        HttpRequest novo = new HttpRequest(ChangeEnergyURL+percent, getApplicationContext() ,_queue);
         try{
             novo.start();
             //novo.join();
@@ -1126,7 +1148,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.join();
             Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
             IsOn = false;
-            notify("Wattapp","plug"+"plug"+_plug_names.get(j)+".local has been turned off");
+            notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned off");
 
         }catch (Exception e){
             e.printStackTrace();
@@ -1144,11 +1166,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.join();
             Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned on by "+Device_Name);
             IsOn = true;
-            notify("Wattapp","plug"+"plug"+_plug_names.get(j)+".local has been turned on");
+            notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned on");
         }catch (Exception e){
             e.printStackTrace();
         }
-       // ConsultUsers();
+
+        sendMessage("Plug start"+"-"+"plug"+_plug_names.get(j)+".local");
+       //ConsultUsers();
     }
 
 //    private class UI_Handler extends Handler{
@@ -1344,9 +1368,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private void fakeMessages()
     {
         float total = 110;
-        float termica = 22;
+        float termica = 9;
         float hidrica = 3;
-        float eolica = 19;
+        float eolica = 7;
         float biomassa = 8;
         float foto = 11;
 
@@ -1371,8 +1395,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         percentage *= 100;
         renewableEnergy =  Math.round(percentage);
         Log.d("STATISTICS","renewableEnergy: "+renewableEnergy);
-        String ChangeEnergy = ChangeEnergyURL + renewableEnergy;
-        ChangeColorByEnergy(ChangeEnergy);
+        ChangeColorByEnergy(renewableEnergy);
         new RefreshData().start();
 
         /*sendMessage("Person consumption-Maria-22-Pedro-11-Joao-7");

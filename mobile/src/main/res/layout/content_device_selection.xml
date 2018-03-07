@@ -64,7 +64,14 @@
             />
     </LinearLayout>
 
-        <LinearLayout
+    <com.example.filipe.socketcontroller.SimulationView
+        android:id="@+id/simulation_view"
+        android:layout_width="500dp"
+        android:layout_height="500dp" />
+
+
+
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -82,12 +89,12 @@
 
             <Button
                 android:id="@+id/btnStopStudy"
-                android:text="@string/stop_study"
+                android:text="@string/Restart"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.5"
                 android:padding="50dp"
-                android:onClick="handleStopStudyClick"/>
+                android:onClick="handleRestartStudyClick"/>
 
         </LinearLayout>
 
@@ -143,10 +150,6 @@
             android:text="DEBUG"
             android:onClick="handleDebugClick"/>
 
-        <com.example.filipe.socketcontroller.SimulationView
-            android:id="@+id/simulation_view"
-            android:layout_width="500dp"
-            android:layout_height="500dp" />
 
         <TextView
             android:layout_marginTop="20dp"
