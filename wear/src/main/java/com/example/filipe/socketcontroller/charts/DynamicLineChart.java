@@ -132,6 +132,11 @@ public class DynamicLineChart extends ValueLineChart
         {
             switchSeries(index);
         }
+        else
+        {
+            add(key);
+            switchSeries(key);
+        }
     }
 
 }

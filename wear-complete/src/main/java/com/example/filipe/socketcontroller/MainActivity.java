@@ -13,8 +13,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
 import android.view.View;
@@ -33,12 +31,9 @@ import com.example.filipe.socketcontroller.tabs.TabAdapter;
 import com.example.filipe.socketcontroller.tabs.TabConfig;
 import com.example.filipe.socketcontroller.util.HttpRequest;
 import com.example.filipe.socketcontroller.util.UI;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.Wearable;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.eazegraph.lib.charts.BarChart;
@@ -57,7 +52,7 @@ import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
 import static com.example.filipe.socketcontroller.util.UI.updateTime;
 
-public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener
+public class MainActivity extends Activity implements SensorEventListener
 {
     private static final String TAG = "Main Activity Watch";
     private static final int WINDOW_SIZE = 40;  // terá qde ser 80
@@ -189,13 +184,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private boolean _sensor_running = false;
     private SensorManager _sensorManager;
     private Sensor _sensor;
-
-    /* ****************** */
-    /* BACK-END (CONEXÃO) */
-    /* ****************** */
-    private GoogleApiClient _client;
-    private Node _phone; // the connected device to send the message to
-    public static final String WEAR_ACC_SERVICE = "acc";
 
     /* **************** */
     /* NAVEGAÇÃO E AÇÃO */
@@ -370,114 +358,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             // _x_acc.setText(x+"");
             z = event.values[2];
             z = _factor*z;
-            Log.d("XYZ","x:"+event.values[0]+",y:"+event.values[1]+",z:"+event.values[2]);
             // _y_acc.setText(z+"");
 
 //            Log.i("DEBUG",x+","+z);
 
             //Log.i(TAG,"sending data form watch");
-    }
-
-    /* ******************************************************************************** */
-    /* ******************************************************************************** */
-    /* ******************************************************************************** */
-
-    /* *********************** */
-    /* COMUNICAÇÃO WEAR-MOBILE */
-    /* *********************** */
-
-    @Override
-    public void onMessageReceived(MessageEvent messageEvent)
-    {
-        try
-        {
-            // Parse das mensagens
-            // (formato: "EVENTO-XXX-YYY-ZZZ-WWW")
-            String [] valores = messageEvent.getPath().split("-");
-
-            // É obtido o identificador da mensagem
-            String event = valores[0];
-
-            switch(event)
-            {
-                // Mensagem com o consumo atual de cada pessoa
-                // (formato: "Person consumption-Maria-22-Pedro-11-Joao-7")
-                case "Person consumption":
-
-                    int nrPessoas = (valores.length - 1 )/ 2;
-                    for(int i = 0; i < nrPessoas; i++)
-                    {
-                        piePessoasAcum.incValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
-                        Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
-                    }
-                    piePessoasAcum.startAnimation();
-                    notify("Person consumption","Updated data!");
-                    Log.d("PERSONS","Person consumption has been updated!");
-                    break;
-
-                // Mensagem com as percentagens de energias renováveis e não renováveis
-                // (formato: "Energy-hidrica-32-termica-9-nao renovavel-70")
-                case "Energy":
-                    int tamanho = (valores.length - 1 )/ 2;
-                    for(int i = 0; i < tamanho; i++)
-                    {
-                        pieEnergias.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
-                        Log.d("ENERGY","Energia "+valores[i*2+1]+": "+valores[i*2+2]);
-                    }
-                    pieEnergias.startAnimation();
-                    notify("Energy","Updated data!");
-                    Log.d("ENERGY","Energy data has been updated!");
-                    break;
-
-                // Mensagem com o consumo geral total
-                // (formato: "Total overall power-900")
-                case "Total overall power":
-                    _consumo.setText(valores[1]);
-                    notify("Overall power  consumption","Updated data!");
-                    Log.d("PLUGS","Total overall consumption (current): "+valores[1]);
-                    break;
-
-                // Mensagem com o consumo atual de uma plug
-                // (formato: "Plug consumption-plug1.local-500")
-                case "Plug consumption":
-                    String plugName = valores[1];
-                    float value = Float.parseFloat(valores[2]);
-                    linePlugs.addPoint(plugName,value);
-                    piePlugsAcum.incValue(plugName,value);
-                    notify("Plug consumption","Updated data!");
-                    Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
-                    break;
-
-                case "Plug start":
-                    String plug = valores[1];
-                    navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
-                    linePlugs.add(plug);
-                    linePlugs.switchSeries(plug);
-                    break;
-
-                case "START":
-                    inStudy = true;
-                    notify("Wattapp","A new study was started!");
-                    break;
-
-                case "STOP":
-                    inStudy = false;
-                    notify("Wattapp","Study ended!");
-                    break;
-
-                // Mensagem inválida
-                default:
-                    Log.d("ERROR","Error: evento `"+event+"` desconhecido");
-                    notify("Wattapp","Invalid message received!");
-                    break;
-            }
-        }
-        catch(Exception e)
-        {
-            Log.i("Error",messageEvent.getPath());
-            e.printStackTrace();
-            notify("Wattapp","Invalid message received!");
-        }
     }
 
     /* ******************************************************************************** */
@@ -955,6 +840,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 enviaNome.start();
                 selected_request.join();
                 enviaNome.join();
+
                 Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
                 IsOn = false;
                 notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned off");
@@ -975,6 +861,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 enviaNome.join();
                 Log.d("PLUGS", "plug" + _plug_names.get(j) + ".local has been turned on by " + Device_Name);
                 IsOn = true;
+                navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
+                linePlugs.switchSeries("plug" + _plug_names.get(j) + ".local");
                 notify("Wattapp", "plug" + _plug_names.get(j) + ".local has been turned on");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1029,18 +917,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 ArrayList<Float> powers = new ArrayList<>();
                 String ArrayIdPower = CheckUsers.getData();
                 JSONArray IdPower = new JSONArray(ArrayIdPower);
-                for(int i = 0; i < IdPower.length(); i++){
+                for(int i = 0; i < IdPower.length(); i++)
+                {
                     JSONObject User = (JSONObject) IdPower.get(i);
-                    users.add(User.get("id").toString());
-                    powers.add(Float.parseFloat(User.get("power").toString()));
+                    piePessoasAcum.incValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
                 }
-                String message = "Person consumption";
-                for(int i = 0; i < users.size(); i++){
-                    String temp = "-"+users.get(i)+"-"+powers.get(i);
-                    message += temp;
-                    Log.d("PERSONS","Consumption of "+users.get(i)+": "+powers.get(i));
-                }
-              //  sendMessage(message);
+                piePessoasAcum.startAnimation();
                 if(!paused) toast(getApplicationContext(),"Person consumption" + " - " + "Updated data!" );
                 else UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
             }catch (Exception e){
@@ -1129,20 +1011,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     float biomassa = JSONData.getInt("biomassa");
                     float foto = JSONData.getInt("foto");
 
-                    sendMessage("Energy"
-                            +"-"+"Não renovável"
-                            +"-"+(total-termica-hidrica-eolica-biomassa-foto)
-                            +"-"+"Térmica"
-                            +"-"+termica
-                            +"-"+"Hídrica"
-                            +"-"+hidrica
-                            +"-"+"Eólica"
-                            +"-"+eolica
-                            +"-"+"Biomassa"
-                            +"-"+biomassa
-                            +"-"+"Fotovoltaica"
-                            +"-"+foto
-                    );
+                    pieEnergias.setValue("Não renovável",(total-termica-hidrica-eolica-biomassa-foto));
+                    pieEnergias.setValue("Térmica",termica);
+                    pieEnergias.setValue("Hídrica",hidrica);
+                    pieEnergias.setValue("Eólica",eolica);
+                    pieEnergias.setValue("Biomassa",biomassa);
+                    pieEnergias.setValue("Fotovoltaica",foto);
+                    pieEnergias.startAnimation();
+
                     if(!paused) toast(getApplicationContext(),"Energy consumption" + " - " + "Updated data!");
                     else UI.notify(this,MainActivity.class,"Energy consumption","Updated data!");
 
@@ -1161,22 +1037,17 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         /* */
         /* */
-            //fakeMessages();
+            pieEnergias.setValue("Não renovável",72);
+            pieEnergias.setValue("Térmica",9);
+            pieEnergias.setValue("Hídrica",3);
+            pieEnergias.setValue("Eólica",7);
+            pieEnergias.setValue("Biomassa",8);
+            pieEnergias.setValue("Fotovoltaica",11);
+            pieEnergias.startAnimation();
         /* */
         /* */
 
-            try{
-                wait(100);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
             new StartUp(PLUGS_URL).start();
-            try{
-                wait(100);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-
 
             TimerTask checkPower = new TimerTask () {
                 @Override
@@ -1209,11 +1080,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                                         String dado = request.getData();
                                         JSONObject JSONData = new JSONObject(dado);
                                         int power = JSONData.getInt("power");
-                                      //  sendMessage("Plug consumption"
-                                       /*         +"-"
-                                                +"plug"+plugs[w]+".local"
-                                                +"-"
-                                                +power);*/
+                                        linePlugs.addPoint("plug"+plugs[w]+".local",power);
+                                        piePlugsAcum.incValue("plug"+plugs[w]+".local",power);
                                         Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
                                         powerTotal += power;
                                     }
@@ -1221,7 +1089,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                                     else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
                                 }
                             }
-                           // sendMessage("Total overall power"+"-"+powerTotal);
+                            _consumo.setText(powerTotal);
                             if(!paused) toast(getApplicationContext(),"Overall power consumption" + " - " + "Updated data!" );
                             else UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
                         }catch (Exception e) {
@@ -1231,7 +1099,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     ConsultUsers();
                 }
             };
-            PowerTimer.schedule(checkPower, 10 ,1000*60/*1 min*/);
+            PowerTimer.schedule(checkPower, 0 ,1000*60/*1 min*/);
         }
 
         public void stop()
