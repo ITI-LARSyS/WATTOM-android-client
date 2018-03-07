@@ -57,7 +57,7 @@ import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
 import static com.example.filipe.socketcontroller.util.UI.updateTime;
 
-public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener
 {
     private static final String TAG = "Main Activity Watch";
     private static final int WINDOW_SIZE = 40;  // terá qde ser 80
@@ -283,14 +283,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        _queue = Volley.newRequestQueue(getApplicationContext());
+        _queue = Volley.newRequestQueue(this);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) { }
-
-    @Override
-    public void onConnectionSuspended(int i) { }
 
     @Override
     public void onStart()
@@ -303,8 +300,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         if(cpuWakeLock.isHeld()) cpuWakeLock.release();
         _sensorManager.unregisterListener(this);
         _sensor_running = false;
-        Wearable.MessageApi.removeListener(_client, this);
-        _client.disconnect();
         Log.d("FIM","----FIM----");
     }
 
@@ -313,25 +308,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         super.onResume();
         paused = false;
-
-        _client = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
-        _client.connect();
-        Wearable.MessageApi.addListener(_client, this);
         if(cpuWakeLock.isHeld()) cpuWakeLock.release();
-
-
         Log.i(TAG, "On resume called");
-
-       // PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-       // cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-       //  cpuWakeLock.acquire();
-
-        // _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override
@@ -407,51 +385,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* *********************** */
     /* COMUNICAÇÃO WEAR-MOBILE */
     /* *********************** */
-    @Override
-    public void onConnected(@Nullable Bundle bundle)
-    {
-        Wearable.NodeApi.getConnectedNodes(_client)
-                .setResultCallback(nodes -> {
-                    for (Node node : nodes.getNodes())
-                    {
-                        _phone = node;
-                        toast(getApplicationContext(),"Connected to `"+node.getDisplayName()+"`!");
-                    }
-                });
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
-    { toast(getApplicationContext(),"Connection failed! ("+connectionResult.toString()+")"); }
-
-    private void sendMessage(String key)
-    {
-            if (_phone != null && _client!= null && _client.isConnected())
-            {
-                Wearable.MessageApi.sendMessage(
-                        _client, _phone.getId(), WEAR_ACC_SERVICE + "" + key, null).setResultCallback(
-                        sendMessageResult -> {
-                            if (!sendMessageResult.getStatus().isSuccess())
-                            {
-                                Log.e(TAG, "Failed to send message with status code: "
-                                        + sendMessageResult.getStatus().getStatusCode());
-                            }
-                            else
-                            {
-                                Log.d("SENDMESSAGE","MESSAGE SENT - "+key);
-                                Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
-                            }
-                        }
-                );
-            }
-            else
-            {
-                Log.d("SENDMESSAGE","Failed to send a message!");
-                Log.d("SENDMESSAGE","client = "+_client);
-                Log.d("SENDMESSAGE","phone = "+_phone);
-                Log.d("SENDMESSAGE","isConnected = "+_client.isConnected());
-            }
-    }
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent)
@@ -586,21 +519,64 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void handleScheduleButton(View v)
     {
-        String time = _textInitTime.getText().toString()+"/";
-        time += _textEndTime.getText().toString();
+        String[][] time = new String[2][2];
+        String init = _textInitTime.getText().toString();
+        String end =_textEndTime.getText().toString();
+        time[0] = init.split(":");
+        time[1] = end.split(":");
         switch(scheduleState)
         {
             case SELECT_TIME_START:
+                hourStart = Integer.parseInt(time[0][0]);
+                minStart = Integer.parseInt(time[0][1]);
+                hourEnd = Integer.parseInt(time[1][0]);
+                minEnd = Integer.parseInt(time[1][1]);
+                HourScheduleStart = hourStart;
+                MinScheduleStart = minStart;
+                HourScheduleEnd = hourEnd;
+                MinScheduleEnd = minEnd;
+
+                if(hourStart > 12){
+                    hourStart = hourStart - 12;
+                }else if (hourStart == 0){
+                    hourStart = 0;
+                }
+                if(minStart < 5){
+                    minStart = 0;
+                }else{
+                    minStart = Math.round(minStart/5);
+                }
+
+                if(hourEnd > 12){
+                    hourEnd = hourEnd - 12;
+                }else if(hourEnd == 0){
+                    hourEnd = 0;
+                }
+                if(minEnd < 5){
+                    minEnd = 0;
+                }else{
+                    minEnd = Math.round(minEnd/5);
+                }
+                SelectedTime(hourStart,minStart);
                 _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_START);
                 scheduleState++;
                 break;
 
             case SELECT_TIME_END:
+                SelectedTime(hourEnd,minEnd);
                 _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_END);
                 scheduleState++;
                 break;
 
             case TIME_CONFIRMED:
+                HttpRequest CrazyLights = new HttpRequest(BASE_URL + "plug/ScheduleMode", getApplicationContext(), _queue);
+                try {
+                    CrazyLights.start();
+                    //CrazyLights.join();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                isScheduleMode = true;
                 _buttonSchedule.setText(R.string.SET_SCHEDULE);
                 scheduleState = SELECT_TIME_START;
                 break;
@@ -608,7 +584,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             default:
                 break;
         }
-        sendMessage(time);
     }
 
     private void setupView()
@@ -1065,7 +1040,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     message += temp;
                     Log.d("PERSONS","Consumption of "+users.get(i)+": "+powers.get(i));
                 }
-                sendMessage(message);
+              //  sendMessage(message);
                 if(!paused) toast(getApplicationContext(),"Person consumption" + " - " + "Updated data!" );
                 else UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
             }catch (Exception e){
@@ -1127,7 +1102,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             //SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
 
             inStudy = true;
-            sendMessage("START");
+           // sendMessage("START");
             toast(getApplicationContext(),"Study started!");
 
             IsOn = false;
@@ -1234,11 +1209,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                                         String dado = request.getData();
                                         JSONObject JSONData = new JSONObject(dado);
                                         int power = JSONData.getInt("power");
-                                        sendMessage("Plug consumption"
-                                                +"-"
+                                      //  sendMessage("Plug consumption"
+                                       /*         +"-"
                                                 +"plug"+plugs[w]+".local"
                                                 +"-"
-                                                +power);
+                                                +power);*/
                                         Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
                                         powerTotal += power;
                                     }
@@ -1246,7 +1221,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                                     else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
                                 }
                             }
-                            sendMessage("Total overall power"+"-"+powerTotal);
+                           // sendMessage("Total overall power"+"-"+powerTotal);
                             if(!paused) toast(getApplicationContext(),"Overall power consumption" + " - " + "Updated data!" );
                             else UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
                         }catch (Exception e) {
@@ -1262,7 +1237,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         public void stop()
         {
             inStudy = false;
-            sendMessage("STOP");
+           // sendMessage("STOP");
             toast(getApplicationContext(),"Study ended!");
             stopServices();
             _correlationRunning = false;
