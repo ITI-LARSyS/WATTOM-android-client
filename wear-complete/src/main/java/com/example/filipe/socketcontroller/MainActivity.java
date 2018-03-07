@@ -587,16 +587,9 @@ public class MainActivity extends Activity implements SensorEventListener
         {
             while(_sensor_running)
             {
-                //sendMessage(x+"#"+z);
-                try {
-                    _last_acc_x = x;            // updatre the global variables to be used elsewhere in the code
-                    _last_acc_y = z;
-
-                    Log.d("SENSOR","x:"+x+" z:"+z);
-                    //toast("got data from watch x "+x+","+z);
-                } catch (NumberFormatException e) {
-                    //Log.e(TAG, "format exception data " + data);
-                }
+                _last_acc_x = x;            // updatre the global variables to be used elsewhere in the code
+                _last_acc_y = z;
+                Log.d("SENSOR","x:"+x+" z:"+z);
 
                 try
                 { Thread.sleep(_sampling_diff); }
@@ -609,7 +602,6 @@ public class MainActivity extends Activity implements SensorEventListener
     public void ola(View v)
     {
         navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
-        linePlugs.add("plug3.local");
         linePlugs.switchSeries("plug3.local");
     }
 
@@ -628,25 +620,19 @@ public class MainActivity extends Activity implements SensorEventListener
         ask.setView(input);
         ask.setCancelable(false);
 
-        ask.setPositiveButton("Set new IP", new DialogInterface.OnClickListener()
+        ask.setPositiveButton("Set new IP", (dialog, whichButton) ->
         {
-            public void onClick(DialogInterface dialog, int whichButton)
-            {
-                String newIP = input.getText().toString();
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("IP",newIP);
-                editor.apply();
-                setIP(newIP);
-                toast(getApplicationContext(),"You chose to set new IP ("+newIP+")");
-            }
+            String newIP = input.getText().toString();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("IP",newIP);
+            editor.apply();
+            setIP(newIP);
+            toast(getApplicationContext(),"You chose to set new IP ("+newIP+")");
         });
-        ask.setNegativeButton("Keep previous IP",new DialogInterface.OnClickListener()
+        ask.setNegativeButton("Keep previous IP", (dialog, whichButton) ->
         {
-            public void onClick(DialogInterface dialog, int whichButton)
-            {
-                setIP(oldIP);
-                toast(getApplicationContext(),"You chose to keep previous IP ("+oldIP+")");
-            }
+            setIP(oldIP);
+            toast(getApplicationContext(),"You chose to keep previous IP ("+oldIP+")");
         });
         ask.show();
     }
@@ -959,21 +945,13 @@ public class MainActivity extends Activity implements SensorEventListener
         public void handleStartStudyClick(View v)
         {
             start();
-            ((TextView)v).setText("STOP STUDY");
             v.setOnClickListener((x)-> handleStopStudyClick(x));
         }
 
         public void handleStopStudyClick(View v)
         {
             stop();
-            ((TextView)v).setText("START STUDY");
             v.setOnClickListener((x)-> handleStartStudyClick(x));
-        }
-
-        public void handleRestartStudyClick(View v)
-        {
-            startActivity(new Intent(this,SplashActivity.class));
-            this.finish();
         }
 
         public void start()
@@ -984,7 +962,6 @@ public class MainActivity extends Activity implements SensorEventListener
             //SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
 
             inStudy = true;
-           // sendMessage("START");
             toast(getApplicationContext(),"Study started!");
 
             IsOn = false;
