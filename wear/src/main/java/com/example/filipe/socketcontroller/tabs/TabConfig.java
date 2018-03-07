@@ -30,11 +30,7 @@ public enum TabConfig
 
     LOG(R.string.TITLE_LOG,
             android.R.drawable.ic_menu_info_details,
-            R.id.tab_log),
-
-    STATS2(R.string.TITLE_STATS2,
-            android.R.drawable.ic_menu_sort_by_size,
-            R.id.tab_stats_bar_test);
+            R.id.tab_log);
 
     public final int title;
     public final int icon;

@@ -34,11 +34,7 @@ public enum TabConfig
 
     SIMULATION(R.string.TITLE_SIMULATION,
             android.R.drawable.ic_menu_slideshow,
-            R.id.tab_simulation),
-
-    STATS2(R.string.TITLE_STATS2,
-            android.R.drawable.ic_menu_sort_by_size,
-            R.id.tab_stats_bar_test);
+            R.id.tab_simulation);
 
     public final int title;
     public final int icon;

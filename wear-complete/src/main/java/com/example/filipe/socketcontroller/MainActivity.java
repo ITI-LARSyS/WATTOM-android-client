@@ -261,6 +261,7 @@ public class MainActivity extends Activity implements SensorEventListener
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
+        _simuView       = (SimulationView) findViewById(R.id.tab_simulation);
 
         hourlyTimer           =  new Timer ();
         minTimer           =  new Timer ();
