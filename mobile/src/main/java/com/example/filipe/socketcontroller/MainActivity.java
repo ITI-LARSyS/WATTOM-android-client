@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private boolean isScheduleMode;
     private String Device_Name;
 
-    private Button btnStartStudy;
+    private int indexLuz = -1, indexChaleira = -1;
 
 
     //Ao iniciar a aplicacao
@@ -194,18 +194,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         Device_Name = Settings.Secure.getString(getContentResolver(), "bluetooth_name");
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //_debug_thread = !_debug_thread;
-                if(debug_view.getVisibility()==View.VISIBLE)
-                    debug_view.setVisibility(View.GONE);
-                else
-                    debug_view.setVisibility(View.VISIBLE);
-            }
+        fab.setOnClickListener(view -> {
+            //_debug_thread = !_debug_thread;
+            if(debug_view.getVisibility()==View.VISIBLE)
+                debug_view.setVisibility(View.GONE);
+            else
+                debug_view.setVisibility(View.VISIBLE);
         });
-
-        btnStartStudy = (Button) findViewById(R.id.btnStartStudy);
 
         _client = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -496,17 +491,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         /* */
         /* */
 
-        try{
-            wait(100);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
         new StartUp(PLUGS_URL).start();
-        try{
-            wait(100);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
 
 
         TimerTask checkPower = new TimerTask () {
@@ -826,9 +811,21 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 //Log.i(TAG,"--- RUNNING COLOR REQUEST : target "+_led_target+" ---");
                 _request.join();
                 String data = _request.getData();
+                // [{"position":2,"velocity":300,"orientation":1,"red":255,"green":255,"blue":255,"name":"plug3.local"},{"position":2,"velocity":300,"orientation":1,"red":0,"green":0,"blue":255,"name":"plug3.local"}]]
+                // luz - 255,255,255 , chaleira 0,0,255
+                //luz = 0, chaleira =1
+
                 JSONArray json_array = new JSONArray(data);
                 for(int i=0;i<_handlers.size();i++) {
                     JSONObject json_message = json_array.getJSONObject(i);
+                    if(json_message.getInt("red") == 0)
+                    {
+                        indexLuz = i;
+                    }
+                    else
+                    {
+                        indexChaleira = i;
+                    }
                     _handlers.get(i).handlePlugMessage(json_message);
                     Thread.sleep(0);
                 }
@@ -923,9 +920,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     push(_plug_data_indexes[_led_target], _plug_target_data[_led_target], _handlers.get(_led_target).getPosition()[0], _handlers.get(_led_target).getPosition()[1]);
                     push(_plug_data_indexes[_led_target], _acc_data[_led_target], _last_acc_x,_last_acc_y);
 
-                    if((_led_target ==_target[0])) {     // used to print the simulation on the screen
-                        _simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1],(float)_last_acc_x,(float)_last_acc_y);
-                    }
+                    //if((_led_target ==_target[0])) {     // used to print the simulation on the screen
+                        for(int i = 0; i < _devices_count; i++)
+                        {
+                           _simuView.setCoords(i,(float) _handlers.get(i).getPosition()[0], (float) _handlers.get(i).getPosition()[1]);
+                            //_simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1],(float)_last_acc_x,(float)_last_acc_y);
+                        }
+                    //}
                 }
                 try {
                     Thread.sleep(_samplingDiff);
@@ -1040,7 +1041,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             //toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
                             if(_togglers[i] == null || !_togglers[i].isAlive())
                             {
-                                final  int finalI = i;
+                                final  int finalI = i; // target correlated
                                 _togglers[i] = new Thread(() ->
                                 {
                                     updateTarget(finalI,true);
@@ -1171,7 +1172,30 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             e.printStackTrace();
         }
 
-        sendMessage("Plug start"+"-"+"plug"+_plug_names.get(j)+".local");
+        // Se tiver mais que um device
+        // (vai para o gráfico desse device)
+        if(indexLuz != -1 && indexChaleira != -1)
+        {
+            if(j == indexLuz)
+            {
+                sendMessage("Device start"+"-"+"Luz top");
+            }
+            else
+            {
+                if(j == indexChaleira)
+                {
+                    sendMessage("Device start"+"-"+"Chaleira top");
+                }
+            }
+        }
+
+        // Se tiver só um device
+        // (vai para o gráfico desse plug)
+        else
+        {
+            sendMessage("Plug start"+"-"+"plug"+_plug_names.get(j)+".local");
+        }
+
        //ConsultUsers();
     }
 

@@ -30,9 +30,6 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
-import org.eazegraph.lib.charts.BarChart;
-import org.eazegraph.lib.models.BarModel;
-
 import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
 import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
@@ -111,10 +108,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ***** */
     private DynamicPieChart piePessoasAcum;
     private DynamicLineChart linePlugs;
+    private DynamicLineChart lineDevices;
     private DynamicPieChart piePlugsAcum;
     private DynamicPieChart pieEnergias;
-    private BarChart mBarChart;
     private TextView textCurSeries;
+    private TextView textCurSeriesDevices;
 
 
     /* *** */
@@ -394,6 +392,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     linePlugs.switchSeries(plug);
                     break;
 
+                case "Device start":
+                    String device = valores[1];
+                    navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
+                    lineDevices.add(device);
+                    lineDevices.switchSeries(device);
+                    break;
+
                 case "START":
                     inStudy = true;
                     notify("Wattapp","A new study was started!");
@@ -524,15 +529,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
         piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
         linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
+        lineDevices = (DynamicLineChart) findViewById(R.id.linechartdevices);
         textCurSeries = (TextView) findViewById(R.id.textCurSeries);
         textCurSeries.bringToFront();
+        textCurSeriesDevices = (TextView) findViewById(R.id.textCurSeriesDevices);
+        textCurSeriesDevices.bringToFront();
         linePlugs.setLegend(textCurSeries);
-        mBarChart = (BarChart) findViewById(R.id.tab_stats_bar_test);
+        lineDevices.setLegend(textCurSeriesDevices);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
         fitToScreen(this,linePlugs,50);
-        fitToScreen(this,mBarChart);
+        fitToScreen(this,lineDevices,50);
 
         /* *** */
         /* LOG */
@@ -551,15 +559,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePessoasAcum.setValue("Manel",20);
         piePessoasAcum.setValue("Afonso",40);
         piePessoasAcum.setValue("Dionísio",10);
-
-        mBarChart.addBar(new BarModel(2.3f, 0xFF123456));
-        mBarChart.addBar(new BarModel(2.f,  0xFF343456));
-        mBarChart.addBar(new BarModel(3.3f, 0xFF563456));
-        mBarChart.addBar(new BarModel(1.1f, 0xFF873F56));
-        mBarChart.addBar(new BarModel(2.7f, 0xFF56B7F1));
-        mBarChart.addBar(new BarModel(2.f,  0xFF343456));
-        mBarChart.addBar(new BarModel(0.4f, 0xFF1FF4AC));
-        mBarChart.addBar(new BarModel(4.f,  0xFF1BA4E6));
 
         linePlugs.addPoint("plug1.local","21:01",2.4f);
         linePlugs.addPoint("plug2.local","21:01",4.4f);
@@ -612,8 +611,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void ola(View v)
     {
-        navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
+        /*navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
         linePlugs.add("plug3.local");
-        linePlugs.switchSeries("plug3.local");
+        linePlugs.switchSeries("plug3.local");*/
+        navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
+        lineDevices.add("Chaleira");
+        lineDevices.switchSeries("Chaleira");
     }
 }

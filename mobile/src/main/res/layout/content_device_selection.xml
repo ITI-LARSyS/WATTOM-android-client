@@ -87,15 +87,6 @@
                 android:padding="50dp"
                 android:onClick="handleStartStudyClick"/>
 
-            <Button
-                android:id="@+id/btnStopStudy"
-                android:text="@string/Restart"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.5"
-                android:padding="50dp"
-                android:onClick="handleRestartStudyClick"/>
-
         </LinearLayout>
 
         <LinearLayout

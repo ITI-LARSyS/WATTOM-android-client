@@ -24,6 +24,10 @@ public enum TabConfig
             android.R.drawable.ic_menu_sort_by_size,
             R.id.tab_power_plugs_total),
 
+    DEVICES(R.string.TITLE_STATS6,
+            android.R.drawable.ic_menu_camera,
+            R.id.tab_power_devices),
+
     ENERGIAS(R.string.TITLE_STATS4,
             android.R.drawable.ic_lock_idle_low_battery,
             R.id.tab_energias),

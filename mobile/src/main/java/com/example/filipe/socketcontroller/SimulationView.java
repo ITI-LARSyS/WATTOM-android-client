@@ -1,32 +1,44 @@
 package com.example.filipe.socketcontroller;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.example.filipe.socketcontroller.util.UI;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Filipe on 01/08/2017.
  */
-public class SimulationView extends SurfaceView implements SurfaceHolder.Callback{
+public class SimulationView extends SurfaceView implements SurfaceHolder.Callback
+{
 
     int height;
     int width;
 
-    float x;
-    float y;
+    //float x;
+    //float y;
 
-    float x2;
-    float y2;
-
+//    float x2;
+    //float y2;
+    private ArrayList<Pair<Float,Float>> coords;
     Paint p;
 
     public SimulationView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        coords = new ArrayList<>();
         getHolder().addCallback(this);
         // TODO Auto-generated constructor stub
     }
@@ -34,11 +46,12 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     @Override
     public void onDraw(Canvas c){
         if(c!=null){
-            c.drawColor(Color.parseColor("#E2E0DB"));
+            //c.drawColor(Color.parseColor("#E2E0DB"));
             drawCircles(c);
             }
         }
 
+    @SuppressLint("WrongCall")
     public void requestRender(){
         System.gc(); // ainda n‹o se se Ž necess‡rio mas pronto s— para ter certeza chamamos o GC agora.. aqui Ž um lugar seguro
         Canvas c = null;
@@ -85,17 +98,22 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     private void drawCircles(Canvas c){
 
 
-        c.drawCircle((x+2)*120, ((y*-1)+2)*120, 20f, p);
+        for(int i = 0; i < coords.size(); i++)
+        {
+            Pair<Float,Float> pair = coords.get(i);
+            c.drawColor(Color.parseColor(UI.colors[i % UI.colors.length]));
+            c.drawCircle((pair.first+2)*120, ((pair.second*-1)+2)*120, 20f, p);
+            //c.drawCircle((x2+2)*120, ((y2*-1)+2)*120, 20f, p);
+        }
 
-        c.drawCircle((x2+2), ((y2*-1)+2), 20f, p);
+
+        //c.drawCircle((x2+2), ((y2*-1)+2), 20f, p);
 
     }
 
-    public void setCoords(float x, float y,float x2, float y2){
-        this.x = x;
-        this.y = y;
-        this.x2 = x2;
-        this.y2 = y2;
+    public void setCoords(int i, float x, float y)
+    {
+        coords.set(i,Pair.create(x,y));
         requestRender();
     }
 
