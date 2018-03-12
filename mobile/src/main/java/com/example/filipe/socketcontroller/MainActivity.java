@@ -15,13 +15,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
-import com.example.filipe.socketcontroller.plugs.PlugMotionHandler;
+import com.example.filipe.socketcontroller.motion.PlugMotionHandler;
+import com.example.filipe.socketcontroller.util.Alarm;
 import com.example.filipe.socketcontroller.util.HttpRequest;
 import com.example.filipe.socketcontroller.util.UI;
 import com.google.android.gms.appindexing.AppIndex;
@@ -41,6 +41,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -404,12 +405,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         stop();
         ((TextView)v).setText(R.string.start_study);
         v.setOnClickListener((x)-> handleStartStudyClick(x));
-    }
-
-    public void handleRestartStudyClick(View v)
-    {
-        startActivity(new Intent(this,SplashActivity.class));
-        this.finish();
     }
 
     public void start()
@@ -784,8 +779,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            HttpRequest TurnOff;
-            HttpRequest Delete;
             for(int i = 0; i < _plug_names.size();i++){
                 TurnOffAndRemove(i);
             }
@@ -1090,32 +1083,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             TurnOffAndRemove(j);
                             ChangeColorByEnergy(renewableEnergy);
                             isScheduleMode = false;
-                            TimerTask minTask = new TimerTask () {
-                                @Override
-                                public void run () {
-                                        TurnOnAndAdd(index);
-                                        TimerTask minTaskEnd = new TimerTask()
-                                        {
-                                            @Override
-                                            public void run ()
-                                            {
-                                                TurnOffAndRemove(index);
-                                            }
-                                        };
-                                        Calendar calendar = Calendar.getInstance();
-                                        calendar.set(Calendar.HOUR_OF_DAY,HourScheduleEnd);
-                                        calendar.set(Calendar.MINUTE,MinScheduleEnd);
-                                        calendar.set(Calendar.SECOND,0);
-                                        calendar.set(Calendar.MILLISECOND,0);
-                                        minTimer.schedule (minTaskEnd, calendar.getTimeInMillis() - System.currentTimeMillis());
-                                }
-                            };
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.set(Calendar.HOUR_OF_DAY,HourScheduleStart);
-                            calendar.set(Calendar.MINUTE,MinScheduleStart);
-                            calendar.set(Calendar.SECOND,0);
-                            calendar.set(Calendar.MILLISECOND,0);
-                            minTimer.schedule (minTask, calendar.getTimeInMillis() - System.currentTimeMillis());
+                            new Alarm(HourScheduleStart,MinScheduleStart,()->
+                            {
+                                TurnOnAndAdd(index);
+                                new Alarm(HourScheduleEnd,HourScheduleEnd,
+                                        ()-> TurnOffAndRemove(index))
+                                        .activate();
+                            }).activate();
                         }else{
                             if(IsOn){
                                 TurnOffAndRemove(j);
@@ -1296,9 +1270,32 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                           +"plug"+plugs[w]+".local"
                                           +"-"
                                           +power);
+
+
                                   Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
                                   powerTotal += power;
                               }
+
+                              // for(int x = 0; x < devices.length ; x++
+                              // {
+                              //    sendMessage("Device consumption"+"-"+consumption);
+                              // }
+
+                              sendMessage("Device consumption"
+                                      +"-"
+                                      +"chaleira top"
+                                      +"-"
+                                      + new Random().nextInt(20)+7);
+
+                              sendMessage("Device consumption"
+                                      +"-"
+                                      +"luz top"
+                                      +"-"
+                                      + new Random().nextInt(22)+11);
+
+                              if(!paused) toast(getApplicationContext(),"Device consumption" + " - " + "Updated data!" );
+                              else UI.notify(getApplicationContext(),MainActivity.class,"Device consumption","Updated data!");
+
                               if(!paused) toast(getApplicationContext(),"Plug consumption" + " - " + "Updated data!" );
                               else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
                           }

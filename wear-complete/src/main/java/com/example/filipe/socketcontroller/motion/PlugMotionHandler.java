@@ -1,4 +1,4 @@
-package com.example.filipe.socketcontroller.plugs;
+package com.example.filipe.socketcontroller.motion;
 
 import android.content.Context;
 import android.content.Intent;

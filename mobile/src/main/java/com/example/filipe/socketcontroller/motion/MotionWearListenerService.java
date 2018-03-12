@@ -1,4 +1,4 @@
-package com.example.filipe.socketcontroller.util;
+package com.example.filipe.socketcontroller.motion;
 
 import android.annotation.SuppressLint;
 import android.util.Log;

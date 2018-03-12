@@ -385,6 +385,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;
 
+                // Mensagem a indicar o 'enable' de uma plug
+                // (formato: "Plug start-plug2.local")
                 case "Plug start":
                     String plug = valores[1];
                     navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
@@ -392,11 +394,22 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     linePlugs.switchSeries(plug);
                     break;
 
+                // Mensagem a indicar o 'enable' de um device
+                // (formato: "Device start-Forno3000MX")
                 case "Device start":
                     String device = valores[1];
                     navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
                     lineDevices.add(device);
                     lineDevices.switchSeries(device);
+                    break;
+
+                // Mensagem a indicar o consumo de um device
+                // (formato: "Device consumption-Forno3000MX-13")
+                case "Device consumption":
+                    String deviceName = valores[1];
+                    float deviceConsumption = Float.parseFloat(valores[2]);
+                    lineDevices.addPoint(deviceName,deviceConsumption);
+                    notify("Device consumption","Updated data!");
                     break;
 
                 case "START":
