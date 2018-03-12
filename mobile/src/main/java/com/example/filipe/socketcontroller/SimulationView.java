@@ -14,6 +14,7 @@ import android.view.SurfaceView;
 
 import com.example.filipe.socketcontroller.util.UI;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
 //    float x2;
     //float y2;
     private ArrayList<Pair<Float,Float>> coords;
-    Paint p;
+    private Paint[] p;
 
     public SimulationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,7 +47,7 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     @Override
     public void onDraw(Canvas c){
         if(c!=null){
-            //c.drawColor(Color.parseColor("#E2E0DB"));
+            c.drawColor(Color.parseColor("#E2E0DB"));
             drawCircles(c);
             }
         }
@@ -85,8 +86,12 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
         Log.e("COMP","COMP WIDGET CREATED");
         height = getHeight();
         width  = getWidth();
-        p = new Paint();
-        p.setColor(Color.parseColor("#FF0000"));
+        p = new Paint[UI.colors.length];
+        for(int i = 0; i < UI.colors.length ; i++)
+        {
+            p[i] = new Paint();
+            p[i].setColor(Color.parseColor(UI.colors[i % UI.colors.length]));
+        }
     }
 
     @Override
@@ -101,8 +106,8 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
         for(int i = 0; i < coords.size(); i++)
         {
             Pair<Float,Float> pair = coords.get(i);
-            c.drawColor(Color.parseColor(UI.colors[i % UI.colors.length]));
-            c.drawCircle((pair.first+2)*120, ((pair.second*-1)+2)*120, 20f, p);
+
+            c.drawCircle((pair.first+2)*120, ((pair.second*-1)+2)*120, 20f, p[i]);
             //c.drawCircle((x2+2)*120, ((y2*-1)+2)*120, 20f, p);
         }
 
@@ -113,7 +118,9 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
 
     public void setCoords(int i, float x, float y)
     {
-        coords.set(i,Pair.create(x,y));
+        if(coords == null) coords = new ArrayList<>();
+        if(i < coords.size()) coords.set(i,Pair.create(x,y));
+        else coords.add(Pair.create(x,y));
         requestRender();
     }
 
