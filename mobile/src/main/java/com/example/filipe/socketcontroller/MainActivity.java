@@ -1101,18 +1101,29 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             TimerTask minTask = new TimerTask () {
                                 @Override
                                 public void run () {
-                                    Calendar calendar = Calendar.getInstance();
-                                    int actualMinute = calendar.get(Calendar.MINUTE);
-                                    int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
-                                    HttpRequest selected_request;
-                                    if(actualMinute == MinScheduleStart && actualHour == HourScheduleStart){
                                         TurnOnAndAdd(index);
-                                    }else if(actualMinute == MinScheduleEnd && actualHour == HourScheduleEnd){
-                                        TurnOffAndRemove(index);
-                                    }
+                                        TimerTask minTaskEnd = new TimerTask()
+                                        {
+                                            @Override
+                                            public void run ()
+                                            {
+                                                TurnOffAndRemove(index);
+                                            }
+                                        };
+                                        Calendar calendar = Calendar.getInstance();
+                                        calendar.set(Calendar.HOUR_OF_DAY,HourScheduleEnd);
+                                        calendar.set(Calendar.MINUTE,MinScheduleEnd);
+                                        calendar.set(Calendar.SECOND,0);
+                                        calendar.set(Calendar.MILLISECOND,0);
+                                        minTimer.schedule (minTaskEnd, calendar.getTimeInMillis() - System.currentTimeMillis());
                                 }
                             };
-                            minTimer.schedule (minTask, 10 ,1000*60/*1min*/);
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.set(Calendar.HOUR_OF_DAY,HourScheduleStart);
+                            calendar.set(Calendar.MINUTE,MinScheduleStart);
+                            calendar.set(Calendar.SECOND,0);
+                            calendar.set(Calendar.MILLISECOND,0);
+                            minTimer.schedule (minTask, calendar.getTimeInMillis() - System.currentTimeMillis());
                         }else{
                             if(IsOn){
                                 TurnOffAndRemove(j);
