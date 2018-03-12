@@ -107,7 +107,8 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
         {
             Pair<Float,Float> pair = coords.get(i);
 
-            c.drawCircle((pair.first+2)*120, ((pair.second*-1)+2)*120, 20f, p[i]);
+                c.drawCircle((pair.first+2)*120, ((pair.second*-1)+2)*120, 20f, p[i]);
+
             //c.drawCircle((x2+2)*120, ((y2*-1)+2)*120, 20f, p);
         }
 

@@ -194,14 +194,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         Device_Name = Settings.Secure.getString(getContentResolver(), "bluetooth_name");
 
-        fab.setOnClickListener(view -> {
-            //_debug_thread = !_debug_thread;
-            if(debug_view.getVisibility()==View.VISIBLE)
-                debug_view.setVisibility(View.GONE);
-            else
-                debug_view.setVisibility(View.VISIBLE);
-        });
-
         _client = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
@@ -1255,12 +1247,80 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }
     }*/
 
+  public void demo3(View v)
+  {
+      new HttpRequest(PLUGS_URL + "Demo3/2", getApplicationContext() ,_queue).start();
+      inStudy = true;
+      sendMessage("START");
+      toast(getApplicationContext(),"Study started!");
+
+      IsOn = false;
+
+
+      new StartUp(PLUGS_URL).start();
+
+
+      TimerTask checkPower = new TimerTask () {
+          @Override
+          public void run () {
+              if(IsOn){
+                  int powerTotal = 0;
+                  HttpRequest Pessoas = new HttpRequest(BASE_URL + "plug/Persons", getApplicationContext() ,_queue);
+                  try{
+                      Pessoas.start();
+                      Pessoas.join();
+                      String StringData = Pessoas.getData();
+                      JSONArray JSONPerson = new JSONArray(StringData);
+                      for(int i = 0; i < JSONPerson.length(); i++){
+                          JSONObject temp = (JSONObject) JSONPerson.get(i);
+                          if(temp.get("id").equals(Device_Name)){
+                              int plugs [];
+                              JSONArray intPlugs = temp.getJSONArray("plugs");
+                              plugs = new int[intPlugs.length()];
+                              for (int j = 0; j < intPlugs.length(); ++j) {
+                                  String plug = intPlugs.getString(j);
+                                  plugs[j] = Integer.parseInt(plug.substring(0, plug.indexOf(".")).replace("plug", ""));
+                              }
+
+                              for(int w = 0; w < plugs.length;w++)
+                              {
+                                  String DataURL = BASE_URL + "plug/"+plugs[w]+"/Power";
+                                  HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
+                                  request.start();
+                                  request.join();
+                                  String dado = request.getData();
+                                  JSONObject JSONData = new JSONObject(dado);
+                                  int power = JSONData.getInt("power");
+                                  sendMessage("Plug consumption"
+                                          +"-"
+                                          +"plug"+plugs[w]+".local"
+                                          +"-"
+                                          +power);
+                                  Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
+                                  powerTotal += power;
+                              }
+                              if(!paused) toast(getApplicationContext(),"Plug consumption" + " - " + "Updated data!" );
+                              else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
+                          }
+                      }
+                      sendMessage("Total overall power"+"-"+powerTotal);
+                      if(!paused) toast(getApplicationContext(),"Overall power consumption" + " - " + "Updated data!" );
+                      else UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
+                  }catch (Exception e) {
+                      e.printStackTrace();
+                  }
+              }
+              ConsultUsers();
+          }
+      };
+      PowerTimer.schedule(checkPower, 10 ,1000*60/*1 min*/);
+  }
 
     //Envia um pedido HTTTP recebe dados e adiciona as plugs que existir
     private void getPlugsData(){
         try {
             _plug_names = new ArrayList<>();
-            HttpRequest novo = new HttpRequest(BASE_URL + "plug/AvailablePlugs", getApplicationContext());
+            HttpRequest novo = new HttpRequest(BASE_URL + "plug", getApplicationContext());
             novo.start();
             novo.join();
             String data = novo.getData();
