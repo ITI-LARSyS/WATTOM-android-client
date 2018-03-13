@@ -541,17 +541,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
         linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
         lineDevices = (DynamicLineChart) findViewById(R.id.linechartdevices);
-       // textCurSeries = (TextView) findViewById(R.id.textCurSeries);
-       // textCurSeries.bringToFront();
-       // textCurSeriesDevices = (TextView) findViewById(R.id.textCurSeriesDevices);
-       // textCurSeriesDevices.bringToFront();
-     //   linePlugs.setIndicator(textCurSeries);
-      //  lineDevices.setIndicator(textCurSeriesDevices);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
-      //  fitToScreen(this,linePlugs,50);
-     //   fitToScreen(this,lineDevices,50);
 
         /* *** */
         /* LOG */

@@ -56,7 +56,7 @@ public class DynamicLineChart extends LinearLayout
         chart.setUseOverlapFill(false);
         chart.setIndicatorLineColor(Color.parseColor("#FFFFFF"));
         chart.setIndicatorTextColor(Color.parseColor("#FFFFFF"));
-        
+
         indicator = new TextView(c);
         indicator.setLayoutParams(new LinearLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT,

@@ -12,13 +12,5 @@
         android:layout_width="wrap_content"
         android:paddingTop="20dp"/>
 
-    <!---<TextView
-        android:id="@+id/textCurSeries"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/NOTHING"
-        android:textAlignment="center"
-        />-->
-
 </LinearLayout>
 
