@@ -347,7 +347,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         piePessoasAcum.incValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                         Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
-                    piePessoasAcum.startAnimation();
                     notify("Person consumption","Updated data!");
                     Log.d("PERSONS","Person consumption has been updated!");
                     break;
@@ -361,7 +360,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         pieEnergias.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                         Log.d("ENERGY","Energia "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
-                    pieEnergias.startAnimation();
                     notify("Energy","Updated data!");
                     Log.d("ENERGY","Energy data has been updated!");
                     break;
@@ -390,7 +388,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Plug start":
                     String plug = valores[1];
                     navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
-                    linePlugs.add(plug);
+                   // linePlugs.add(plug);
                     linePlugs.switchSeries(plug);
                     break;
 
@@ -399,7 +397,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Device start":
                     String device = valores[1];
                     navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
-                    lineDevices.add(device);
+                //    lineDevices.add(device);
                     lineDevices.switchSeries(device);
                     break;
 
@@ -547,8 +545,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         textCurSeries.bringToFront();
         textCurSeriesDevices = (TextView) findViewById(R.id.textCurSeriesDevices);
         textCurSeriesDevices.bringToFront();
-        linePlugs.setLegend(textCurSeries);
-        lineDevices.setLegend(textCurSeriesDevices);
+        linePlugs.setIndicator(textCurSeries);
+        lineDevices.setIndicator(textCurSeriesDevices);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
@@ -628,7 +626,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePlugs.add("plug3.local");
         linePlugs.switchSeries("plug3.local");*/
         navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
-        lineDevices.add("Chaleira");
+     //   lineDevices.add("Chaleira");
         lineDevices.switchSeries("Chaleira");
     }
 }

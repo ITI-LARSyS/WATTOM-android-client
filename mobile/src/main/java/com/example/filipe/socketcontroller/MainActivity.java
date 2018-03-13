@@ -40,7 +40,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -103,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     //Pedro stuff, for schedule
     private int hourStart,minStart,hourEnd,minEnd;
-    private int HourScheduleStart,MinScheduleStart,HourScheduleEnd,MinScheduleEnd;
+    private int HourScheduleStart, MinutesScheduleStart,HourScheduleEnd, MinutesScheduleEnd;
 
 
     //handlers and receivers for the targets
@@ -159,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private int indexLuz = -1, indexChaleira = -1;
 
+    private TimerTask plugPower;
+
 
     //Ao iniciar a aplicacao
     // - Atribui cada elemento da interface uma variavel
@@ -176,15 +177,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        _counter        = (TextView) findViewById(R.id.counter);
-        _pId            = (EditText) findViewById(R.id.participant_id);
-        _simuView       = (SimulationView) findViewById(R.id.simulation_view);
-        _instructions   = (TextView) findViewById(R.id.instructions_field);
-        _condition      = (TextView) findViewById(R.id.condition_field);
-        _trial_field    = (TextView) findViewById(R.id.trial_field);
-        hourlyTimer           =  new Timer ();
-        minTimer           =  new Timer ();
-        PowerTimer          =  new Timer ();
+        _counter = (TextView) findViewById(R.id.counter);
+        _pId = (EditText) findViewById(R.id.participant_id);
+        _simuView = (SimulationView) findViewById(R.id.simulation_view);
+        _instructions = (TextView) findViewById(R.id.instructions_field);
+        _condition = (TextView) findViewById(R.id.condition_field);
+        _trial_field = (TextView) findViewById(R.id.trial_field);
+        hourlyTimer = new Timer();
+        minTimer = new Timer();
+        PowerTimer = new Timer();
 //        IsNotFirstTime = 0;
         isScheduleMode = false;
 
@@ -207,6 +208,63 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        plugPower = new TimerTask() {
+            @Override
+            public void run() {
+                HttpRequest request = new HttpRequest(BASE_URL + "plug/AvailablePlugs", getApplicationContext(), _queue);
+                try {
+                    request.start();
+                    request.join();
+                    String StringData = request.getData();
+                    JSONArray JSONPlugs = new JSONArray(StringData);
+                    for (int j = 0; j < JSONPlugs.length(); j++) {
+                        JSONObject plug = (JSONObject) JSONPlugs.get(j);
+                        String plugName = plug.getString("name");
+                        int id = Integer.parseInt(plugName.substring(0, plugName.indexOf(".")).replace("plug", ""));
+                        String url = BASE_URL + "plug/" + id + "/Power";
+                        HttpRequest plug_power = new HttpRequest(url, getApplicationContext(), _queue);
+                        plug_power.start();
+                        plug_power.join();
+                        String data = plug_power.getData();
+                        JSONObject JSONData = new JSONObject(data);
+                        int power = JSONData.getInt("power");
+                        sendMessage("Plug consumption"
+                                + "-"
+                                + "plug" + id + ".local"
+                                + "-"
+                                + power);
+                        Log.d("STATISTICS", "plug" + id + ".local is consuming " + power);
+                    }
+
+                    sendMessage("Device consumption"
+                            + "-"
+                            + "chaleira top"
+                            + "-"
+                            + new Random().nextInt(20) + 7);
+
+                    sendMessage("Device consumption"
+                            + "-"
+                            + "luz top"
+                            + "-"
+                            + new Random().nextInt(22) + 11);
+
+                    if (!paused)
+                        toast(getApplicationContext(), "Device consumption" + " - " + "Updated data!");
+                    else
+                        UI.notify(getApplicationContext(), MainActivity.class, "Device consumption", "Updated data!");
+
+                    if (!paused)
+                        toast(getApplicationContext(), "Plug consumption" + " - " + "Updated data!");
+                    else
+                        UI.notify(getApplicationContext(), MainActivity.class, "Plug consumption", "Updated data!");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                ConsultUsers();
+            }
+        };
     }
 
     // Ao receber uma mensagem:
@@ -228,9 +286,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 hourEnd = Integer.parseInt(detailsStart[0]);
                 minEnd = Integer.parseInt(detailsStart[1]);
                 HourScheduleStart = hourStart;
-                MinScheduleStart = minStart;
+                MinutesScheduleStart = minStart;
                 HourScheduleEnd = hourEnd;
-                MinScheduleEnd = minEnd;
+                MinutesScheduleEnd = minEnd;
 
                 if(hourStart > 12){
                     hourStart = hourStart - 12;
@@ -481,7 +539,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         new StartUp(PLUGS_URL).start();
 
 
-        TimerTask checkPower = new TimerTask () {
+        /*TimerTask checkPower = new TimerTask () {
             @Override
             public void run () {
                 if(IsOn){
@@ -519,7 +577,25 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                             +power);
                                     Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
                                     powerTotal += power;
+
+
                                 }
+
+                                sendMessage("Device consumption"
+                                        +"-"
+                                        +"chaleira top"
+                                        +"-"
+                                        + new Random().nextInt(20)+7);
+
+                                sendMessage("Device consumption"
+                                        +"-"
+                                        +"luz top"
+                                        +"-"
+                                        + new Random().nextInt(22)+11);
+
+                                if(!paused) toast(getApplicationContext(),"Device consumption" + " - " + "Updated data!" );
+                                else UI.notify(getApplicationContext(),MainActivity.class,"Device consumption","Updated data!");
+
                                 if(!paused) toast(getApplicationContext(),"Plug consumption" + " - " + "Updated data!" );
                                 else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
                             }
@@ -534,7 +610,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 ConsultUsers();
             }
         };
-        PowerTimer.schedule(checkPower, 10 ,1000*60/*1 min*/);
+        PowerTimer.schedule(checkPower, 10 ,1000*60;*/
+        new Timer().schedule(plugPower,10,1000*60);
     }
 
     public void stop()
@@ -1083,13 +1160,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             TurnOffAndRemove(j);
                             ChangeColorByEnergy(renewableEnergy);
                             isScheduleMode = false;
-                            new Alarm(HourScheduleStart,MinScheduleStart,()->
+                            new Alarm(HourScheduleStart, MinutesScheduleStart,()->
                             {
                                 TurnOnAndAdd(index);
-                                new Alarm(HourScheduleEnd,HourScheduleEnd,
-                                        ()-> TurnOffAndRemove(index))
-                                        .activate();
-                            }).activate();
+                                new Alarm(HourScheduleEnd, MinutesScheduleEnd, ()->
+                                {
+                                    TurnOffAndRemove(index);
+                                },false).activate();
+                            },false).activate();
                         }else{
                             if(IsOn){
                                 TurnOffAndRemove(j);
@@ -1278,7 +1356,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
                               // for(int x = 0; x < devices.length ; x++
                               // {
-                              //    sendMessage("Device consumption"+"-"+consumption);
+                              //    sendMessage("Device consumption"+"-"+"Forno300MX"+"-"+consumption);
                               // }
 
                               sendMessage("Device consumption"

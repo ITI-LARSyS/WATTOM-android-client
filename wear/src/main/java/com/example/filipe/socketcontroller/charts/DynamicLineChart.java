@@ -3,7 +3,6 @@ package com.example.filipe.socketcontroller.charts;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.TextView;
 
 import org.eazegraph.lib.charts.ValueLineChart;
@@ -15,57 +14,49 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
 
 public class DynamicLineChart extends ValueLineChart
 {
     private HashMap<String,ValueLineSeries> values;
-    private String current = "";
-    private TextView legend;
-    private int currentIndex = 0;
+    private TextView indicator;
 
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         values = new HashMap<>();
     }
+
     public DynamicLineChart(Context context)
     {
         super(context);
         values = new HashMap<>();
     }
-    public String getCurrentKey()
+
+    public void setIndicator(TextView indicator)
     {
-        return current;
+        this.indicator = indicator;
+        indicator.setOnClickListener((v)-> switchSeries());
     }
 
-    public void setLegend(TextView legend)
+    public int getCurrentIndex()
     {
-        this.legend = legend;
-        legend.setOnClickListener((v)-> switchSeries());
+        return new ArrayList<>(values.keySet()).indexOf(indicator.getText()+"");
     }
+
+    public void refresh()
+    {
+        switchSeries(indicator.getText()+"");
+    }
+
     public void add(String key)
     {
-        if(!contains(key))
+        values.put(key, new ValueLineSeries());
+        values.get(key).setColor(Color.parseColor(colors[(values.size() - 1) % colors.length]));
+        if (indicator.getText().equals("-"))
         {
-            values.put(key, new ValueLineSeries());
-            values.get(key).setColor(Color.parseColor(colors[(values.size() - 1) % colors.length]));
-
-            if (legend == null)
-            {
-                addSeries(values.get(key));
-            }
-            else
-            {
-                if (current.equals(""))
-                {
-                    addSeries(values.get(key));
-                    current = key;
-                    legend.setText(key);
-                }
-            }
+            switchSeries(key);
         }
     }
     public void remove(String key)
@@ -74,7 +65,6 @@ public class DynamicLineChart extends ValueLineChart
     }
     public void addPoint(String key,float point)
     {
-        add(key);
         addPoint(key,getCurrentTime(),point);
     }
     public void addPoint(String key,String legend,float point)
@@ -83,6 +73,7 @@ public class DynamicLineChart extends ValueLineChart
         { add(key); }
 
         values.get(key).addPoint(new ValueLinePoint(legend,point));
+        refresh();
     }
     private String getCurrentTime()
     {
@@ -108,35 +99,29 @@ public class DynamicLineChart extends ValueLineChart
     {
         if(values.size() > 1)
         {
-            currentIndex = (currentIndex + 1) % values.size();
-            switchSeries(currentIndex);
+            int index = getCurrentIndex();
+            index = (index + 1) % values.size();
+            switchSeries(index);
         }
     }
     public void switchSeries(int index)
     {
         if(index <= values.size())
         {
-            clearChart();
-            addSeries((ValueLineSeries) values.values().toArray()[index]);
-            if(legend != null)
-            {
-                legend.setText((String)values.keySet().toArray()[index]);
-            }
+            String key = (String) values.keySet().toArray()[index];
+            switchSeries(key);
         }
     }
 
     public void switchSeries(String key)
     {
-        int index = new ArrayList<>(values.keySet()).indexOf(key);
-        if(index != -1)
-        {
-            switchSeries(index);
-        }
-        else
+        clearChart();
+        if(!values.containsKey(key))
         {
             add(key);
-            switchSeries(key);
         }
+        addSeries(values.get(key));
+        indicator.setText(key);
     }
 
 }
