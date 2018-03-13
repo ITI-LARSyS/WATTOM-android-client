@@ -9,23 +9,17 @@
 
     <com.example.filipe.socketcontroller.charts.DynamicLineChart
         android:id="@+id/linechartdevices"
-        app:egUseCubic="true"
-        app:egUseOverlapFill="false"
-        app:egCurveSmoothness="0.4"
-        app:egIndicatorLineColor="#FFFFFF"
-        app:egLegendHeight="30dp"
-        app:egIndicatorTextColor="#FFFFFF"
-        android:layout_height="0dp"
-        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:paddingTop="20dp"/>
 
-    <TextView
+   <!--- <TextView
         android:id="@+id/textCurSeriesDevices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/NOTHING"
         android:textAlignment="center"
-        />
+        /> -->
 
 </LinearLayout>
 

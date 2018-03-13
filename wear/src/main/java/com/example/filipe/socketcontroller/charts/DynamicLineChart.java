@@ -1,8 +1,15 @@
 package com.example.filipe.socketcontroller.charts;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.eazegraph.lib.charts.ValueLineChart;
@@ -17,27 +24,50 @@ import java.util.HashMap;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
 
-public class DynamicLineChart extends ValueLineChart
+public class DynamicLineChart extends LinearLayout
 {
     private HashMap<String,ValueLineSeries> values;
+    private ValueLineChart chart;
     private TextView indicator;
+   // private View rootView;
 
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        values = new HashMap<>();
+        init(context);
     }
 
     public DynamicLineChart(Context context)
     {
         super(context);
-        values = new HashMap<>();
+        init(context);
     }
 
-    public void setIndicator(TextView indicator)
+    private void init(Context c)
     {
-        this.indicator = indicator;
+        this.setOrientation(LinearLayout.VERTICAL);
+
+        values = new HashMap<>();
+
+        chart = new ValueLineChart(c);
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        chart.setLayoutParams(new LinearLayout.LayoutParams(metrics.widthPixels - 80,metrics.heightPixels - 80));
+        chart.setUseCubic(true);
+        chart.setUseOverlapFill(false);
+        chart.setIndicatorLineColor(Color.parseColor("#FFFFFF"));
+        chart.setIndicatorTextColor(Color.parseColor("#FFFFFF"));
+        
+        indicator = new TextView(c);
+        indicator.setLayoutParams(new LinearLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT));
         indicator.setOnClickListener((v)-> switchSeries());
+        indicator.bringToFront();
+        indicator.setText("-");
+        indicator.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
+
+        addView(chart);
+        addView(indicator);
     }
 
     public int getCurrentIndex()
@@ -115,12 +145,12 @@ public class DynamicLineChart extends ValueLineChart
 
     public void switchSeries(String key)
     {
-        clearChart();
+        chart.clearChart();
         if(!values.containsKey(key))
         {
             add(key);
         }
-        addSeries(values.get(key));
+        chart.addSeries(values.get(key));
         indicator.setText(key);
     }
 
