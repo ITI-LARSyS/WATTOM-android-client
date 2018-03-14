@@ -574,6 +574,21 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePlugs.addPoint("plug1.local","21:05",4.4f);
         linePlugs.addPoint("plug2.local","21:05",4.4f);
 
+        lineDevices.addPoint("Acer Aspire","14:02",2.4f);
+        lineDevices.addPoint("Xiaomi","14:02",1.4f);
+        lineDevices.addPoint("Acer Aspire","14:03",4.1f);
+        lineDevices.addPoint("Xiaomi","14:03",1.2f);
+        lineDevices.addPoint("Acer Aspire","14:04",2.3f);
+        lineDevices.addPoint("Xiaomi","14:04",1.3f);
+        lineDevices.addPoint("Acer Aspire","14:05",3.7f);
+        lineDevices.addPoint("Xiaomi","14:05",1.7f);
+        lineDevices.addPoint("Acer Aspire","14:06",2.5f);
+        lineDevices.addPoint("Xiaomi","14:06",1.2f);
+        lineDevices.addPoint("Acer Aspire","14:07",3.0f);
+        lineDevices.addPoint("Xiaomi","14:07",1.9f);
+        lineDevices.addPoint("Acer Aspire","14:08",3.1f);
+        lineDevices.addPoint("Xiaomi","14:08",1.6f);
+
         piePlugsAcum.incValue("plug1.local",30);
         piePlugsAcum.incValue("plug2.local",20);
         piePlugsAcum.incValue("plug4.local",20);
