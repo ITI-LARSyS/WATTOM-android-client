@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private int indexLuz = -1, indexChaleira = -1;
 
-    private TimerTask plugPower;
+    private TimerTask powerTask, energyTask, personTask;
 
 
     //Ao iniciar a aplicacao
@@ -209,62 +209,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
-        plugPower = new TimerTask() {
-            @Override
-            public void run() {
-                HttpRequest request = new HttpRequest(BASE_URL + "plug/AvailablePlugs", getApplicationContext(), _queue);
-                try {
-                    request.start();
-                    request.join();
-                    String StringData = request.getData();
-                    JSONArray JSONPlugs = new JSONArray(StringData);
-                    for (int j = 0; j < JSONPlugs.length(); j++) {
-                        JSONObject plug = (JSONObject) JSONPlugs.get(j);
-                        String plugName = plug.getString("name");
-                        int id = Integer.parseInt(plugName.substring(0, plugName.indexOf(".")).replace("plug", ""));
-                        String url = BASE_URL + "plug/" + id + "/Power";
-                        HttpRequest plug_power = new HttpRequest(url, getApplicationContext(), _queue);
-                        plug_power.start();
-                        plug_power.join();
-                        String data = plug_power.getData();
-                        JSONObject JSONData = new JSONObject(data);
-                        int power = JSONData.getInt("power");
-                        sendMessage("Plug consumption"
-                                + "-"
-                                + "plug" + id + ".local"
-                                + "-"
-                                + power);
-                        Log.d("STATISTICS", "plug" + id + ".local is consuming " + power);
-                    }
-
-                    sendMessage("Device consumption"
-                            + "-"
-                            + "chaleira top"
-                            + "-"
-                            + new Random().nextInt(20) + 7);
-
-                    sendMessage("Device consumption"
-                            + "-"
-                            + "luz top"
-                            + "-"
-                            + new Random().nextInt(22) + 11);
-
-                    if (!paused)
-                        toast(getApplicationContext(), "Device consumption" + " - " + "Updated data!");
-                    else
-                        UI.notify(getApplicationContext(), MainActivity.class, "Device consumption", "Updated data!");
-
-                    if (!paused)
-                        toast(getApplicationContext(), "Plug consumption" + " - " + "Updated data!");
-                    else
-                        UI.notify(getApplicationContext(), MainActivity.class, "Plug consumption", "Updated data!");
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                ConsultUsers();
-            }
-        };
+        initTasks();
     }
 
     // Ao receber uma mensagem:
@@ -478,57 +423,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         IsOn = false;
 
-        TimerTask hourlyTask = new TimerTask () {
-            @Override
-            public void run () {
-                /*Date dNow = new Date();
-                SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
-                String data = dateFormat.format(dNow);
-                String DataURL = EnergyData+data;
-                HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
-                try{
-                    request.start();
-                    request.join();
-                    String StringData = request.getData();
-                    JSONObject JSONData = new JSONObject(StringData);
-                    JSONArray aux = (JSONArray) JSONData.get("prod_data");
-                    JSONData = (JSONObject) aux.get(0);
-                    float total = JSONData.getInt("total");
-                    float termica = JSONData.getInt("termica");
-                    float hidrica = JSONData.getInt("hidrica");
-                    float eolica = JSONData.getInt("eolica");
-                    float biomassa = JSONData.getInt("biomassa");
-                    float foto = JSONData.getInt("foto");
-
-                    sendMessage("Energy"
-                            +"-"+"Não renovável"
-                            +"-"+(total-termica-hidrica-eolica-biomassa-foto)
-                            +"-"+"Térmica"
-                            +"-"+termica
-                            +"-"+"Hídrica"
-                            +"-"+hidrica
-                            +"-"+"Eólica"
-                            +"-"+eolica
-                            +"-"+"Biomassa"
-                            +"-"+biomassa
-                            +"-"+"Fotovoltaica"
-                            +"-"+foto
-                    );
-                    if(!paused) toast(getApplicationContext(),"Energy consumption" + " - " + "Updated data!");
-                    else UI.notify(this,MainActivity.class,"Energy consumption","Updated data!");
-
-                    // falta enviar para o wear (para atualizar o pie chart)
-                    float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
-                    percentage *= 100;
-                    renewableEnergy =  Math.round(percentage);
-                    ChangeColorByEnergy(renewableEnergy);
-                    new RefreshData().start();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }*/
-            }
-        };
-        hourlyTimer.schedule (hourlyTask, 0 ,1000*60*15);
+        new Timer().schedule(energyTask,10,1000*60*15);
 
         /* */
         /* */
@@ -537,81 +432,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         /* */
 
         new StartUp(PLUGS_URL).start();
-
-
-        /*TimerTask checkPower = new TimerTask () {
-            @Override
-            public void run () {
-                if(IsOn){
-                    int powerTotal = 0;
-                    HttpRequest Pessoas = new HttpRequest(BASE_URL + "plug/Persons", getApplicationContext() ,_queue);
-                    try{
-                        Pessoas.start();
-                        Pessoas.join();
-                        String StringData = Pessoas.getData();
-                        JSONArray JSONPerson = new JSONArray(StringData);
-                        for(int i = 0; i < JSONPerson.length(); i++){
-                            JSONObject temp = (JSONObject) JSONPerson.get(i);
-                            if(temp.get("id").equals(Device_Name)){
-                                int plugs [];
-                                JSONArray intPlugs = temp.getJSONArray("plugs");
-                                plugs = new int[intPlugs.length()];
-                                for (int j = 0; j < intPlugs.length(); ++j) {
-                                    String plug = intPlugs.getString(j);
-                                    plugs[j] = Integer.parseInt(plug.substring(0, plug.indexOf(".")).replace("plug", ""));
-                                }
-
-                                for(int w = 0; w < plugs.length;w++)
-                                {
-                                    String DataURL = BASE_URL + "plug/"+plugs[w]+"/Power";
-                                    HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
-                                    request.start();
-                                    request.join();
-                                    String dado = request.getData();
-                                    JSONObject JSONData = new JSONObject(dado);
-                                    int power = JSONData.getInt("power");
-                                    sendMessage("Plug consumption"
-                                            +"-"
-                                            +"plug"+plugs[w]+".local"
-                                            +"-"
-                                            +power);
-                                    Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
-                                    powerTotal += power;
-
-
-                                }
-
-                                sendMessage("Device consumption"
-                                        +"-"
-                                        +"chaleira top"
-                                        +"-"
-                                        + new Random().nextInt(20)+7);
-
-                                sendMessage("Device consumption"
-                                        +"-"
-                                        +"luz top"
-                                        +"-"
-                                        + new Random().nextInt(22)+11);
-
-                                if(!paused) toast(getApplicationContext(),"Device consumption" + " - " + "Updated data!" );
-                                else UI.notify(getApplicationContext(),MainActivity.class,"Device consumption","Updated data!");
-
-                                if(!paused) toast(getApplicationContext(),"Plug consumption" + " - " + "Updated data!" );
-                                else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
-                            }
-                        }
-                        sendMessage("Total overall power"+"-"+powerTotal);
-                        if(!paused) toast(getApplicationContext(),"Overall power consumption" + " - " + "Updated data!" );
-                        else UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
-                    }catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                ConsultUsers();
-            }
-        };
-        PowerTimer.schedule(checkPower, 10 ,1000*60;*/
-        new Timer().schedule(plugPower,10,1000*60);
+        new Timer().schedule(powerTask,10,1000*60);
+        new Timer().schedule(personTask,10,1000*60);
     }
 
     public void stop()
@@ -1301,94 +1123,28 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
   public void demo3(View v)
   {
-      new HttpRequest(PLUGS_URL + "Demo3/2", getApplicationContext() ,_queue).start();
-      inStudy = true;
-      sendMessage("START");
-      toast(getApplicationContext(),"Study started!");
-
-      IsOn = false;
-
-
-      new StartUp(PLUGS_URL).start();
-
-
-      TimerTask checkPower = new TimerTask () {
-          @Override
-          public void run () {
-              if(IsOn){
-                  int powerTotal = 0;
-                  HttpRequest Pessoas = new HttpRequest(BASE_URL + "plug/Persons", getApplicationContext() ,_queue);
-                  try{
-                      Pessoas.start();
-                      Pessoas.join();
-                      String StringData = Pessoas.getData();
-                      JSONArray JSONPerson = new JSONArray(StringData);
-                      for(int i = 0; i < JSONPerson.length(); i++){
-                          JSONObject temp = (JSONObject) JSONPerson.get(i);
-                          if(temp.get("id").equals(Device_Name)){
-                              int plugs [];
-                              JSONArray intPlugs = temp.getJSONArray("plugs");
-                              plugs = new int[intPlugs.length()];
-                              for (int j = 0; j < intPlugs.length(); ++j) {
-                                  String plug = intPlugs.getString(j);
-                                  plugs[j] = Integer.parseInt(plug.substring(0, plug.indexOf(".")).replace("plug", ""));
-                              }
-
-                              for(int w = 0; w < plugs.length;w++)
-                              {
-                                  String DataURL = BASE_URL + "plug/"+plugs[w]+"/Power";
-                                  HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
-                                  request.start();
-                                  request.join();
-                                  String dado = request.getData();
-                                  JSONObject JSONData = new JSONObject(dado);
-                                  int power = JSONData.getInt("power");
-                                  sendMessage("Plug consumption"
-                                          +"-"
-                                          +"plug"+plugs[w]+".local"
-                                          +"-"
-                                          +power);
-
-
-                                  Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
-                                  powerTotal += power;
-                              }
-
-                              // for(int x = 0; x < devices.length ; x++
-                              // {
-                              //    sendMessage("Device consumption"+"-"+"Forno300MX"+"-"+consumption);
-                              // }
-
-                              sendMessage("Device consumption"
-                                      +"-"
-                                      +"chaleira top"
-                                      +"-"
-                                      + new Random().nextInt(20)+7);
-
-                              sendMessage("Device consumption"
-                                      +"-"
-                                      +"luz top"
-                                      +"-"
-                                      + new Random().nextInt(22)+11);
-
-                              if(!paused) toast(getApplicationContext(),"Device consumption" + " - " + "Updated data!" );
-                              else UI.notify(getApplicationContext(),MainActivity.class,"Device consumption","Updated data!");
-
-                              if(!paused) toast(getApplicationContext(),"Plug consumption" + " - " + "Updated data!" );
-                              else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
-                          }
-                      }
-                      sendMessage("Total overall power"+"-"+powerTotal);
-                      if(!paused) toast(getApplicationContext(),"Overall power consumption" + " - " + "Updated data!" );
-                      else UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
-                  }catch (Exception e) {
-                      e.printStackTrace();
-                  }
-              }
-              ConsultUsers();
+      new Thread(()->
+      {
+          HttpRequest demo = new HttpRequest(PLUGS_URL + "Demo3/2", getApplicationContext() ,_queue);
+          demo.start();
+          try {
+              demo.join();
+          } catch (InterruptedException e) {
+              e.printStackTrace();
           }
-      };
-      PowerTimer.schedule(checkPower, 10 ,1000*60/*1 min*/);
+          inStudy = true;
+          sendMessage("START");
+          toast(getApplicationContext(),"Study started!");
+
+          IsOn = false;
+
+
+          new StartUp(PLUGS_URL).start();
+
+
+          new Timer().schedule(powerTask,10,1000*60);
+          new Timer().schedule(personTask,10,1000*60);
+      }).start();
   }
 
     //Envia um pedido HTTTP recebe dados e adiciona as plugs que existir
@@ -1431,7 +1187,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }
     }
 
-    private void ConsultUsers(){
+    /*private void ConsultUsers(){
         HttpRequest CheckUsers = new HttpRequest(BASE_URL + "plug/Power", getApplicationContext(),_queue);
         try{
             CheckUsers.start();
@@ -1457,7 +1213,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }catch (Exception e){
             e.printStackTrace();
         }
-    }
+    }*/
 
     private void sendMessage(String key){
         if (_wear != null && _client!= null && _client.isConnected()) {
@@ -1580,6 +1336,151 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     {
         if(!paused) toast(getApplicationContext(),title + " - " + message);
         else UI.notify(this,MainActivity.class,title,message);
+    }
+
+    public void initTasks()
+    {
+        powerTask = new TimerTask() {
+            @Override
+            public void run() {
+                HttpRequest request = new HttpRequest(BASE_URL + "plug/AvailablePlugs", getApplicationContext(), _queue);
+                try {
+                    request.start();
+                    request.join();
+                    String StringData = request.getData();
+                    JSONArray JSONPlugs = new JSONArray(StringData);
+                    for (int j = 0; j < JSONPlugs.length(); j++) {
+                        JSONObject plug = (JSONObject) JSONPlugs.get(j);
+                        String plugName = plug.getString("name");
+                        int id = Integer.parseInt(plugName.substring(0, plugName.indexOf(".")).replace("plug", ""));
+                        String url = BASE_URL + "plug/" + id + "/Power";
+                        HttpRequest plug_power = new HttpRequest(url, getApplicationContext(), _queue);
+                        plug_power.start();
+                        plug_power.join();
+                        String data = plug_power.getData();
+                        JSONObject JSONData = new JSONObject(data);
+                        int power = JSONData.getInt("power");
+                        sendMessage("Plug consumption"
+                                + "-"
+                                + "plug" + id + ".local"
+                                + "-"
+                                + power);
+                        Log.d("STATISTICS", "plug" + id + ".local is consuming " + power);
+                    }
+
+                    sendMessage("Device consumption"
+                            + "-"
+                            + "chaleira top"
+                            + "-"
+                            + (new Random().nextInt( 20) + 7));
+
+                    sendMessage("Device consumption"
+                            + "-"
+                            + "luz top"
+                            + "-"
+                            + (new Random().nextInt(22) + 11));
+
+                    if (!paused)
+                        toast(getApplicationContext(), "Device consumption" + " - " + "Updated data!");
+                    else
+                        UI.notify(getApplicationContext(), MainActivity.class, "Device consumption", "Updated data!");
+
+                    if (!paused)
+                        toast(getApplicationContext(), "Plug consumption" + " - " + "Updated data!");
+                    else
+                        UI.notify(getApplicationContext(), MainActivity.class, "Plug consumption", "Updated data!");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //ConsultUsers();
+            }
+        };
+
+        energyTask = new TimerTask () {
+            @Override
+            public void run () {
+                /*Date dNow = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
+                String data = dateFormat.format(dNow);
+                String DataURL = EnergyData+data;
+                HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
+                try{
+                    request.start();
+                    request.join();
+                    String StringData = request.getData();
+                    JSONObject JSONData = new JSONObject(StringData);
+                    JSONArray aux = (JSONArray) JSONData.get("prod_data");
+                    JSONData = (JSONObject) aux.get(0);
+                    float total = JSONData.getInt("total");
+                    float termica = JSONData.getInt("termica");
+                    float hidrica = JSONData.getInt("hidrica");
+                    float eolica = JSONData.getInt("eolica");
+                    float biomassa = JSONData.getInt("biomassa");
+                    float foto = JSONData.getInt("foto");
+
+                    sendMessage("Energy"
+                            +"-"+"Não renovável"
+                            +"-"+(total-termica-hidrica-eolica-biomassa-foto)
+                            +"-"+"Térmica"
+                            +"-"+termica
+                            +"-"+"Hídrica"
+                            +"-"+hidrica
+                            +"-"+"Eólica"
+                            +"-"+eolica
+                            +"-"+"Biomassa"
+                            +"-"+biomassa
+                            +"-"+"Fotovoltaica"
+                            +"-"+foto
+                    );
+                    if(!paused) toast(getApplicationContext(),"Energy consumption" + " - " + "Updated data!");
+                    else UI.notify(this,MainActivity.class,"Energy consumption","Updated data!");
+
+                    // falta enviar para o wear (para atualizar o pie chart)
+                    float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
+                    percentage *= 100;
+                    renewableEnergy =  Math.round(percentage);
+                    ChangeColorByEnergy(renewableEnergy);
+                    new RefreshData().start();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }*/
+            }
+        };
+
+        personTask = new TimerTask()
+        {
+            @Override
+            public void run() {
+                HttpRequest CheckUsers = new HttpRequest(BASE_URL + "plug/Power", getApplicationContext(), _queue);
+                try {
+                    CheckUsers.start();
+                    CheckUsers.join();
+                    ArrayList<String> users = new ArrayList<>();
+                    ArrayList<Float> powers = new ArrayList<>();
+                    String ArrayIdPower = CheckUsers.getData();
+                    JSONArray IdPower = new JSONArray(ArrayIdPower);
+                    for (int i = 0; i < IdPower.length(); i++) {
+                        JSONObject User = (JSONObject) IdPower.get(i);
+                        users.add(User.get("id").toString());
+                        powers.add(Float.parseFloat(User.get("power").toString()));
+                    }
+                    String message = "Person consumption";
+                    for (int i = 0; i < users.size(); i++) {
+                        String temp = "-" + users.get(i) + "-" + powers.get(i);
+                        message += temp;
+                        Log.d("PERSONS", "Consumption of " + users.get(i) + ": " + powers.get(i));
+                    }
+                    sendMessage(message);
+                    if (!paused)
+                        toast(getApplicationContext(), "Person consumption" + " - " + "Updated data!");
+                    else
+                        UI.notify(getApplicationContext(), MainActivity.class, "Person consumption", "Updated data!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
     }
 
 }

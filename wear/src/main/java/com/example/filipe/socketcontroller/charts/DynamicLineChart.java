@@ -1,14 +1,10 @@
 package com.example.filipe.socketcontroller.charts;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -17,9 +13,7 @@ import org.eazegraph.lib.models.ValueLinePoint;
 import org.eazegraph.lib.models.ValueLineSeries;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
@@ -29,7 +23,6 @@ public class DynamicLineChart extends LinearLayout
     private HashMap<String,ValueLineSeries> values;
     private ValueLineChart chart;
     private TextView indicator;
-   // private View rootView;
 
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
