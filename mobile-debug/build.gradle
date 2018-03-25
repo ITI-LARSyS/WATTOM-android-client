@@ -1,0 +1,39 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 24
+    defaultConfig {
+        applicationId "com.example.filipe.socketcontroller"
+        minSdkVersion 18
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    wearApp project(':wear')
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:24.2.1'
+    implementation 'com.google.android.gms:play-services:9.8.0'
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+    implementation 'com.android.volley:volley:1.0.0'
+    implementation 'com.android.support:multidex:1.0.1'
+    implementation 'com.android.support:design:24.2.1'
+    implementation 'com.android.support:mediarouter-v7:24.2.1'
+    implementation 'com.android.support:support-vector-drawable:24.2.1'
+}

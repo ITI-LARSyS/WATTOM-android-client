@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:orientation="horizontal"
+    android:gravity="center"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.example.filipe.socketcontroller.MainActivity"
+    tools:showIn="@layout/activity_device_selection">
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLargePopupMenu"
+                android:text="Please select a target..."/>
+
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Caralhinho"
+                android:onClick="handleTestClick"/>
+
+            <Button
+                android:id="@+id/start_thread"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Star Debug Thread"
+                android:onClick="handleDebugClick"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="force_update"
+                android:onClick="handleUpdateClick"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Participant ID:"/>
+        <EditText
+            android:id="@+id/participant_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            />
+    </LinearLayout>
+
+    <com.example.filipe.socketcontroller.SimulationView
+        android:id="@+id/simulation_view"
+        android:layout_width="500dp"
+        android:layout_height="500dp" />
+
+
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="50dp">
+
+            <Button
+                android:id="@+id/btnStartStudy"
+                android:text="@string/start_study"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.5"
+                android:padding="50dp"
+                android:onClick="handleStartStudyClick"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_marginTop="30dp"
+                android:id="@+id/trial_field"
+                android:layout_width="match_parent"
+                android:gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:textSize="20pt"
+                android:text="-"/>
+
+
+            <TextView
+                android:layout_marginTop="30dp"
+                android:id="@+id/counter"
+                android:layout_width="match_parent"
+                android:gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:textSize="50pt"
+                android:text="-"/>
+
+            <TextView
+                android:id="@+id/instructions_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="25pt"
+                android:text="-"
+                />
+
+
+        </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/debug_view"
+        android:layout_width="0dp"
+        android:layout_weight="0.5"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        >
+        <Button
+            android:id="@+id/debug_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DEBUG"
+            android:onClick="handleDebugClick"/>
+
+
+        <TextView
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Condition (T,A)"/>
+
+        <EditText
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/condition_field"
+            android:hint="T,A"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="handleRefreshClick"
+            android:text="refresh"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

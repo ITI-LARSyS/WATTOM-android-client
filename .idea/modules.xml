@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SocketController.iml" filepath="$PROJECT_DIR$/SocketController.iml" />
       <module fileurl="file://$PROJECT_DIR$/mobile/mobile.iml" filepath="$PROJECT_DIR$/mobile/mobile.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mobile-debug/mobile-debug.iml" filepath="$PROJECT_DIR$/mobile-debug/mobile-debug.iml" />
       <module fileurl="file://$PROJECT_DIR$/wear/wear.iml" filepath="$PROJECT_DIR$/wear/wear.iml" />
       <module fileurl="file://$PROJECT_DIR$/wear-complete/wear-complete.iml" filepath="$PROJECT_DIR$/wear-complete/wear-complete.iml" />
       <module fileurl="file://$PROJECT_DIR$/wearable/wearable.iml" filepath="$PROJECT_DIR$/wearable/wearable.iml" />
