@@ -2,6 +2,8 @@ package com.example.filipe.socketcontroller.motion;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.util.Log;
 
 
@@ -170,6 +172,7 @@ public class PlugMotionHandler extends Thread{
             //Log.i(TAG,"--- RUNNING COLOR REQUEST : target "+_led_target+" ---");
             _request.join();
             String data = _request.getData();
+
             JSONArray json_array = new JSONArray(data);
             JSONObject json_message = json_array.getJSONObject(_led_target);
             handlePlugMessage(json_message);
@@ -206,14 +209,19 @@ public class PlugMotionHandler extends Thread{
         int max = 400;  // alterei o total aqui
 
         Log.wtf(TAG,"Limit:"+limit+" Resolution:"+_resolution);
-
+        ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
         while (_isRunning){
             if(total<_resolution*1.5){
+
+
                 milis2 = System.currentTimeMillis();
+                Log.e("COUNTER",""+counter);
                 if(counter == limit) {
+
                     _currentLED = _currentLED + _orientation;
                     _currentLED = _currentLED == 12 ? 0 : _currentLED;
                     _currentLED = _currentLED == -1 ? 11 : _currentLED;
+
                     counter = 1;
                 }else{
                     counter++;

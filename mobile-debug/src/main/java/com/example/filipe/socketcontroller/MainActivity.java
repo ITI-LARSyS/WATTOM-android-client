@@ -130,15 +130,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        _counter        = (TextView) findViewById(R.id.counter);
-        _pId            = (EditText) findViewById(R.id.participant_id);
+       // _counter        = (TextView) findViewById(R.id.counter);
+      //  _pId            = (EditText) findViewById(R.id.participant_id);
         _simuView       = (SimulationView) findViewById(R.id.simulation_view);
-        _instructions   = (TextView) findViewById(R.id.instructions_field);
-        _condition      = (TextView) findViewById(R.id.condition_field);
-        _trial_field    = (TextView) findViewById(R.id.trial_field);
+       // _instructions   = (TextView) findViewById(R.id.instructions_field);
+       // _condition      = (TextView) findViewById(R.id.condition_field);
+       // _trial_field    = (TextView) findViewById(R.id.trial_field);
 
         //_simuView.setVisibility(View.GONE);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+      /*  FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         final View debug_view = findViewById(R.id.debug_view);
         debug_view.setVisibility(View.GONE);
 
@@ -151,23 +151,23 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 else
                     debug_view.setVisibility(View.VISIBLE);
             }
-        });
+        }); */
 
-        _client = new GoogleApiClient.Builder(this)
+       /* _client = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(AppIndex.API).build();
 
-        _client.connect();
+       // _client.connect();
         Wearable.MessageApi.addListener(_client, this);
-        _queue = Volley.newRequestQueue(getApplicationContext());
+        _queue = Volley.newRequestQueue(getApplicationContext()); */
 
     }
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        _started = true;
+        /*_started = true;
 
         String merda = messageEvent.getPath();
         String data = merda.replace("acc", "");
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             Log.i(TAG,"got data from watch x "+x+","+z);
         } catch (NumberFormatException e) {
             Log.e(TAG, "format exception data " + data);
-        }
+        } */
     }
 
     private void push(int index, double[][] data,double x, double y){
@@ -216,12 +216,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     protected void onStop() {
         super.onStop();
-        Wearable.MessageApi.removeListener(_client, this);
-        Log.wtf(TAG, " wtf called from main activity");
+//        Wearable.MessageApi.removeListener(_client, this);
+      //  Log.wtf(TAG, " wtf called from main activity");
         stopServices();
-        _correlationRunning = false;
-        saveFile();
-        _client.disconnect();
+     //   _correlationRunning = false;
+   //     saveFile();
+   //     _client.disconnect();
     }
 
     private boolean saveFile(){
@@ -257,11 +257,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
 
     public void handleStartStudyClick(View v){
-        _participant = Integer.parseInt(_pId.getText().toString());
-        _angle       = 0;
-        _pointing    = _condition.getText().toString();
+//        _participant = Integer.parseInt(_pId.getText().toString());
+     //   _angle       = 0;
+   //     _pointing    = _condition.getText().toString();
         SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
-        new StartUp(PLUGS_URL+"/"+_plug).start();
+        new StartUp(PLUGS_URL+_plug).start();
     }
 
     public void handleUpdateClick(View v){
@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void firstStartup(String url){
 
-        _corrHandler = new CorrelationHandler();
+        //_corrHandler = new CorrelationHandler();
 
         _handlers = new ArrayList<>();
         _aggregators = new ArrayList<>();
@@ -386,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
             _plug_names = new ArrayList<>();
 
-            HttpRequest novo = new HttpRequest(server_url, getApplicationContext());
+            HttpRequest novo = new HttpRequest(server_url, getApplicationContext(),_queue);
             novo.start();
             novo.join();
             String data = novo.getData();
@@ -398,15 +398,23 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 try {
 //                    if ((int) (obj.get("blue")) == 0)
                         _target = i;
-                        String red = Integer.toHexString(Integer.parseInt(obj.getString("red")));
+                        /*String red = Integer.toHexString(Integer.parseInt(obj.getString("red")));
                         String green =  Integer.toHexString(Integer.parseInt(obj.getString("green")));
                     String blue =  Integer.toHexString(Integer.parseInt(obj.getString("blue")));
-                    _simuView.setColor(i,"#"+red+green+blue);
-                    _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
+                    _simuView.setColor(i,"#"+red+green+blue);*/
+                    int red = Integer.parseInt(obj.getString("red"));
+                    int green =  Integer.parseInt(obj.getString("green"));
+                    int blue =  Integer.parseInt(obj.getString("blue"));
+                    String hex = String.format("#%02x%02x%02x",red,green,blue);
+                    _simuView.setColor(i,hex);
+                    System.out.println("cor:"+"#"+red+green+blue);
+                    _plug_names.add("3");
+                    //_plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
                     Log.i(TAG, "plug "+_plug_names.get(i));
 
                 }catch (JSONException e){
                     Log.wtf(TAG," não devia dar prob aqui");
+                    e.printStackTrace();
                 }
             }
             Log.i(TAG,"-------");
@@ -426,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        _client.connect();
+//        _client.connect();
     }
 
     private class StartUp extends Thread{
@@ -449,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _correlationRunning = true;
                 _started = true;
                 _updating = false;
-                _corrHandler.start();
+//                _corrHandler.start();
 
                 for(int i=1;i<_handlers.size();i++) {
                     Log.d(TAG,"forcing the update of the handlers");
@@ -738,8 +746,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         _ui_handler.sendMessage(msg);
                         Log.wtf("Corr", "AQUI");
 
-                        stopServices();
-                        _correlationRunning = false;
+                       // stopServices();
+                       // _correlationRunning = false;
                     }else{
                         _updateStudyWorker = new UpdateStudy(10);
                         _updateStudyWorker.start();

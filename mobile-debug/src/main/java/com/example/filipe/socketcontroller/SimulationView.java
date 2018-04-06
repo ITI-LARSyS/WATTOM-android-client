@@ -41,6 +41,7 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     public SimulationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         coords = new ArrayList<>();
+        colors = new ArrayList<>();
         getHolder().addCallback(this);
         // TODO Auto-generated constructor stub
     }
@@ -106,13 +107,16 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
 
         for(int i = 0; i < coords.size(); i++)
         {
-            Paint p = new Paint();
-            p.setColor(Color.parseColor(colors.get(i)));
+            if(colors.size() == coords.size() && colors.get(i) != null)
+            {
+                Paint p = new Paint();
+                p.setColor(Color.parseColor(colors.get(i)));
 
-            Pair<Float,Float> pair = coords.get(i);
-            c.drawCircle((pair.first+2)*120, ((pair.second*-1)+2)*120, 20f, p);
+                Pair<Float,Float> pair = coords.get(i);
+                c.drawCircle((pair.first+2)*120, ((pair.second*-1)+2)*120, 20f, p);
 
-            //c.drawCircle((x2+2)*120, ((y2*-1)+2)*120, 20f, p);
+                //c.drawCircle((x2+2)*120, ((y2*-1)+2)*120, 20f, p);
+            }
         }
 
 
@@ -130,7 +134,9 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
 
     public void setColor(int i, String color)
     {
-        colors.set(i,color);
+        if(colors == null) colors = new ArrayList<>();
+        if(i < colors.size()) colors.set(i,color);
+        else colors.add(color);
     }
 
 

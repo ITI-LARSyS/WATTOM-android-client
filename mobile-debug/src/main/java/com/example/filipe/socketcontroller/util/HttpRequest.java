@@ -72,6 +72,7 @@ public class HttpRequest extends Thread {
                 5,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
+        if(_queue == null)  _queue = Volley.newRequestQueue(_appCtx);
         _queue.add(stringRequest);
 
         try {
