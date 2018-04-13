@@ -29,6 +29,7 @@ public class PlugMotionHandler extends Thread{
     // private  String _server_url = "http://192.168.1.6:3000/plug/3";
 
     private static final String TARGET = "target";
+    private final static boolean SOUND =  true;
 
 
     private String _message = "[{position:0, velocity:400, orientation:1}]";
@@ -210,12 +211,22 @@ public class PlugMotionHandler extends Thread{
 
         Log.wtf(TAG,"Limit:"+limit+" Resolution:"+_resolution);
         ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+
         while (_isRunning){
+
             if(total<_resolution*1.5){
 
-
                 milis2 = System.currentTimeMillis();
-                Log.e("COUNTER",""+counter);
+
+                //Log.i(TAG, "total: "+total+" , counter: "+counter+" , limit: "+limit+" , LED: "+_currentLED);
+
+                if(_currentLED==0 && SOUND)
+                    toneGen1.startTone(ToneGenerator.TONE_CDMA_CALLDROP_LITE,100);
+
+
+                if(_currentLED==6 && SOUND)
+                    toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_REORDER,100);
+                
                 if(counter == limit) {
 
                     _currentLED = _currentLED + _orientation;
@@ -233,6 +244,7 @@ public class PlugMotionHandler extends Thread{
                     _angle = (_temp_val/_raio);
                     _x = _raio*Math.sin(_angle);
                     _y = _raio*Math.cos(_angle);
+                  //  Log.i(TAG,_x+"");
                 }
                 try {
                     newVel =_ajustedVelocity-(System.currentTimeMillis()-milis2);

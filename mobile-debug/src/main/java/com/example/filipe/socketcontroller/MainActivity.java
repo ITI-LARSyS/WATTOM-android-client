@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private double _last_acc_y = 0;
 
     //plugs url for notifying good correlation
-    private final static String BASE_URL = "http://192.168.8.196:3000";
+    private final static String BASE_URL = "http://192.168.8.113:3000";
     //  private final static String BASE_URL = "http://192.168.1.7:3000";
 
     private final static String PLUGS_URL =BASE_URL+"/plug/";
