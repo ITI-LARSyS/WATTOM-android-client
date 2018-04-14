@@ -262,7 +262,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             // _x_acc.setText(x+"");
             z = event.values[2];
             z = _factor*z;
-            Log.d("XYZ","x:"+event.values[0]+",y:"+event.values[1]+",z:"+event.values[2]);
+            //Log.d("XYZ","x:"+event.values[0]+",y:"+event.values[1]+",z:"+event.values[2]);
             // _y_acc.setText(z+"");
 
 //            Log.i("DEBUG",x+","+z);
@@ -306,11 +306,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                                 Log.e(TAG, "Failed to send message with status code: "
                                         + sendMessageResult.getStatus().getStatusCode());
                             }
-                            else
+                           /* else
                             {
                                 Log.d("SENDMESSAGE","MESSAGE SENT - "+key);
                                 Log.d("SENDMESSAGE","status "+sendMessageResult.getStatus().isSuccess());
-                            }
+                            }*/
                         }
                 );
             }

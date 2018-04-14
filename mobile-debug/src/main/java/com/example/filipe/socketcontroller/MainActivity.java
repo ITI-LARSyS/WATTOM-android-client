@@ -153,25 +153,35 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
         }); */
 
-       /* _client = new GoogleApiClient.Builder(this)
+       _client = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(AppIndex.API).build();
 
-       // _client.connect();
+       _client.connect();
         Wearable.MessageApi.addListener(_client, this);
-        _queue = Volley.newRequestQueue(getApplicationContext()); */
+       _queue = Volley.newRequestQueue(getApplicationContext());
 
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        _client.connect();
+    }
+
+    @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        /*_started = true;
+        _started = true;
 
         String merda = messageEvent.getPath();
         String data = merda.replace("acc", "");
         String[] tokens = data.split("#");
+        Log.i(TAG,"test");
         try {
             double x = Double.parseDouble(tokens[0]);
             double z = Double.parseDouble(tokens[1])*-1;
@@ -180,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             Log.i(TAG,"got data from watch x "+x+","+z);
         } catch (NumberFormatException e) {
             Log.e(TAG, "format exception data " + data);
-        } */
+        }
     }
 
     private void push(int index, double[][] data,double x, double y){
@@ -216,12 +226,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     protected void onStop() {
         super.onStop();
-//        Wearable.MessageApi.removeListener(_client, this);
-      //  Log.wtf(TAG, " wtf called from main activity");
+        Wearable.MessageApi.removeListener(_client, this);
+        Log.wtf(TAG, " wtf called from main activity");
         stopServices();
-     //   _correlationRunning = false;
+        _correlationRunning = false;
    //     saveFile();
-   //     _client.disconnect();
+        _client.disconnect();
     }
 
     private boolean saveFile(){
@@ -307,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void firstStartup(String url){
 
-        //_corrHandler = new CorrelationHandler();
+        _corrHandler = new CorrelationHandler();
 
         _handlers = new ArrayList<>();
         _aggregators = new ArrayList<>();
@@ -428,15 +438,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-//        _client.connect();
-    }
-
     private class StartUp extends Thread{
 
         private String _url;
@@ -448,6 +449,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         @Override
         public void run(){
             try {
+
+                Log.e(TAG, "Starging up");
+
                 _updating = true;
                 _started = false;
                 getPlugsData(_url);
@@ -457,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _correlationRunning = true;
                 _started = true;
                 _updating = false;
-//                _corrHandler.start();
+                _corrHandler.start();
 
                 for(int i=1;i<_handlers.size();i++) {
                     Log.d(TAG,"forcing the update of the handlers");
@@ -479,6 +483,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         public void run(){
 
             try {
+
+                Log.e(TAG, "Refreshing");
+
+
                 _updating = true;
                 _started = false;
                 _correlationRunning = false;
@@ -652,15 +660,33 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     _correlations[1][i] = pc.correlation(_plug_target_data[i][1], _acc_data[i][1]);
                 }
                 for(int i=0;i<_devices_count;i++){
-                    Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
+                  //  Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
 
                     if ((_correlations[0][i] > 0.8 && _correlations[0][i] < 0.9999) && (_correlations[1][i]>0.8 &&  _correlations[1][i]<0.9999)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
-                        Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
+
+
+
                         if(_correlations_count[i]==3) {
                             _correlations_count[i] = 0;
-                            if (i == _target){
+
+                            Log.i("Positive Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
+
+                            try {
+                                HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + i, getApplicationContext(),_queue);
+                                selected_request.start();
+                                ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+                                toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
+                                selected_request.join();
+                                Log.e(TAG, "-----   running "+SELECTED_URL + "" + i+" request  ------");
+
+                                Thread.sleep(6000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                           /* if (i == _target){
                                 _target_selection = true;
                                 // Beep to show its the correct match
                                 ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
@@ -672,7 +698,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
                                 toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
                                 updateTarget(i,true);
-                            }
+                            }*/
                         }
                     }
                 }
