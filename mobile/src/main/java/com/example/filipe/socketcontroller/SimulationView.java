@@ -32,14 +32,18 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     //float x;
     //float y;
 
-//    float x2;
+    //    float x2;
     //float y2;
+    private static final String TAG = "Simulation View";
     private ArrayList<Pair<Float,Float>> coords;
+    private ArrayList<String> colors;
     private Paint[] p;
+    private int radious;
 
     public SimulationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         coords = new ArrayList<>();
+        colors = new ArrayList<>();
         getHolder().addCallback(this);
         // TODO Auto-generated constructor stub
     }
@@ -49,8 +53,8 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
         if(c!=null){
             c.drawColor(Color.parseColor("#E2E0DB"));
             drawCircles(c);
-            }
         }
+    }
 
     @SuppressLint("WrongCall")
     public void requestRender(){
@@ -86,12 +90,13 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
         Log.e("COMP","COMP WIDGET CREATED");
         height = getHeight();
         width  = getWidth();
-        p = new Paint[UI.colors.length];
+        radious = (height/2);
+       /* p = new Paint[UI.colors.length];
         for(int i = 0; i < UI.colors.length ; i++)
         {
             p[i] = new Paint();
             p[i].setColor(Color.parseColor(UI.colors[i % UI.colors.length]));
-        }
+        }*/
     }
 
     @Override
@@ -103,13 +108,20 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     private void drawCircles(Canvas c){
 
 
+        Log.i(TAG,"height "+height+" width:"+width+" , radious: "+radious);
+
         for(int i = 0; i < coords.size(); i++)
         {
-            Pair<Float,Float> pair = coords.get(i);
+            if(colors.size() == coords.size() && colors.get(i) != null)
+            {
+                Paint p = new Paint();
+                p.setColor(Color.parseColor(colors.get(i)));
 
-                c.drawCircle((pair.first+2)*120, ((pair.second*-1)+2)*120, 20f, p[i]);
+                Pair<Float,Float> pair = coords.get(i);
+                c.drawCircle(((pair.first*(radious/2.3f)))+radious, (((pair.second*-1)*(radious/2.3f)))+radious, 20f, p);
 
-            //c.drawCircle((x2+2)*120, ((y2*-1)+2)*120, 20f, p);
+                //c.drawCircle((x2+2)*120, ((y2*-1)+2)*120, 20f, p);
+            }
         }
 
 
@@ -123,6 +135,13 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
         if(i < coords.size()) coords.set(i,Pair.create(x,y));
         else coords.add(Pair.create(x,y));
         requestRender();
+    }
+
+    public void setColor(int i, String color)
+    {
+        if(colors == null) colors = new ArrayList<>();
+        if(i < colors.size()) colors.set(i,color);
+        else colors.add(color);
     }
 
 

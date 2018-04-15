@@ -11,6 +11,7 @@
     tools:context="com.example.filipe.socketcontroller.MainActivity"
     tools:showIn="@layout/activity_device_selection">
 
+    <!---
         <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,6 +46,8 @@
                 android:onClick="handleUpdateClick"/>
 
     </LinearLayout>
+    -->
+    <!---
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -63,6 +66,7 @@
             android:visibility="gone"
             />
     </LinearLayout>
+    -->
 
     <com.example.filipe.socketcontroller.SimulationView
         android:id="@+id/simulation_view"
@@ -89,7 +93,7 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <!-- <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -123,9 +127,10 @@
                 />
 
 
-        </LinearLayout>
+        </LinearLayout> -->
 
 
+    <!--
     <LinearLayout
         android:id="@+id/debug_view"
         android:layout_width="0dp"
@@ -164,5 +169,6 @@
             />
 
     </LinearLayout>
+    -->
 
 </LinearLayout>

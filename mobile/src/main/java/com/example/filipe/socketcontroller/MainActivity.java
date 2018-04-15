@@ -405,9 +405,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void handleStopStudyClick(View v)
     {
-        stop();
-        ((TextView)v).setText(R.string.start_study);
-        v.setOnClickListener((x)-> handleStartStudyClick(x));
+        onDestroy();
+        toast(getApplicationContext(),"Study ended!");
+        this.finish();
+        startActivity(new Intent(this,MainActivity.class));
+      //  ((TextView)v).setText(R.string.start_study);
+      //  v.setOnClickListener((x)-> handleStartStudyClick(x));
     }
 
     public void start()
@@ -423,8 +426,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         IsOn = false;
 
-        new Timer().schedule(energyTask,10,1000*60*15);
-
         /* */
         /* */
         fakeMessages();
@@ -432,6 +433,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         /* */
 
         new StartUp(PLUGS_URL).start();
+        new Timer().schedule(energyTask,10,1000*60*15);
         new Timer().schedule(powerTask,10,1000*60);
         new Timer().schedule(personTask,10,1000*60);
     }
