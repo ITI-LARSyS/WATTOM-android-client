@@ -226,7 +226,7 @@ public class PlugMotionHandler extends Thread{
 
                 if(_currentLED==6 && SOUND)
                     toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_REORDER,100);
-                
+
                 if(counter == limit) {
 
                     _currentLED = _currentLED + _orientation;

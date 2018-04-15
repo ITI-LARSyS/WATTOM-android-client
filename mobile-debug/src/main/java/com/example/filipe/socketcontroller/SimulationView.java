@@ -108,7 +108,7 @@ public class SimulationView extends SurfaceView implements SurfaceHolder.Callbac
     private void drawCircles(Canvas c){
 
 
-        Log.i(TAG,"height "+height+" width:"+width+" , radious: "+radious);
+       // Log.i(TAG,"height "+height+" width:"+width+" , radious: "+radious);
 
         for(int i = 0; i < coords.size(); i++)
         {
