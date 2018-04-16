@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -160,6 +161,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private TimerTask powerTask, energyTask, personTask;
 
+    private ImageView corrImage;
+    private static final int CORR_OFF = android.R.drawable.presence_offline;
+    private static final int CORR_NONE = android.R.drawable.presence_invisible;
+    private static final int CORR_GOOD = android.R.drawable.presence_online;
+    private static final int CORR_BAD = android.R.drawable.presence_busy;
+    private static final int CORR_NORMAL = android.R.drawable.presence_away;
 
     //Ao iniciar a aplicacao
     // - Atribui cada elemento da interface uma variavel
@@ -177,22 +184,24 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        _counter = (TextView) findViewById(R.id.counter);
+       /* _counter = (TextView) findViewById(R.id.counter);
         _pId = (EditText) findViewById(R.id.participant_id);
         _simuView = (SimulationView) findViewById(R.id.simulation_view);
         _instructions = (TextView) findViewById(R.id.instructions_field);
         _condition = (TextView) findViewById(R.id.condition_field);
-        _trial_field = (TextView) findViewById(R.id.trial_field);
+        _trial_field = (TextView) findViewById(R.id.trial_field); */
         hourlyTimer = new Timer();
         minTimer = new Timer();
         PowerTimer = new Timer();
 //        IsNotFirstTime = 0;
         isScheduleMode = false;
+        corrImage = (ImageView) findViewById(R.id.corrstate);
+        corrImage.setImageResource(CORR_OFF);
 
         //_simuView.setVisibility(View.GONE);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        final View debug_view = findViewById(R.id.debug_view);
-        debug_view.setVisibility(View.GONE);
+       /* final View debug_view = findViewById(R.id.debug_view);
+        debug_view.setVisibility(View.GONE); */
 
         Device_Name = Settings.Secure.getString(getContentResolver(), "bluetooth_name");
 
@@ -897,6 +906,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlations       = new double[2][_devices_count];
             _correlations_count = new int[_devices_count];
             _togglers = new Thread[_devices_count];
+
+            corrImage.setImageResource(CORR_NONE);
+
             while(_correlationRunning){
                 //if(_countingTime)     // check if we are counting time in the current matching process
                 //   checkRunningTime();
@@ -915,10 +927,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
                     if (((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)))
                     {  // sometimes at the start we get 1.0 we want to avoid that
+
+                        corrImage.setImageResource(CORR_GOOD);
+
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
                         if(_correlations_count[i] == 3) {
+
+
                             _correlations_count[i] = 0;
                             //if (i == _target[i]){
                             _target_selection = true;
@@ -947,6 +964,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 //                                updateTarget(i,true);
                             //}
                         }
+                    }
+                    else  if ( _correlations[0][i] < 0 || _correlations[1][i] < 0)
+                    {
+                        corrImage.setImageResource(CORR_BAD);
+                    }
+                    else
+                    {
+                        corrImage.setImageResource(CORR_NORMAL);
                     }
                 }
 
