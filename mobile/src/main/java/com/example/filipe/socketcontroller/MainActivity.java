@@ -1,5 +1,6 @@
 package com.example.filipe.socketcontroller;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -160,13 +162,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private int indexLuz = -1, indexChaleira = -1;
 
     private TimerTask powerTask, energyTask, personTask;
-
-    private ImageView corrImage;
+    
     private static final int CORR_OFF = android.R.drawable.presence_offline;
     private static final int CORR_NONE = android.R.drawable.presence_invisible;
     private static final int CORR_GOOD = android.R.drawable.presence_online;
     private static final int CORR_BAD = android.R.drawable.presence_busy;
     private static final int CORR_NORMAL = android.R.drawable.presence_away;
+    private Context ctx;
 
     //Ao iniciar a aplicacao
     // - Atribui cada elemento da interface uma variavel
@@ -177,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        ctx = this;
         super.onCreate(savedInstanceState);
         askIP();
 
@@ -195,8 +198,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         PowerTimer = new Timer();
 //        IsNotFirstTime = 0;
         isScheduleMode = false;
-        corrImage = (ImageView) findViewById(R.id.corrstate);
-        corrImage.setImageResource(CORR_OFF);
 
         //_simuView.setVisibility(View.GONE);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -907,7 +908,14 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlations_count = new int[_devices_count];
             _togglers = new Thread[_devices_count];
 
-            corrImage.setImageResource(CORR_NONE);
+            ImageView corrIcons[] = new ImageView[_devices_count];
+            LinearLayout container = (LinearLayout) ((Activity)ctx).findViewById(R.id.corrstates);
+            for (int i = 0; i < _devices_count ; i++)
+            {
+                corrIcons[i] = new ImageView(ctx);
+                corrIcons[i].setImageResource(CORR_NONE);
+                container.addView(corrIcons[i]);
+            }
 
             while(_correlationRunning){
                 //if(_countingTime)     // check if we are counting time in the current matching process
@@ -928,7 +936,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     if (((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)))
                     {  // sometimes at the start we get 1.0 we want to avoid that
 
-                        corrImage.setImageResource(CORR_GOOD);
+                        corrIcons[i].setImageResource(CORR_GOOD);
 
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
@@ -967,11 +975,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     }
                     else  if ( _correlations[0][i] < 0 || _correlations[1][i] < 0)
                     {
-                        corrImage.setImageResource(CORR_BAD);
+                        corrIcons[i].setImageResource(CORR_BAD);
                     }
                     else
                     {
-                        corrImage.setImageResource(CORR_NORMAL);
+                        corrIcons[i].setImageResource(CORR_NORMAL);
                     }
                 }
 
