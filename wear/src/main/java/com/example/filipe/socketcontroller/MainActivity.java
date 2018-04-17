@@ -182,6 +182,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     public void onResume()
     {
         super.onResume();
+
+        toast(this,"Resuming..");
+
         paused = false;
 
         _client = new GoogleApiClient.Builder(this)
@@ -344,7 +347,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
                     {
-                        piePessoasAcum.incValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
+                        piePessoasAcum.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                         Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
                     notify("Person consumption","Updated data!");
@@ -378,7 +381,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     String plugName = valores[1];
                     float value = Float.parseFloat(valores[2]);
                     linePlugs.addPoint(plugName,value);
-                    piePlugsAcum.incValue(plugName,value);
+                    piePlugsAcum.setValue(plugName,value);
                     notify("Plug consumption","Updated data!");
                     Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;

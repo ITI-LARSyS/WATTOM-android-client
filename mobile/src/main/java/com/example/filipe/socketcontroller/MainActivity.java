@@ -162,7 +162,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private int indexLuz = -1, indexChaleira = -1;
 
     private TimerTask powerTask, energyTask, personTask;
-    
+
+
     private static final int CORR_OFF = android.R.drawable.presence_offline;
     private static final int CORR_NONE = android.R.drawable.presence_invisible;
     private static final int CORR_GOOD = android.R.drawable.presence_online;
