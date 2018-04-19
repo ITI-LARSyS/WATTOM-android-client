@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // - Cria a fila de pedidos
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        
+
         super.onCreate(savedInstanceState);
         askIP();
 
