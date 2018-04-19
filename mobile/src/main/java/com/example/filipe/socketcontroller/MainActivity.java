@@ -426,27 +426,33 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void start()
     {
-        //_participant = Integer.parseInt(_pId.getText().toString());
-        //_angle       = 0;
-        //_pointing    = _condition.getText().toString();
-        //SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
+        new Thread(()->
+        {
+            //_participant = Integer.parseInt(_pId.getText().toString());
+            //_angle       = 0;
+            //_pointing    = _condition.getText().toString();
+            //SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
 
-        inStudy = true;
-        sendMessage("START");
-        toast(getApplicationContext(),"Study started!");
+            inStudy = true;
+            sendMessage("START");
+            toast(getApplicationContext(),"Study started!");
 
-        IsOn = false;
+            IsOn = false;
 
-        /* */
-        /* */
-        fakeMessages();
-        /* */
-        /* */
+            fakeMessages();
 
-        new StartUp(PLUGS_URL).start();
-        new Timer().schedule(energyTask,10,1000*60*15);
-        new Timer().schedule(powerTask,10,1000*60);
-        new Timer().schedule(personTask,10,1000*60);
+            new Timer().schedule(energyTask,10,1000*60*15);
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            new StartUp(PLUGS_URL).start();
+            new Timer().schedule(powerTask,10,1000*60);
+            new Timer().schedule(personTask,10,1000*60);
+        }).start();
     }
 
     public void stop()
@@ -929,8 +935,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 for(int i=0;(i<_devices_count) && (_plug_data_indexes[_target[i]] == WINDOW_SIZE);i++){
                     _correlations[0][i] = pc.correlation(_plug_target_data[i][0], _acc_data[i][0]);
                     _correlations[1][i] = pc.correlation(_plug_target_data[i][1], _acc_data[i][1]);
-                    Log.d("CORR0",""+_correlations[0][i]);
-                    Log.d("CORR1",""+_correlations[1][i]);
+                    //Log.d("CORR0",""+_correlations[0][i]);
+                    //Log.d("CORR1",""+_correlations[1][i]);
                 }
                 for(int i=0;i<_devices_count;i++){
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
@@ -938,13 +944,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     {  // sometimes at the start we get 1.0 we want to avoid that
 
                         corrIcons[i].setImageResource(CORR_GOOD);
+                        toast(getApplicationContext(),"Boa correlação "+i+" - "+_correlations_count[i]+"o");
 
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
                         if(_correlations_count[i] == 3) {
-
-
                             _correlations_count[i] = 0;
                             //if (i == _target[i]){
                             _target_selection = true;

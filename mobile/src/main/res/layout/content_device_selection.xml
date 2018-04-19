@@ -73,13 +73,13 @@
         android:layout_height="500dp" /> -->
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
             android:padding="30dp">
 
-            <LinearLayout
+        <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -97,6 +97,16 @@
 
 
         </LinearLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:layout_weight="1"
+            android:onClick="demo3"
+            android:src="@android:drawable/ic_dialog_email"/>
 
         <!-- <LinearLayout
             android:layout_width="match_parent"
