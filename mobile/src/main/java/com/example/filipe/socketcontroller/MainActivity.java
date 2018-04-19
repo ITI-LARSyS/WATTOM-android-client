@@ -169,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private static final int CORR_GOOD = android.R.drawable.presence_online;
     private static final int CORR_BAD = android.R.drawable.presence_busy;
     private static final int CORR_NORMAL = android.R.drawable.presence_away;
-    private Context ctx;
 
     //Ao iniciar a aplicacao
     // - Atribui cada elemento da interface uma variavel
@@ -179,8 +178,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // - Cria a fila de pedidos
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        ctx = this;
+        
         super.onCreate(savedInstanceState);
         askIP();
 
@@ -914,6 +912,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlations       = new double[2][_devices_count];
             _correlations_count = new int[_devices_count];
             _togglers = new Thread[_devices_count];
+            Context ctx = getApplicationContext();
 
             ImageView corrIcons[] = new ImageView[_devices_count];
             LinearLayout container = (LinearLayout) ((Activity)ctx).findViewById(R.id.corrstates);
