@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         isScheduleMode = false;
 
         //_simuView.setVisibility(View.GONE);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+       // FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
        /* final View debug_view = findViewById(R.id.debug_view);
         debug_view.setVisibility(View.GONE); */
 
