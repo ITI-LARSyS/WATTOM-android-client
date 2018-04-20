@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:padding="10dp"
     android:orientation="horizontal"
     android:gravity="center"
     tools:context="com.example.filipe.socketcontroller.MainActivity"
@@ -73,18 +73,19 @@
         android:layout_height="500dp" /> -->
 
     <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:gravity="center"
-            android:padding="30dp">
+            android:gravity="center|bottom"
+            android:padding="25dp"
+            android:weightSum="8">
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:id="@+id/corrstates"
-                android:orientation="vertical">
+                android:orientation="horizontal" >
 
             </LinearLayout>
 
@@ -92,15 +93,17 @@
                 android:id="@+id/btnStartStudy"
                 android:text="@string/start_study"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="handleStartStudyClick"/>
+                android:layout_height="0dp"
+                android:onClick="handleStartStudyClick"
+                android:layout_weight="2"/>
 
             <Button
                 android:id="@+id/btnDemo3"
                 android:text="DEMO 3"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="demo3"/>
+                android:layout_height="0dp"
+                android:onClick="demo3"
+                android:layout_weight="1"/>
 
         </LinearLayout>
 

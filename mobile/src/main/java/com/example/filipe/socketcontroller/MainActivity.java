@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -14,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -414,10 +416,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void handleStopStudyClick(View v)
     {
-        onDestroy();
         toast(getApplicationContext(),"Study ended!");
-        this.finish();
         startActivity(new Intent(this,MainActivity.class));
+        this.finish();
       //  ((TextView)v).setText(R.string.start_study);
       //  v.setOnClickListener((x)-> handleStartStudyClick(x));
     }
@@ -824,7 +825,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     //if((_led_target ==_target[0])) {     // used to print the simulation on the screen
                         for(int i = 0; i < _devices_count; i++)
                         {
-                           _simuView.setCoords(i,(float) _handlers.get(i).getPosition()[0], (float) _handlers.get(i).getPosition()[1]);
+//                           _simuView.setCoords(i,(float) _handlers.get(i).getPosition()[0], (float) _handlers.get(i).getPosition()[1]);
                             //_simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1],(float)_last_acc_x,(float)_last_acc_y);
                         }
                     //}
@@ -913,14 +914,17 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlations_count = new int[_devices_count];
             _togglers = new Thread[_devices_count];
             Context ctx = getApplicationContext();
+            Activity a = MainActivity.this;
 
             ImageView corrIcons[] = new ImageView[_devices_count];
-            LinearLayout container = (LinearLayout) ((Activity)ctx).findViewById(R.id.corrstates);
+            LinearLayout container = (LinearLayout) a.findViewById(R.id.corrstates);
             for (int i = 0; i < _devices_count ; i++)
             {
                 corrIcons[i] = new ImageView(ctx);
                 corrIcons[i].setImageResource(CORR_NONE);
-                container.addView(corrIcons[i]);
+                corrIcons[i].setLayoutParams(new LinearLayout.LayoutParams(50,50));
+                int finalI = i;
+                runOnUiThread(()->container.addView(corrIcons[finalI]));
             }
 
             while(_correlationRunning){
@@ -938,12 +942,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     //Log.d("CORR1",""+_correlations[1][i]);
                 }
                 for(int i=0;i<_devices_count;i++){
+                    int current = i;
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
                     if (((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)))
                     {  // sometimes at the start we get 1.0 we want to avoid that
 
-                        corrIcons[i].setImageResource(CORR_GOOD);
-                        toast(getApplicationContext(),"Boa correlação "+i+" - "+_correlations_count[i]+"o");
+                        runOnUiThread(()->corrIcons[current].setImageResource(CORR_GOOD));
 
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
@@ -980,11 +984,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     }
                     else  if ( _correlations[0][i] < 0 || _correlations[1][i] < 0)
                     {
-                        corrIcons[i].setImageResource(CORR_BAD);
+                        runOnUiThread(()->corrIcons[current].setImageResource(CORR_BAD));
                     }
                     else
                     {
-                        corrIcons[i].setImageResource(CORR_NORMAL);
+                        runOnUiThread(()->corrIcons[current].setImageResource(CORR_NORMAL));
                     }
                 }
 
@@ -1095,13 +1099,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         {
             if(j == indexLuz)
             {
-                sendMessage("Device start"+"-"+"Luz top");
+                sendMessage("Device start"+"-"+"luz top");
             }
             else
             {
                 if(j == indexChaleira)
                 {
-                    sendMessage("Device start"+"-"+"Chaleira top");
+                    sendMessage("Device start"+"-"+"chaleira top");
                 }
             }
         }
@@ -1294,6 +1298,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
+        input.setRawInputType(Configuration.KEYBOARD_12KEY);
         ask.setView(input);
         ask.setCancelable(false);
 
