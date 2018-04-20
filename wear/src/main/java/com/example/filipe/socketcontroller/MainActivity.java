@@ -575,6 +575,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePlugs.addPoint("plug2.local","21:03",4.0f);
         linePlugs.addPoint("plug2.local","21:04",5f);
         linePlugs.addPoint("plug2.local","21:05",4.4f);
+        linePlugs.addPoint("plug4.local","21:01",4.4f);
+        linePlugs.addPoint("plug4.local","21:02",2.9f);
+        linePlugs.addPoint("plug4.local","21:03",4.0f);
+        linePlugs.addPoint("plug4.local","21:04",5f);
+        linePlugs.addPoint("plug4.local","21:05",4.4f);
 
         lineDevices.addPoint("Acer Aspire","14:02",2.4f);
         lineDevices.addPoint("Xiaomi","14:02",1.4f);

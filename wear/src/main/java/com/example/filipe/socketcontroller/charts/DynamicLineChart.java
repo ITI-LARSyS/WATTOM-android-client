@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -53,6 +54,7 @@ public class DynamicLineChart extends LinearLayout
         chart.setUseDynamicScaling(false);
         chart.setIndicatorLineColor(Color.parseColor("#FFFFFF"));
         chart.setIndicatorTextColor(Color.parseColor("#FFFFFF"));
+        chart.setIndicatorTextUnit("W");
 
         indicator = new TextView(c);
         indicator.setLayoutParams(new LinearLayout.LayoutParams(

@@ -16,16 +16,42 @@ import static com.example.filipe.socketcontroller.util.UI.colors;
 public class DynamicPieChart extends PieChart
 {
     private HashMap<String,PieModel> values;
+    private int currentIndex;
     public DynamicPieChart(Context context)
     {
         super(context);
-        values = new HashMap<>();
+        init();
     }
     public DynamicPieChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        values = new HashMap<>();
+        init();
     }
+
+    private void init()
+    {
+        values = new HashMap<>();
+        this.setInnerValueUnit("W");
+        this.setOnClickListener((v)->switchSlice());
+        currentIndex = -1;
+    }
+
+    public void switchSlice()
+    {
+        if(values.size() > 1)
+        {
+            switchSlice((currentIndex + 1) % values.size());
+        }
+    }
+    public void switchSlice(int index)
+    {
+        if(index <= values.size())
+        {
+            currentIndex = index;
+            setCurrentItem(currentIndex);
+        }
+    }
+
     private void add(String key)
     {
         PieModel slice = new PieModel(key,0,Color.parseColor(colors[values.size() % colors.length]));
@@ -35,13 +61,15 @@ public class DynamicPieChart extends PieChart
     private void refresh()
     {
         clearChart();
-        for(Map.Entry<String,PieModel> p : values.entrySet())
-        { addPieSlice(p.getValue()); }
-    }
-    public void remove(String key)
-    {
-        values.remove(key);
-        refresh();
+        if(currentIndex == -1)
+        {
+            currentIndex = 0;
+        }
+        for(PieModel p : values.values())
+        {
+            addPieSlice(p);
+        }
+        setCurrentItem(currentIndex);
     }
     public void setValue(String key,float value)
     {
