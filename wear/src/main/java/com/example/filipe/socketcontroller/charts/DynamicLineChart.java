@@ -23,6 +23,7 @@ public class DynamicLineChart extends LinearLayout
     private HashMap<String,ValueLineSeries> values;
     private ValueLineChart chart;
     private TextView indicator;
+    private int currentIndex;
 
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
@@ -45,8 +46,11 @@ public class DynamicLineChart extends LinearLayout
         chart = new ValueLineChart(c);
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         chart.setLayoutParams(new LinearLayout.LayoutParams(metrics.widthPixels - 80,metrics.heightPixels - 80));
+        chart.setShowStandardValues(true);
+        chart.setShowDecimal(true);
         chart.setUseCubic(true);
-        chart.setUseOverlapFill(false);
+        chart.setUseOverlapFill(true);
+        chart.setUseDynamicScaling(false);
         chart.setIndicatorLineColor(Color.parseColor("#FFFFFF"));
         chart.setIndicatorTextColor(Color.parseColor("#FFFFFF"));
 
@@ -55,37 +59,33 @@ public class DynamicLineChart extends LinearLayout
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT));
         indicator.setOnClickListener((v)-> switchSeries());
-        indicator.bringToFront();
         indicator.setText("-");
         indicator.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
+
+        currentIndex = -1;
 
         addView(chart);
         addView(indicator);
     }
 
-    public int getCurrentIndex()
-    {
-        return new ArrayList<>(values.keySet()).indexOf(indicator.getText()+"");
-    }
-
     public void refresh()
     {
-        switchSeries(indicator.getText()+"");
+        if (currentIndex == -1)
+        {
+            switchSeries(0);
+        }
+        else
+        {
+            switchSeries(currentIndex);
+        }
     }
 
     public void add(String key)
     {
         values.put(key, new ValueLineSeries());
         values.get(key).setColor(Color.parseColor(colors[(values.size() - 1) % colors.length]));
-        if (indicator.getText().equals("-"))
-        {
-            switchSeries(key);
-        }
     }
-    public void remove(String key)
-    {
-        values.remove(key);
-    }
+
     public void addPoint(String key,float point)
     {
         addPoint(key,getCurrentTime(),point);
@@ -95,7 +95,9 @@ public class DynamicLineChart extends LinearLayout
         if(!contains(key))
         { add(key); }
 
-        values.get(key).addPoint(new ValueLinePoint(legend,point));
+        ValueLinePoint value = new ValueLinePoint(legend,point);
+        values.get(key).addPoint(value);
+
         refresh();
     }
     private String getCurrentTime()
@@ -122,16 +124,15 @@ public class DynamicLineChart extends LinearLayout
     {
         if(values.size() > 1)
         {
-            int index = getCurrentIndex();
-            index = (index + 1) % values.size();
-            switchSeries(index);
+            switchSeries((currentIndex + 1) % values.size());
         }
     }
     public void switchSeries(int index)
     {
         if(index <= values.size())
         {
-            String key = (String) values.keySet().toArray()[index];
+            currentIndex = index;
+            String key = (String) values.keySet().toArray()[currentIndex];
             switchSeries(key);
         }
     }

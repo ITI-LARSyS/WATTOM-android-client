@@ -922,7 +922,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             {
                 corrIcons[i] = new ImageView(ctx);
                 corrIcons[i].setImageResource(CORR_NONE);
-                corrIcons[i].setLayoutParams(new LinearLayout.LayoutParams(50,50));
+                corrIcons[i].setLayoutParams(new LinearLayout.LayoutParams(100,100));
                 int finalI = i;
                 runOnUiThread(()->container.addView(corrIcons[finalI]));
             }
@@ -944,7 +944,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 for(int i=0;i<_devices_count;i++){
                     int current = i;
                     //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
-                    if (((_correlations[0][i] >= 0.8 && _correlations[0][i] < 1) && (_correlations[1][i]>=0.8 &&  _correlations[1][i]<1)))
+                    if (((_correlations[0][i] > 0.8 && _correlations[0][i] < 1) && (_correlations[1][i] > 0.8 &&  _correlations[1][i] < 1)))
                     {  // sometimes at the start we get 1.0 we want to avoid that
 
                         runOnUiThread(()->corrIcons[current].setImageResource(CORR_GOOD));
@@ -966,7 +966,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 {
                                     updateTarget(finalI,true);
                                     try {
-                                        Thread.sleep(1000);
+                                        Thread.sleep(2000);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
@@ -1022,7 +1022,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 for(int j = 0; j<_devices_count;j++){
                     if(match && led_target == _target[j]){
                         index = j;
-                        if(isScheduleMode){
+
+                        // Schedule mode
+                        if(isScheduleMode)
+                        {
                             TurnOffAndRemove(j);
                             ChangeColorByEnergy(renewableEnergy);
                             isScheduleMode = false;
@@ -1034,12 +1037,43 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                     TurnOffAndRemove(index);
                                 },false).activate();
                             },false).activate();
-                        }else{
-                            if(IsOn){
-                                TurnOffAndRemove(j);
-                            }else{
-                                TurnOnAndAdd(j);
+                        }
+
+                        // Caso contrário (caso geral)
+                        else
+                        {
+                            // Se tiver mais que um device
+                            // (vai para o gráfico desse device)
+                            if(isMultiTarget())
+                            {
+                                if(j == indexLuz)
+                                {
+                                    sendMessage("Device start"+"-"+"luz top");
+                                }
+                                else
+                                {
+                                    if(j == indexChaleira)
+                                    {
+                                        sendMessage("Device start"+"-"+"chaleira top");
+                                    }
+                                }
                             }
+
+                            // Se tiver só um device
+                            // (vai para o gráfico desse plug)
+                            else
+                            {
+                                if(IsOn)
+                                {
+                                    TurnOffAndRemove(j);
+                                }
+                                else
+                                {
+                                    TurnOnAndAdd(j);
+                                    sendMessage("Plug start"+"-"+"plug"+_plug_names.get(j)+".local");
+                                }
+                            }
+
                             //HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
                             // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
                         }
@@ -1091,30 +1125,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned on");
         }catch (Exception e){
             e.printStackTrace();
-        }
-
-        // Se tiver mais que um device
-        // (vai para o gráfico desse device)
-        if(indexLuz != -1 && indexChaleira != -1)
-        {
-            if(j == indexLuz)
-            {
-                sendMessage("Device start"+"-"+"luz top");
-            }
-            else
-            {
-                if(j == indexChaleira)
-                {
-                    sendMessage("Device start"+"-"+"chaleira top");
-                }
-            }
-        }
-
-        // Se tiver só um device
-        // (vai para o gráfico desse plug)
-        else
-        {
-            sendMessage("Plug start"+"-"+"plug"+_plug_names.get(j)+".local");
         }
 
        //ConsultUsers();
@@ -1365,7 +1375,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
         percentage *= 100;
         renewableEnergy =  Math.round(percentage);
-        Log.d("STATISTICS","renewableEnergy: "+renewableEnergy);
+        //Log.d("STATISTICS","renewableEnergy: "+renewableEnergy);
         ChangeColorByEnergy(renewableEnergy);
         new RefreshData().start();
 
@@ -1526,6 +1536,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
             }
         };
+    }
+    private boolean isMultiTarget()
+    {
+        return indexLuz != -1 && indexChaleira != -1;
     }
 
 }

@@ -2,15 +2,19 @@ package com.example.filipe.socketcontroller.motion;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.util.Log;
 
+
 import com.android.volley.RequestQueue;
-import com.example.filipe.socketcontroller.MainActivity;
+import com.android.volley.toolbox.Volley;
 import com.example.filipe.socketcontroller.util.HttpRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 /**
  * Created by Filipe on 16/05/2017.
@@ -21,10 +25,11 @@ public class PlugMotionHandler extends Thread{
 
     private static final String TAG = "PlugMotionHandler";
     private static final int N_LEDS = 12;
-    private  String _server_url = MainActivity.getBaseURL()+"/plug/3";
-   // private  String _server_url = "http://192.168.1.6:3000/plug/3";
+    private  String _server_url = "http://192.168.8.113:3000/plug/3";
+    // private  String _server_url = "http://192.168.1.6:3000/plug/3";
 
     private static final String TARGET = "target";
+    private final static boolean SOUND =  false;
 
 
     private String _message = "[{position:0, velocity:400, orientation:1}]";
@@ -87,7 +92,7 @@ public class PlugMotionHandler extends Thread{
 
     }
 
-    public PlugMotionHandler(Context application_context, int frequency, int target, String url){
+    public PlugMotionHandler(Context application_context,int frequency, int target, String url){
         this._appCtx = application_context;
         _dataPackage = new Intent();
         _ajustedVelocity = frequency;
@@ -104,7 +109,7 @@ public class PlugMotionHandler extends Thread{
             _period          = N_LEDS*_velocity;
             //_ajustedVelocity = Math.round(_period/(float)_resolution);
             _resolution      = Math.round(_period/_ajustedVelocity);
-           // Log.i(TAG,"adj_v:"+_ajustedVelocity+" res: "+_resolution);
+            // Log.i(TAG,"adj_v:"+_ajustedVelocity+" res: "+_resolution);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -114,6 +119,7 @@ public class PlugMotionHandler extends Thread{
 
     public double[] getPosition(){
         return new double[]{_x, _y};
+
     }
 
     public void stopSimulation(){
@@ -145,14 +151,14 @@ public class PlugMotionHandler extends Thread{
 
             _currentLED = _currentLED == 12 ? 0 : _currentLED;
             _currentLED = _currentLED == -1 ? 11 : _currentLED;
-           // Log.i("ORIENTATION",": "+_orientation);
+            // Log.i("ORIENTATION",": "+_orientation);
             //_ajustedVelocity = Math.round(_period/(float)_resolution);
 
         } catch(JSONException e){
             e.printStackTrace();
         }
 
-       // Log.i(TAG,"adj_vel:"+_ajustedVelocity+" res: "+_resolution);
+        // Log.i(TAG,"adj_vel:"+_ajustedVelocity+" res: "+_resolution);
     }
 
     public void forceUpdate(){
@@ -167,6 +173,7 @@ public class PlugMotionHandler extends Thread{
             //Log.i(TAG,"--- RUNNING COLOR REQUEST : target "+_led_target+" ---");
             _request.join();
             String data = _request.getData();
+
             JSONArray json_array = new JSONArray(data);
             JSONObject json_message = json_array.getJSONObject(_led_target);
             handlePlugMessage(json_message);
@@ -203,14 +210,29 @@ public class PlugMotionHandler extends Thread{
         int max = 400;  // alterei o total aqui
 
         Log.wtf(TAG,"Limit:"+limit+" Resolution:"+_resolution);
+        ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
         while (_isRunning){
+
             if(total<_resolution*1.5){
+
                 milis2 = System.currentTimeMillis();
+
+                //Log.i(TAG, "total: "+total+" , counter: "+counter+" , limit: "+limit+" , LED: "+_currentLED);
+
+                if(_currentLED==0 && SOUND)
+                    toneGen1.startTone(ToneGenerator.TONE_CDMA_CALLDROP_LITE,100);
+
+
+                if(_currentLED==6 && SOUND)
+                    toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_REORDER,100);
+
                 if(counter == limit) {
+
                     _currentLED = _currentLED + _orientation;
                     _currentLED = _currentLED == 12 ? 0 : _currentLED;
                     _currentLED = _currentLED == -1 ? 11 : _currentLED;
+
                     counter = 1;
                 }else{
                     counter++;
@@ -222,20 +244,21 @@ public class PlugMotionHandler extends Thread{
                     _angle = (_temp_val/_raio);
                     _x = _raio*Math.sin(_angle);
                     _y = _raio*Math.cos(_angle);
+                    //  Log.i(TAG,_x+"");
                 }
                 try {
                     newVel =_ajustedVelocity-(System.currentTimeMillis()-milis2);
                     total++;
                     newVel=newVel<0?0:newVel;
-                   if(newVel>0)
-                       sleep(newVel);
+                    if(newVel>0)
+                        sleep(newVel);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }catch (IllegalArgumentException e){
                     e.printStackTrace();
                 }
             }else{
-                Log.i(TAG,"------readjusting-------");
+                // Log.i(TAG,"------readjusting-------");
                 compensation = getPlugData();
                 counter = Math.round((compensation*(_resolution/N_LEDS))/_velocity)*2;
                 limit = _resolution/N_LEDS;

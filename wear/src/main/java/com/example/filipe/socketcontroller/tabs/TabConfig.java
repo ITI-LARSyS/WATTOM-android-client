@@ -30,11 +30,11 @@ public enum TabConfig
 
     ENERGIAS(R.string.TITLE_STATS4,
             android.R.drawable.ic_lock_idle_low_battery,
-            R.id.tab_energias),
+            R.id.tab_energias)/*,
 
     LOG(R.string.TITLE_LOG,
             android.R.drawable.ic_menu_info_details,
-            R.id.tab_log);
+            R.id.tab_log)*/;
 
     public final int title;
     public final int icon;

@@ -54,6 +54,10 @@ public class MainActivity extends Activity implements SensorEventListener
     private static final String TAG = "Main Activity Watch";
     private static final int WINDOW_SIZE = 40;  // terá qde ser 80
 
+    private int indexLuz = -1, indexChaleira = -1;
+
+    private TimerTask powerTask, energyTask, personTask;
+
     //View stuff
     private TextView _counter;
     private EditText _pId;
@@ -258,7 +262,7 @@ public class MainActivity extends Activity implements SensorEventListener
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
-        _simuView       = (SimulationView) findViewById(R.id.tab_simulation);
+      //  _simuView       = (SimulationView) findViewById(R.id.tab_simulation);
 
         hourlyTimer           =  new Timer ();
         minTimer           =  new Timer ();
@@ -510,15 +514,9 @@ public class MainActivity extends Activity implements SensorEventListener
         pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
         piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
         linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
-        textCurSeries = (TextView) findViewById(R.id.textCurSeries);
-        textCurSeries.bringToFront();
-        linePlugs.setLegend(textCurSeries);
-        mBarChart = (BarChart) findViewById(R.id.tab_stats_bar_test);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
-        fitToScreen(this,linePlugs,50);
-        fitToScreen(this,mBarChart);
 
         /* *** */
         /* LOG */
@@ -666,7 +664,7 @@ public class MainActivity extends Activity implements SensorEventListener
                     push(_plug_data_indexes[_led_target], _acc_data[_led_target], _last_acc_x,_last_acc_y);
 
                     if((_led_target ==_target[0])) {     // used to print the simulation on the screen
-                        _simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1],(float)_last_acc_x,(float)_last_acc_y);
+                        //_simuView.setCoords((float) _handlers.get(_led_target).getPosition()[0], (float) _handlers.get(_led_target).getPosition()[1],(float)_last_acc_x,(float)_last_acc_y);
                     }
                 }
                 try {

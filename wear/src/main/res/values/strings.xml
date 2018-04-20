@@ -5,12 +5,12 @@
     <!--- TAB TITLES -->
     <string name="TITLE_STARTSTOP">Start/Stop</string>
     <string name="TITLE_SCHEDULE">Schedule</string>
-    <string name="TITLE_STATS1">Total power usage by person</string>
+    <string name="TITLE_STATS1">Power usage by person (Pie)</string>
     <string name="TITLE_STATS2">Stats (Bar Graph)</string>
-    <string name="TITLE_STATS3">Current power usage by plug</string>
+    <string name="TITLE_STATS3">Power usage by plug (Line)</string>
     <string name="TITLE_STATS4">Energy</string>
-    <string name="TITLE_STATS5">Total power usage by plug</string>
-    <string name="TITLE_STATS6">Current power usage by device</string>
+    <string name="TITLE_STATS5">Power usage by plug (Pie)</string>
+    <string name="TITLE_STATS6">Power usage by device (Line)</string>
     <string name="TITLE_LOG">Log</string>
 
     <!--- START/STOP TAB -->
@@ -20,11 +20,11 @@
     <string name="QUIT">Quit</string>
 
     <!--- SCHEDULE TAB -->
-    <string name="SET_SCHEDULE">Set Schedule</string>
+    <string name="SET_SCHEDULE">OK</string>
     <string name="SET_SCHEDULE_CONFIRM_START">Confirm Start</string>
     <string name="SET_SCHEDULE_CONFIRM_END">Confirm End</string>
-    <string name="SET_SCHEDULE_START">Set Schedule start</string>
-    <string name="SET_SCHEDULE_END">Set Schedule end</string>
+    <string name="SET_SCHEDULE_START">Schedule Start</string>
+    <string name="SET_SCHEDULE_END">Schedule End</string>
     <string name="NOTHING">-</string>
 
 </resources>

@@ -183,8 +183,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         super.onResume();
 
-        toast(this,"Resuming..");
-
         paused = false;
 
         _client = new GoogleApiClient.Builder(this)
@@ -493,6 +491,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
             case TIME_CONFIRMED:
                 _buttonSchedule.setText(R.string.SET_SCHEDULE);
+                toast(this,"Scheduled!");
                 scheduleState = SELECT_TIME_START;
                 break;
 
@@ -567,14 +566,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePessoasAcum.setValue("Dionísio",10);
 
         linePlugs.addPoint("plug1.local","21:01",2.4f);
-        linePlugs.addPoint("plug2.local","21:01",4.4f);
-        linePlugs.addPoint("plug2.local","21:02",2.9f);
         linePlugs.addPoint("plug1.local","21:02",1f);
         linePlugs.addPoint("plug1.local","21:03",4.4f);
+        linePlugs.addPoint("plug1.local","21:04",6.9f);
+        linePlugs.addPoint("plug1.local","21:05",5.4f);
+        linePlugs.addPoint("plug2.local","21:01",4.4f);
+        linePlugs.addPoint("plug2.local","21:02",2.9f);
         linePlugs.addPoint("plug2.local","21:03",4.0f);
-        linePlugs.addPoint("plug1.local","21:04",4.4f);
         linePlugs.addPoint("plug2.local","21:04",5f);
-        linePlugs.addPoint("plug1.local","21:05",4.4f);
         linePlugs.addPoint("plug2.local","21:05",4.4f);
 
         lineDevices.addPoint("Acer Aspire","14:02",2.4f);

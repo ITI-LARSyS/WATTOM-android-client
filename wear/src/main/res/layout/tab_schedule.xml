@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:padding="5dp"
+    android:padding="10dp"
     tools:context="com.example.filipe.socketcontroller.MainActivity"
     android:orientation="vertical">
 
@@ -26,7 +26,7 @@
     <TimePicker
         android:id="@+id/InitialPicker"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:timePickerMode="spinner"
         android:visibility="gone"/>
 
@@ -46,7 +46,7 @@
     <TimePicker
         android:id="@+id/EndPicker"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:timePickerMode="spinner"
         android:visibility="gone"/>
 
@@ -55,6 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="handleScheduleButton"
-        android:text="@string/SET_SCHEDULE" />
+        android:text="@string/SET_SCHEDULE"
+        android:backgroundTint="@color/green"/>
 
 </LinearLayout>
