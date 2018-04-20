@@ -96,6 +96,7 @@ public class DynamicLineChart extends LinearLayout
         { add(key); }
 
         ValueLinePoint value = new ValueLinePoint(legend,point);
+        value.setIgnore(false);
         values.get(key).addPoint(value);
 
         refresh();
@@ -143,6 +144,10 @@ public class DynamicLineChart extends LinearLayout
         if(!values.containsKey(key))
         {
             add(key);
+        }
+        for(ValueLinePoint p : values.get(key).getSeries())
+        {
+            p.setIgnore(false);
         }
         chart.addSeries(values.get(key));
         indicator.setText(key);
