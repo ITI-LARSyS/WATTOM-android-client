@@ -8,7 +8,7 @@
     <string name="TITLE_STATS1">Power usage by person (Pie)</string>
     <string name="TITLE_STATS2">Stats (Bar Graph)</string>
     <string name="TITLE_STATS3">Power usage by plug (Line)</string>
-    <string name="TITLE_STATS4">Energy</string>
+    <string name="TITLE_STATS4">Energy (Pie)</string>
     <string name="TITLE_STATS5">Power usage by plug (Pie)</string>
     <string name="TITLE_STATS6">Power usage by device (Line)</string>
     <string name="TITLE_LOG">Log</string>
