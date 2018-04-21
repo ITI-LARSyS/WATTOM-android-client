@@ -44,7 +44,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -1348,7 +1350,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private void fakeMessages()
     {
-        float total = 110;
+        /*float total = 110;
         float termica = 9;
         float hidrica = 3;
         float eolica = 7;
@@ -1455,25 +1457,51 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         energyTask = new TimerTask () {
             @Override
             public void run () {
-                /*Date dNow = new Date();
+
+                float total = 0;
+                float termica = 0;
+                float hidrica = 0;
+                float eolica = 0;
+                float biomassa = 0;
+                float foto = 0;
+
+                Date dNow = new Date();
                 SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
                 String data = dateFormat.format(dNow);
                 String DataURL = EnergyData+data;
+
                 HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
-                try{
+
+                try
+                {
                     request.start();
                     request.join();
                     String StringData = request.getData();
                     JSONObject JSONData = new JSONObject(StringData);
                     JSONArray aux = (JSONArray) JSONData.get("prod_data");
                     JSONData = (JSONObject) aux.get(0);
-                    float total = JSONData.getInt("total");
-                    float termica = JSONData.getInt("termica");
-                    float hidrica = JSONData.getInt("hidrica");
-                    float eolica = JSONData.getInt("eolica");
-                    float biomassa = JSONData.getInt("biomassa");
-                    float foto = JSONData.getInt("foto");
 
+                    total = JSONData.getInt("total");
+                    termica = JSONData.getInt("termica");
+                    hidrica = JSONData.getInt("hidrica");
+                    eolica = JSONData.getInt("eolica");
+                    biomassa = JSONData.getInt("biomassa");
+                    foto = JSONData.getInt("foto");
+                }
+
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                    total = 110;
+                    termica = 9;
+                    hidrica = 3;
+                    eolica = 7;
+                    biomassa = 8;
+                    foto = 11;
+                }
+
+                finally
+                {
                     sendMessage("Energy"
                             +"-"+"Não renovável"
                             +"-"+(total-termica-hidrica-eolica-biomassa-foto)
@@ -1489,7 +1517,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             +"-"+foto
                     );
                     if(!paused) toast(getApplicationContext(),"Energy consumption" + " - " + "Updated data!");
-                    else UI.notify(this,MainActivity.class,"Energy consumption","Updated data!");
+                    else UI.notify(getApplicationContext(),MainActivity.class,"Energy consumption","Updated data!");
 
                     // falta enviar para o wear (para atualizar o pie chart)
                     float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
@@ -1497,9 +1525,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     renewableEnergy =  Math.round(percentage);
                     ChangeColorByEnergy(renewableEnergy);
                     new RefreshData().start();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }*/
+                }
             }
         };
 

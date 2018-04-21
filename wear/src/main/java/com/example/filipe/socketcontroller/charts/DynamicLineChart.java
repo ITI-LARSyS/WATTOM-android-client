@@ -1,5 +1,6 @@
 package com.example.filipe.socketcontroller.charts;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -29,6 +30,7 @@ public class DynamicLineChart extends LinearLayout
     private TextView indicator;
     private int currentIndex;
 
+    @SuppressLint("CustomViewStyleable")
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
