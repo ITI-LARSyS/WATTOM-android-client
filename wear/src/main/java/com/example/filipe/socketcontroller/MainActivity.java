@@ -601,6 +601,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePlugsAcum.incValue("plug4.local",20);
         piePlugsAcum.incValue("plug1.local",20);
         piePlugsAcum.incValue("plug5.local",20);
+
+        pieEnergias.setValue("Eólica",20);
+        pieEnergias.setValue("Não renovável",50);
+        pieEnergias.setValue("Hídrica",10);
     }
 
     public void notify(String title, String message)

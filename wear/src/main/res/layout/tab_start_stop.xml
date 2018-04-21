@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:onClick="handleSensorClick"
         android:text="@string/SENSOR"
+        android:textSize="20sp"
         android:switchPadding="10dp"
         android:padding="10dp"/>
 

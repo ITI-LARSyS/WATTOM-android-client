@@ -23,8 +23,8 @@
     <string name="SET_SCHEDULE">OK</string>
     <string name="SET_SCHEDULE_CONFIRM_START">Confirm Start</string>
     <string name="SET_SCHEDULE_CONFIRM_END">Confirm End</string>
-    <string name="SET_SCHEDULE_START">Schedule Start</string>
-    <string name="SET_SCHEDULE_END">Schedule End</string>
+    <string name="SET_SCHEDULE_START">Begin</string>
+    <string name="SET_SCHEDULE_END">End</string>
     <string name="NOTHING">-</string>
 
 </resources>
