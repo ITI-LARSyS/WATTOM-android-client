@@ -2,12 +2,15 @@ package com.example.filipe.socketcontroller.charts;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.example.filipe.socketcontroller.R;
 
 import org.eazegraph.lib.charts.ValueLineChart;
 import org.eazegraph.lib.models.ValueLinePoint;
@@ -30,6 +33,17 @@ public class DynamicLineChart extends LinearLayout
     {
         super(context, attrs);
         init(context);
+
+        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.DynamicCharts, 0, 0);
+        try
+        {
+            String unit = ta.getString(R.styleable.DynamicCharts_unitShown);
+            chart.setIndicatorTextUnit(unit);
+        }
+        finally
+        {
+            ta.recycle();
+        }
     }
 
     public DynamicLineChart(Context context)
@@ -44,6 +58,17 @@ public class DynamicLineChart extends LinearLayout
 
         values = new HashMap<>();
 
+        initChart(c);
+        initIndicator(c);
+
+        currentIndex = -1;
+
+        addView(chart);
+        addView(indicator);
+    }
+
+    private void initChart(Context c)
+    {
         chart = new ValueLineChart(c);
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         chart.setLayoutParams(new LinearLayout.LayoutParams(metrics.widthPixels - 80,metrics.heightPixels - 80));
@@ -54,8 +79,10 @@ public class DynamicLineChart extends LinearLayout
         chart.setUseDynamicScaling(false);
         chart.setIndicatorLineColor(Color.parseColor("#FFFFFF"));
         chart.setIndicatorTextColor(Color.parseColor("#FFFFFF"));
-        chart.setIndicatorTextUnit("W");
+    }
 
+    private void initIndicator(Context c)
+    {
         indicator = new TextView(c);
         indicator.setLayoutParams(new LinearLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT,
@@ -63,11 +90,6 @@ public class DynamicLineChart extends LinearLayout
         indicator.setOnClickListener((v)-> switchSeries());
         indicator.setText("-");
         indicator.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
-
-        currentIndex = -1;
-
-        addView(chart);
-        addView(indicator);
     }
 
     public void refresh()
@@ -78,7 +100,7 @@ public class DynamicLineChart extends LinearLayout
         }
         else
         {
-            switchSeries(currentIndex);
+            invalidate();
         }
     }
 

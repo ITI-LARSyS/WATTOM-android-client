@@ -7,6 +7,4 @@
     android:gravity="center"
     android:id="@+id/piePlugsAcum"
     android:padding="8dp"
-    app:egLegendTextSize="18sp"
-    app:egUsePieRotation="true"
-    app:egValueTextSize="36sp"/>
+    app:unitShown="W"/>

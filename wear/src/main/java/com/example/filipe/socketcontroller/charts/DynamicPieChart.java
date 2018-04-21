@@ -1,9 +1,13 @@
 package com.example.filipe.socketcontroller.charts;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
+
+import com.example.filipe.socketcontroller.R;
 
 import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
@@ -22,16 +26,28 @@ public class DynamicPieChart extends PieChart
         super(context);
         init();
     }
+
+    @SuppressLint("CustomViewStyleable")
     public DynamicPieChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         init();
+        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.DynamicCharts, 0, 0);
+        try
+        {
+            String unit = ta.getString(R.styleable.DynamicCharts_unitShown);
+            this.setInnerValueUnit(unit);
+        }
+        finally
+        {
+            ta.recycle();
+        }
     }
 
     private void init()
     {
         values = new HashMap<>();
-        this.setInnerValueUnit("W");
+        this.setUsePieRotation(false);
         this.setOnClickListener((v)->switchSlice());
         currentIndex = -1;
     }
@@ -43,13 +59,11 @@ public class DynamicPieChart extends PieChart
             switchSlice((currentIndex + 1) % values.size());
         }
     }
+
     public void switchSlice(int index)
     {
-        if(index <= values.size())
-        {
-            currentIndex = index;
-            setCurrentItem(currentIndex);
-        }
+        currentIndex = index;
+        setCurrentItem(currentIndex);
     }
 
     private void add(String key)

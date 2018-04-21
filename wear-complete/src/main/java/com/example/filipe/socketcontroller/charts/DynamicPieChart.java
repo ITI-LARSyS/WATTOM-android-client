@@ -16,12 +16,13 @@ import static com.example.filipe.socketcontroller.util.UI.colors;
 public class DynamicPieChart extends PieChart
 {
     private HashMap<String,PieModel> values;
-    private int currentIndex;
+
     public DynamicPieChart(Context context)
     {
         super(context);
         init();
     }
+
     public DynamicPieChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
@@ -33,23 +34,20 @@ public class DynamicPieChart extends PieChart
         values = new HashMap<>();
         this.setInnerValueUnit("W");
         this.setOnClickListener((v)->switchSlice());
-        currentIndex = -1;
     }
 
     public void switchSlice()
     {
         if(values.size() > 1)
         {
+            int currentIndex = getCurrentItem();
             switchSlice((currentIndex + 1) % values.size());
         }
     }
+
     public void switchSlice(int index)
     {
-        if(index <= values.size())
-        {
-            currentIndex = index;
-            setCurrentItem(currentIndex);
-        }
+        setCurrentItem(index);
     }
 
     private void add(String key)
@@ -58,19 +56,16 @@ public class DynamicPieChart extends PieChart
         values.put(key,slice);
         refresh();
     }
+
     private void refresh()
     {
         clearChart();
-        if(currentIndex == -1)
-        {
-            currentIndex = 0;
-        }
         for(PieModel p : values.values())
         {
             addPieSlice(p);
         }
-        setCurrentItem(currentIndex);
     }
+
     public void setValue(String key,float value)
     {
         if(!contains(key))
@@ -79,6 +74,7 @@ public class DynamicPieChart extends PieChart
         values.get(key).setValue(value);
         refresh();
     }
+
     public void incValue(String key, float value)
     {
         if(!contains(key))
@@ -88,6 +84,7 @@ public class DynamicPieChart extends PieChart
         values.get(key).setValue(old + value);
         refresh();
     }
+
     public boolean contains(String key)
     {
         return values.containsKey(key);
