@@ -122,7 +122,6 @@ public class DynamicLineChart extends LinearLayout
         { add(key); }
 
         ValueLinePoint value = new ValueLinePoint(legend,point);
-        value.setIgnore(false);
         values.get(key).addPoint(value);
 
         refresh();

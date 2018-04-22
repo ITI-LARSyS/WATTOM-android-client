@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -137,7 +138,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.general_layout);
-      //  getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // São obtidos os IDs dos elementos da View e estes são configurados
         setupView();
