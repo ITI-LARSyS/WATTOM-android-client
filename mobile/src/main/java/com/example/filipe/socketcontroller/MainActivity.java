@@ -1050,13 +1050,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             {
                                 if(j == indexLuz)
                                 {
-                                    sendMessage("Device start"+"-"+"luz top");
+                                    sendMessage("Device start"+"-"+"Candeeiro");
                                 }
                                 else
                                 {
                                     if(j == indexChaleira)
                                     {
-                                        sendMessage("Device start"+"-"+"chaleira top");
+                                        sendMessage("Device start"+"-"+"Chaleira");
                                     }
                                 }
                             }
