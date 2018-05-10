@@ -12,12 +12,11 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -51,7 +50,9 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.example.filipe.socketcontroller.util.UI.hide;
 import static com.example.filipe.socketcontroller.util.UI.toast;
+import static com.example.filipe.socketcontroller.util.UI.unhide;
 
 public class MainActivity extends AppCompatActivity implements  MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -184,8 +185,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        askIP();
-
         setContentView(R.layout.activity_device_selection);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -411,22 +410,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // E inicia a thread StartUp
     public void handleStartStudyClick(View v)
     {
-        start();
-        ((TextView)v).setText(R.string.stop_study);
-        v.setOnClickListener((x)-> handleStopStudyClick(x));
-    }
-
-    public void handleStopStudyClick(View v)
-    {
-        toast(getApplicationContext(),"Study ended!");
-        startActivity(new Intent(this,MainActivity.class));
-        this.finish();
-      //  ((TextView)v).setText(R.string.start_study);
-      //  v.setOnClickListener((x)-> handleStartStudyClick(x));
-    }
-
-    public void start()
-    {
+        prepareStudy();
         new Thread(()->
         {
             //_participant = Integer.parseInt(_pId.getText().toString());
@@ -456,15 +440,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }).start();
     }
 
-    public void stop()
+    public void handleStopStudyClick(View v)
     {
-        inStudy = false;
-        sendMessage("STOP");
         toast(getApplicationContext(),"Study ended!");
-        stopServices();
-        _correlationRunning = false;
         startActivity(new Intent(this,MainActivity.class));
         this.finish();
+      //  ((TextView)v).setText(R.string.start_study);
+      //  v.setOnClickListener((x)-> handleStartStudyClick(x));
     }
 
     // Obriga um handler a fazer um forceUpdate()
@@ -1177,8 +1159,23 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }
     }*/
 
+  private void prepareStudy()
+  {
+      Button start = (Button) findViewById(R.id.btnStartStudy);
+      hide(start);
+
+      Button demo = (Button) findViewById(R.id.btnDemo3);
+      hide(demo);
+
+      Button stop = (Button) findViewById(R.id.btnStopStudy);
+      unhide(stop);
+
+      askIP();
+  }
+
   public void demo3(View v)
   {
+      prepareStudy();
       new Thread(()->
       {
           HttpRequest demo = new HttpRequest(PLUGS_URL + "Demo3/2", getApplicationContext() ,_queue);
