@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private Node _wear;
 
     //plugs url for notifying good correlation
-    private static String BASE_URL = "http://0.0.0.0:3000";
+    private static String BASE_URL = "http://0.0.0.0:3000/";
     //  private final static String BASE_URL = "http://192.168.1.7:3000";
     private final static String EnergyData = "http://aveiro.m-iti.org/sinais_energy_production/services/today_production_request.php?date=";
 
@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        askIP();
         setContentView(R.layout.activity_device_selection);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -443,6 +444,19 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     public void handleStopStudyClick(View v)
     {
         toast(getApplicationContext(),"Study ended!");
+        new Thread(()->
+        {
+            HttpRequest stopMoving = new HttpRequest(PLUGS_URL + "StopMoving", getApplicationContext(), _queue);
+            stopMoving.start();
+            try
+            {
+                stopMoving.join();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+        }).start();
         startActivity(new Intent(this,MainActivity.class));
         this.finish();
       //  ((TextView)v).setText(R.string.start_study);
@@ -1169,8 +1183,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
       Button stop = (Button) findViewById(R.id.btnStopStudy);
       unhide(stop);
-
-      askIP();
   }
 
   public void demo3(View v)

@@ -77,12 +77,12 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="25dp"
-            android:weightSum="8">
+            android:padding="25dp">
 
         <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="0.5"
                 android:id="@+id/corrstates"
                 android:orientation="horizontal"/>
 
@@ -92,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:onClick="handleStartStudyClick"
-                android:layout_weight="3"/>
+                android:layout_weight="0.25"/>
 
             <Button
                 android:id="@+id/btnDemo3"
@@ -100,7 +100,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:onClick="demo3"
-                android:layout_weight="2"/>
+                android:layout_weight="0.25"/>
 
             <Button
                 android:id="@+id/btnStopStudy"
@@ -108,7 +108,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:onClick="handleStopStudyClick"
-                android:layout_weight="5"
+                android:layout_weight="0.5"
                 android:visibility="gone"/>
 
         </LinearLayout>
