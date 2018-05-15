@@ -28,6 +28,7 @@ import com.example.filipe.socketcontroller.charts.DynamicPieChart;
 import com.example.filipe.socketcontroller.motion.PlugMotionHandler;
 import com.example.filipe.socketcontroller.tabs.TabAdapter;
 import com.example.filipe.socketcontroller.tabs.TabConfig;
+import com.example.filipe.socketcontroller.util.Alarm;
 import com.example.filipe.socketcontroller.util.HttpRequest;
 import com.example.filipe.socketcontroller.util.UI;
 import com.google.android.gms.wearable.Node;
@@ -39,8 +40,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -102,7 +106,7 @@ public class MainActivity extends Activity implements SensorEventListener
 
     //Pedro stuff, for schedule
     private int hourStart,minStart,hourEnd,minEnd;
-    private int HourScheduleStart,MinScheduleStart,HourScheduleEnd,MinScheduleEnd;
+    private int HourScheduleStart,MinutesScheduleStart,HourScheduleEnd,MinutesScheduleEnd;
 
 
     //handlers and receivers for the targets
@@ -223,6 +227,7 @@ public class MainActivity extends Activity implements SensorEventListener
     private DynamicPieChart pieEnergias;
     private BarChart mBarChart;
     private TextView textCurSeries;
+    private DynamicLineChart lineDevices;
 
 
     /* *** */
@@ -274,6 +279,8 @@ public class MainActivity extends Activity implements SensorEventListener
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         _queue = Volley.newRequestQueue(this);
+
+        initTasks();
     }
 
     @Override
@@ -419,9 +426,9 @@ public class MainActivity extends Activity implements SensorEventListener
                 hourEnd = Integer.parseInt(time[1][0]);
                 minEnd = Integer.parseInt(time[1][1]);
                 HourScheduleStart = hourStart;
-                MinScheduleStart = minStart;
+                MinutesScheduleStart = minStart;
                 HourScheduleEnd = hourEnd;
-                MinScheduleEnd = minEnd;
+                MinutesScheduleEnd = minEnd;
 
                 if(hourStart > 12){
                     hourStart = hourStart - 12;
@@ -514,6 +521,7 @@ public class MainActivity extends Activity implements SensorEventListener
         pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
         piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
         linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
+        lineDevices = (DynamicLineChart) findViewById(R.id.linechartdevices);
         fitToScreen(this,piePessoasAcum);
         fitToScreen(this,pieEnergias);
         fitToScreen(this,piePlugsAcum);
@@ -536,31 +544,45 @@ public class MainActivity extends Activity implements SensorEventListener
         piePessoasAcum.setValue("Afonso",40);
         piePessoasAcum.setValue("Dionísio",10);
 
-        mBarChart.addBar(new BarModel(2.3f, 0xFF123456));
-        mBarChart.addBar(new BarModel(2.f,  0xFF343456));
-        mBarChart.addBar(new BarModel(3.3f, 0xFF563456));
-        mBarChart.addBar(new BarModel(1.1f, 0xFF873F56));
-        mBarChart.addBar(new BarModel(2.7f, 0xFF56B7F1));
-        mBarChart.addBar(new BarModel(2.f,  0xFF343456));
-        mBarChart.addBar(new BarModel(0.4f, 0xFF1FF4AC));
-        mBarChart.addBar(new BarModel(4.f,  0xFF1BA4E6));
-
         linePlugs.addPoint("plug1.local","21:01",2.4f);
-        linePlugs.addPoint("plug2.local","21:01",4.4f);
-        linePlugs.addPoint("plug2.local","21:02",2.9f);
         linePlugs.addPoint("plug1.local","21:02",1f);
         linePlugs.addPoint("plug1.local","21:03",4.4f);
+        linePlugs.addPoint("plug1.local","21:04",6.9f);
+        linePlugs.addPoint("plug1.local","21:05",5.4f);
+        linePlugs.addPoint("plug2.local","21:01",4.4f);
+        linePlugs.addPoint("plug2.local","21:02",2.9f);
         linePlugs.addPoint("plug2.local","21:03",4.0f);
-        linePlugs.addPoint("plug1.local","21:04",4.4f);
         linePlugs.addPoint("plug2.local","21:04",5f);
-        linePlugs.addPoint("plug1.local","21:05",4.4f);
         linePlugs.addPoint("plug2.local","21:05",4.4f);
+        linePlugs.addPoint("plug4.local","21:01",4.4f);
+        linePlugs.addPoint("plug4.local","21:02",2.9f);
+        linePlugs.addPoint("plug4.local","21:03",4.0f);
+        linePlugs.addPoint("plug4.local","21:04",5f);
+        linePlugs.addPoint("plug4.local","21:05",4.4f);
 
+        lineDevices.addPoint("Chaleira","14:02",2.4f);
+        lineDevices.addPoint("Candeeiro","14:02",1.4f);
+        lineDevices.addPoint("Chaleira","14:03",4.1f);
+        lineDevices.addPoint("Candeeiro","14:03",1.2f);
+        lineDevices.addPoint("Chaleira","14:04",2.3f);
+        lineDevices.addPoint("Candeeiro","14:04",1.3f);
+        lineDevices.addPoint("Chaleira","14:05",3.7f);
+        lineDevices.addPoint("Candeeiro","14:05",1.7f);
+        lineDevices.addPoint("Chaleira","14:06",2.5f);
+        lineDevices.addPoint("Candeeiro","14:06",1.2f);
+        lineDevices.addPoint("Chaleira","14:07",3.0f);
+        lineDevices.addPoint("Candeeiro","14:07",1.9f);
+        lineDevices.addPoint("Chaleira","14:08",3.1f);
+        lineDevices.addPoint("Candeeiro","14:08",1.6f);
         piePlugsAcum.incValue("plug1.local",30);
         piePlugsAcum.incValue("plug2.local",20);
         piePlugsAcum.incValue("plug4.local",20);
         piePlugsAcum.incValue("plug1.local",20);
         piePlugsAcum.incValue("plug5.local",20);
+
+        pieEnergias.setValue("Eólica",20);
+        pieEnergias.setValue("Não renovável",50);
+        pieEnergias.setValue("Hídrica",10);
     }
 
     public void notify(String title, String message)
@@ -593,12 +615,6 @@ public class MainActivity extends Activity implements SensorEventListener
                 { e.printStackTrace(); }
             }
         }
-    }
-
-    public void ola(View v)
-    {
-        navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
-        linePlugs.switchSeries("plug3.local");
     }
 
     private void askIP()
@@ -769,31 +785,48 @@ public class MainActivity extends Activity implements SensorEventListener
             for (int j = 0; j < _devices_count; j++) {
                 if (match && led_target == _target[j]) {
                     index = j;
+
+                    // Schedule mode
                     if (isScheduleMode) {
                         TurnOffAndRemove(j);
                         ChangeColorByEnergy(renewableEnergy);
                         isScheduleMode = false;
-                        TimerTask minTask = new TimerTask() {
-                            @Override
-                            public void run() {
-                                Calendar calendar = Calendar.getInstance();
-                                int actualMinute = calendar.get(Calendar.MINUTE);
-                                int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
-                                HttpRequest selected_request;
-                                if (actualMinute == MinScheduleStart && actualHour == HourScheduleStart) {
-                                    TurnOnAndAdd(index);
-                                } else if (actualMinute == MinScheduleEnd && actualHour == HourScheduleEnd) {
-                                    TurnOffAndRemove(index);
+                        new Alarm(HourScheduleStart, MinutesScheduleStart, () ->
+                        {
+                            TurnOnAndAdd(index);
+                            new Alarm(HourScheduleEnd, MinutesScheduleEnd, () ->
+                            {
+                                TurnOffAndRemove(index);
+                            }, false).activate();
+                        }, false).activate();
+                    }
+
+                    // Caso contrário (caso geral)
+                    else {
+                        // Se tiver mais que um device
+                        // (vai para o gráfico desse device)
+                        if (isMultiTarget()) {
+                            if (j == indexLuz) {
+                                navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(), true);
+                                lineDevices.switchSeries("Candeeiro");
+                            } else {
+                                if (j == indexChaleira) {
+                                    navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(), true);
+                                    lineDevices.switchSeries("Chaleira");
                                 }
                             }
-                        };
-                        minTimer.schedule(minTask, 10, 1000 * 60/*1min*/);
-                    } else {
-                        if (IsOn) {
-                            TurnOffAndRemove(j);
-                        } else {
-                            TurnOnAndAdd(j);
                         }
+
+                        // Se tiver só um device
+                        // (vai para o gráfico desse plug)
+                        else {
+                            if (IsOn) {
+                                TurnOffAndRemove(j);
+                            } else {
+                                TurnOnAndAdd(j);
+                            }
+                        }
+
                         //HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
                         // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
                     }
@@ -825,7 +858,7 @@ public class MainActivity extends Activity implements SensorEventListener
 
                 Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
                 IsOn = false;
-                notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned off");
+                //notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned off");
 
             }catch (Exception e){
                 e.printStackTrace();
@@ -845,7 +878,7 @@ public class MainActivity extends Activity implements SensorEventListener
                 IsOn = true;
                 navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
                 linePlugs.switchSeries("plug" + _plug_names.get(j) + ".local");
-                notify("Wattapp", "plug" + _plug_names.get(j) + ".local has been turned on");
+                //notify("Wattapp", "plug" + _plug_names.get(j) + ".local has been turned on");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -902,7 +935,7 @@ public class MainActivity extends Activity implements SensorEventListener
                 for(int i = 0; i < IdPower.length(); i++)
                 {
                     JSONObject User = (JSONObject) IdPower.get(i);
-                    piePessoasAcum.incValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
+                    piePessoasAcum.setValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
                 }
                 piePessoasAcum.startAnimation();
                 if(!paused) toast(getApplicationContext(),"Person consumption" + " - " + "Updated data!" );
@@ -962,124 +995,37 @@ public class MainActivity extends Activity implements SensorEventListener
 
             IsOn = false;
 
-            TimerTask hourlyTask = new TimerTask () {
-                @Override
-                public void run () {
-                /*Date dNow = new Date();
-                SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
-                String data = dateFormat.format(dNow);
-                String DataURL = EnergyData+data;
-                HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
-                try{
-                    request.start();
-                    request.join();
-                    String StringData = request.getData();
-                    JSONObject JSONData = new JSONObject(StringData);
-                    JSONArray aux = (JSONArray) JSONData.get("prod_data");
-                    JSONData = (JSONObject) aux.get(0);
-                    float total = JSONData.getInt("total");
-                    float termica = JSONData.getInt("termica");
-                    float hidrica = JSONData.getInt("hidrica");
-                    float eolica = JSONData.getInt("eolica");
-                    float biomassa = JSONData.getInt("biomassa");
-                    float foto = JSONData.getInt("foto");
+            new Timer().schedule(energyTask,10,1000*60*15);
 
-                    pieEnergias.setValue("Não renovável",(total-termica-hidrica-eolica-biomassa-foto));
-                    pieEnergias.setValue("Térmica",termica);
-                    pieEnergias.setValue("Hídrica",hidrica);
-                    pieEnergias.setValue("Eólica",eolica);
-                    pieEnergias.setValue("Biomassa",biomassa);
-                    pieEnergias.setValue("Fotovoltaica",foto);
-                    pieEnergias.startAnimation();
-
-                    if(!paused) toast(getApplicationContext(),"Energy consumption" + " - " + "Updated data!");
-                    else UI.notify(this,MainActivity.class,"Energy consumption","Updated data!");
-
-                    // falta enviar para o wear (para atualizar o pie chart)
-                    float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
-                    percentage *= 100;
-                    renewableEnergy =  Math.round(percentage);
-                    ChangeColorByEnergy(renewableEnergy);
-                    new RefreshData().start();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }*/
-                }
-            };
-            hourlyTimer.schedule (hourlyTask, 0 ,1000*60*15);
-
-        /* */
-        /* */
-            pieEnergias.setValue("Não renovável",72);
-            pieEnergias.setValue("Térmica",9);
-            pieEnergias.setValue("Hídrica",3);
-            pieEnergias.setValue("Eólica",7);
-            pieEnergias.setValue("Biomassa",8);
-            pieEnergias.setValue("Fotovoltaica",11);
-            pieEnergias.startAnimation();
-        /* */
-        /* */
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             new StartUp(PLUGS_URL).start();
-
-            TimerTask checkPower = new TimerTask () {
-                @Override
-                public void run () {
-                    if(IsOn){
-                        int powerTotal = 0;
-                        HttpRequest Pessoas = new HttpRequest(BASE_URL + "plug/Persons", getApplicationContext() ,_queue);
-                        try{
-                            Pessoas.start();
-                            Pessoas.join();
-                            String StringData = Pessoas.getData();
-                            JSONArray JSONPerson = new JSONArray(StringData);
-                            for(int i = 0; i < JSONPerson.length(); i++){
-                                JSONObject temp = (JSONObject) JSONPerson.get(i);
-                                if(temp.get("id").equals(Device_Name)){
-                                    int plugs [];
-                                    JSONArray intPlugs = temp.getJSONArray("plugs");
-                                    plugs = new int[intPlugs.length()];
-                                    for (int j = 0; j < intPlugs.length(); ++j) {
-                                        String plug = intPlugs.getString(j);
-                                        plugs[j] = Integer.parseInt(plug.substring(0, plug.indexOf(".")).replace("plug", ""));
-                                    }
-
-                                    for(int w = 0; w < plugs.length;w++)
-                                    {
-                                        String DataURL = BASE_URL + "plug/"+plugs[w]+"/Power";
-                                        HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
-                                        request.start();
-                                        request.join();
-                                        String dado = request.getData();
-                                        JSONObject JSONData = new JSONObject(dado);
-                                        int power = JSONData.getInt("power");
-                                        linePlugs.addPoint("plug"+plugs[w]+".local",power);
-                                        piePlugsAcum.incValue("plug"+plugs[w]+".local",power);
-                                        Log.d("STATISTICS","plug"+plugs[w]+".local is consuming "+power);
-                                        powerTotal += power;
-                                    }
-                                    if(!paused) toast(getApplicationContext(),"Plug consumption" + " - " + "Updated data!" );
-                                    else UI.notify(getApplicationContext(),MainActivity.class,"Plug consumption","Updated data!");
-                                }
-                            }
-                            _consumo.setText(powerTotal);
-                            if(!paused) toast(getApplicationContext(),"Overall power consumption" + " - " + "Updated data!" );
-                            else UI.notify(getApplicationContext(),MainActivity.class,"Overall power consumption","Updated data!");
-                        }catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    ConsultUsers();
-                }
-            };
-            PowerTimer.schedule(checkPower, 0 ,1000*60/*1 min*/);
+            new Timer().schedule(powerTask,10,1000*60);
+            new Timer().schedule(personTask,10,1000*60);
         }
 
         public void stop()
         {
             inStudy = false;
            // sendMessage("STOP");
-            toast(getApplicationContext(),"Study ended!");
+          //  toast(getApplicationContext(),"Study ended!");
+            new Thread(()->
+            {
+                HttpRequest stopMoving = new HttpRequest(PLUGS_URL + "StopMoving", getApplicationContext(), _queue);
+                stopMoving.start();
+                try
+                {
+                    stopMoving.join();
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+            }).start();
             stopServices();
             _correlationRunning = false;
             startActivity(new Intent(this,MainActivity.class));
@@ -1185,5 +1131,151 @@ public class MainActivity extends Activity implements SensorEventListener
                 e.printStackTrace();
             }
         }
+    }
+
+    public void initTasks()
+    {
+        powerTask = new TimerTask() {
+            @Override
+            public void run() {
+                HttpRequest request = new HttpRequest(BASE_URL + "plug/AvailablePlugs", getApplicationContext(), _queue);
+                try {
+                    request.start();
+                    request.join();
+                    String StringData = request.getData();
+                    JSONArray JSONPlugs = new JSONArray(StringData);
+                    for (int j = 0; j < JSONPlugs.length(); j++) {
+                        JSONObject plug = (JSONObject) JSONPlugs.get(j);
+                        String plugName = plug.getString("name");
+                        int id = Integer.parseInt(plugName.substring(0, plugName.indexOf(".")).replace("plug", ""));
+                        String url = BASE_URL + "plug/" + id + "/Power";
+                        HttpRequest plug_power = new HttpRequest(url, getApplicationContext(), _queue);
+                        plug_power.start();
+                        plug_power.join();
+                        String data = plug_power.getData();
+                        JSONObject JSONData = new JSONObject(data);
+                        int power = JSONData.getInt("power");
+                        linePlugs.addPoint(plugName,power);
+                        piePlugsAcum.setValue(plugName,power);
+                    }
+
+                    lineDevices.addPoint("Chaleira",new Random().nextInt( 20) + 7);
+                    lineDevices.addPoint("Candeeiro",(new Random().nextInt(22) + 11));
+
+                    /*if (!paused)
+                        toast(getApplicationContext(), "Device consumption" + " - " + "Updated data!");
+                    else
+                        UI.notify(getApplicationContext(), MainActivity.class, "Device consumption", "Updated data!");
+
+                    if (!paused)
+                        toast(getApplicationContext(), "Plug consumption" + " - " + "Updated data!");
+                    else
+                        UI.notify(getApplicationContext(), MainActivity.class, "Plug consumption", "Updated data!");*/
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //ConsultUsers();
+            }
+        };
+
+        energyTask = new TimerTask () {
+            @Override
+            public void run () {
+
+                float total = 0;
+                float termica = 0;
+                float hidrica = 0;
+                float eolica = 0;
+                float biomassa = 0;
+                float foto = 0;
+
+                Date dNow = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
+                String data = dateFormat.format(dNow);
+                String DataURL = EnergyData+data;
+
+                HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
+
+                try
+                {
+                    request.start();
+                    request.join();
+                    String StringData = request.getData();
+                    JSONObject JSONData = new JSONObject(StringData);
+                    JSONArray aux = (JSONArray) JSONData.get("prod_data");
+                    JSONData = (JSONObject) aux.get(0);
+
+                    total = JSONData.getInt("total");
+                    termica = JSONData.getInt("termica");
+                    hidrica = JSONData.getInt("hidrica");
+                    eolica = JSONData.getInt("eolica");
+                    biomassa = JSONData.getInt("biomassa");
+                    foto = JSONData.getInt("foto");
+                }
+
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                    total = 110;
+                    termica = 9;
+                    hidrica = 3;
+                    eolica = 7;
+                    biomassa = 8;
+                    foto = 11;
+                }
+
+                finally
+                {
+                    pieEnergias.setValue("Não renovável", (total - termica - hidrica - eolica - biomassa - foto));
+                    pieEnergias.setValue("Térmica", termica);
+                    pieEnergias.setValue("Hídrica", hidrica);
+                    pieEnergias.setValue("Eólica", eolica);
+                    pieEnergias.setValue("Biomassa", biomassa);
+                    pieEnergias.setValue("Fotovoltaica", foto);
+                    pieEnergias.startAnimation();
+                }
+                   /* if(!paused) toast(getApplicationContext(),"Energy consumption" + " - " + "Updated data!");
+                    else UI.notify(getApplicationContext(),MainActivity.class,"Energy consumption","Updated data!"); */
+
+                    // falta enviar para o wear (para atualizar o pie chart)
+                    float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
+                    percentage *= 100;
+                    renewableEnergy =  Math.round(percentage);
+                    ChangeColorByEnergy(renewableEnergy);
+                    new RefreshData().start();
+            }
+        };
+
+        personTask = new TimerTask()
+        {
+            @Override
+            public void run() {
+                HttpRequest CheckUsers = new HttpRequest(BASE_URL + "plug/Power", getApplicationContext(),_queue);
+                try{
+                    CheckUsers.start();
+                    CheckUsers.join();
+                    ArrayList<String> users = new ArrayList<>();
+                    ArrayList<Float> powers = new ArrayList<>();
+                    String ArrayIdPower = CheckUsers.getData();
+                    JSONArray IdPower = new JSONArray(ArrayIdPower);
+                    for(int i = 0; i < IdPower.length(); i++)
+                    {
+                        JSONObject User = (JSONObject) IdPower.get(i);
+                        piePessoasAcum.setValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
+                    }
+                    piePessoasAcum.startAnimation();
+                    if(!paused) toast(getApplicationContext(),"Person consumption" + " - " + "Updated data!" );
+                    else UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        };
+    }
+
+    private boolean isMultiTarget()
+    {
+        return indexLuz != -1 && indexChaleira != -1;
     }
 }

@@ -24,17 +24,17 @@ public enum TabConfig
             android.R.drawable.ic_menu_sort_by_size,
             R.id.tab_power_plugs_total),
 
+    DEVICES(R.string.TITLE_STATS6,
+            android.R.drawable.ic_menu_camera,
+            R.id.tab_power_devices),
+
     ENERGIAS(R.string.TITLE_STATS4,
             android.R.drawable.ic_lock_idle_low_battery,
-            R.id.tab_energias),
+            R.id.tab_energias)/*,
 
     LOG(R.string.TITLE_LOG,
             android.R.drawable.ic_menu_info_details,
-            R.id.tab_log)/*,
-
-   SIMULATION(R.string.TITLE_SIMULATION,
-            android.R.drawable.ic_menu_slideshow,
-            R.id.tab_simulation)*/;
+            R.id.tab_log)*/;
 
     public final int title;
     public final int icon;

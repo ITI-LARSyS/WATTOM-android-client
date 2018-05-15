@@ -5,4 +5,6 @@
     <string name="start_study">Start New Study</string>
     <string name="stop_study">Stop Study</string>
     <string name="Restart">restart</string>
+    <string name="targets_label">Alvos:</string>
+    <string name="multi_target_mode">MULTI-TARGET MODE</string>
 </resources>

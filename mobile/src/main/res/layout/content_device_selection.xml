@@ -4,11 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
-    android:orientation="horizontal"
+    android:padding="20dp"
+    android:orientation="vertical"
     android:gravity="center"
-    tools:context="com.example.filipe.socketcontroller.MainActivity"
-   >
+    tools:context="com.example.filipe.socketcontroller.MainActivity">
 
     <!---
         <LinearLayout
@@ -76,13 +75,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:gravity="center"
-            android:padding="25dp">
+            android:gravity="center">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.1"
+            android:textSize="20sp"
+            android:text="@string/targets_label"/>
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.5"
+                android:layout_weight="0.3"
                 android:id="@+id/corrstates"
                 android:orientation="horizontal"/>
 
@@ -92,15 +97,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:onClick="handleStartStudyClick"
-                android:layout_weight="0.25"/>
+                android:layout_weight="0.3"/>
 
             <Button
                 android:id="@+id/btnDemo3"
-                android:text="DEMO 3"
+                android:text="@string/multi_target_mode"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:onClick="demo3"
-                android:layout_weight="0.25"/>
+                android:layout_weight="0.3"/>
 
             <Button
                 android:id="@+id/btnStopStudy"
@@ -108,7 +113,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:onClick="handleStopStudyClick"
-                android:layout_weight="0.5"
+                android:layout_weight="0.6"
                 android:visibility="gone"/>
 
         </LinearLayout>

@@ -4,9 +4,7 @@
     android:layout_width="0dp"
     android:layout_height="0dp"
     android:padding="8dp"
-    app:egLegendTextSize="18sp"
-    app:egUsePieRotation="true"
-    app:egValueTextSize="36sp"
+    app:unitShown="W"
     android:gravity="center"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"/>

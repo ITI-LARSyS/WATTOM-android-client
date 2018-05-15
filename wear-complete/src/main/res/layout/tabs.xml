@@ -9,9 +9,8 @@
         <include layout="@layout/tab_power_pessoas_total"   android:id="@+id/tab_power_pessoas_total"   />
         <include layout="@layout/tab_power_plugs_current"   android:id="@+id/tab_power_plugs_current"   />
         <include layout="@layout/tab_power_plugs_total"     android:id="@+id/tab_power_plugs_total"     />
+        <include layout="@layout/tab_power_devices"   android:id="@+id/tab_power_devices"   />
         <include layout="@layout/tab_energias"              android:id="@+id/tab_energias"              />
-        <include layout="@layout/tab_log"                   android:id="@+id/tab_log"                   />
-        <!--- <include layout="@layout/tab_simulation"        android:id="@+id/tab_simulation"        /> -->
-        <include layout="@layout/tab_stats_bar_test"        android:id="@+id/tab_stats_bar_test"        />
+        <!-- <include layout="@layout/tab_log"                   android:id="@+id/tab_log"                   /> -->
 
 </LinearLayout>

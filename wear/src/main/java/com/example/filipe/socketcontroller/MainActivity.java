@@ -287,7 +287,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     for (Node node : nodes.getNodes())
                     {
                         _phone = node;
-                        toast(getApplicationContext(),"Connected to `"+node.getDisplayName()+"`!");
+                       // toast(getApplicationContext(),"Connected to `"+node.getDisplayName()+"`!");
                     }
                 });
     }
@@ -609,8 +609,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void notify(String title, String message)
     {
-        if(!paused) toast(getApplicationContext(),title + " - " + message);
-        else UI.notify(this,MainActivity.class,title,message);
+        //if(!paused) toast(getApplicationContext(),title + " - " + message);
+        if(paused) UI.notify(this,MainActivity.class,title,message);
     }
 
     /* ******************************************************************************** */
