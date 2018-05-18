@@ -492,7 +492,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
             case TIME_CONFIRMED:
                 _buttonSchedule.setText(R.string.SET_SCHEDULE);
-                toast(this,"Scheduled!");
+                toast(this,"Scheduled! (follow the target to confirm)");
                 scheduleState = SELECT_TIME_START;
                 break;
 
