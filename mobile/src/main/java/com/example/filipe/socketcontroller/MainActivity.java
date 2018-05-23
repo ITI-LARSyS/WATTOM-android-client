@@ -168,6 +168,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private TimerTask powerTask, energyTask, personTask;
 
+    private int currentMode;
+    private static final int NO_MODE = -1;
+    private static final int SELECT_TARGET_MODE = 0;
+    private static final int STANDARD_MODE = 1;
+    private static final int SCHEDULE_MODE = 2;
+
+    private static final String[] PLUG_NAMES = { "Cozinha" , "Sala de estar" , "Quarto de dormir" , "Casa de banho" , "Hall de entrada" , "Escritório" , "Lavandaria" , "Dispensa" , "Arrecadação" };
 
     private static final int CORR_OFF = android.R.drawable.presence_offline;
     private static final int CORR_NONE = android.R.drawable.presence_invisible;
@@ -200,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         minTimer = new Timer();
         PowerTimer = new Timer();
 //        IsNotFirstTime = 0;
-        isScheduleMode = false;
+        currentMode = STANDARD_MODE;
 
         //_simuView.setVisibility(View.GONE);
        // FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -282,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                isScheduleMode = true;
+                currentMode = SCHEDULE_MODE;
                 vez = 0;
             }
         }else{
@@ -425,9 +432,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
             IsOn = false;
 
-            fakeMessages();
-
-            new Timer().schedule(energyTask,10,1000*60*15);
+            new Timer().schedule(energyTask,0,1000*60*15);
 
             try {
                 Thread.sleep(1000);
@@ -681,9 +686,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _updating = true;
                 _started = false;
                 getPlugsData();
-                Thread.sleep(0);
+                Thread.sleep(500);
                 firstStartup(_url);
-                Thread.sleep(0);
+                Thread.sleep(1000);
                 //_correlationRunning = true;
                 _started = true;
                 _updating = false;
@@ -695,7 +700,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 e.printStackTrace();
             }
             for(int i = 0; i < _plug_names.size();i++){
-                TurnOffAndRemove(i);
+                TurnOffAndRemove(Integer.parseInt(_plug_names.get(i)));
             }
         }
     }
@@ -1021,61 +1026,69 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     if(match && led_target == _target[j]){
                         index = j;
 
-                        // Schedule mode
-                        if(isScheduleMode)
+                        switch(currentMode)
                         {
-                            TurnOffAndRemove(j);
-                            ChangeColorByEnergy(renewableEnergy);
-                            isScheduleMode = false;
-                            new Alarm(HourScheduleStart, MinutesScheduleStart,()->
-                            {
-                                TurnOnAndAdd(index);
-                                new Alarm(HourScheduleEnd, MinutesScheduleEnd, ()->
-                                {
-                                    TurnOffAndRemove(index);
-                                },false).activate();
-                            },false).activate();
-                        }
+                            case NO_MODE:
+                                // (does nothing)
+                                break;
 
-                        // Caso contrário (caso geral)
-                        else
-                        {
-                            // Se tiver mais que um device
-                            // (vai para o gráfico desse device)
-                            if(isMultiTarget())
-                            {
-                                if(j == indexLuz)
+                            /* Seleção da plug */
+                            case SELECT_TARGET_MODE:
+                                // ...
+                                // ...
+                                // ...
+                                break;
+
+                            /* Ligar/desligar uma plug */
+                            case STANDARD_MODE:
+                                // Se tiver mais que um device
+                                // (vai para o gráfico desse device)
+                                if(isMultiTarget())
                                 {
-                                    sendMessage("Device start"+"-"+"Candeeiro");
-                                }
-                                else
-                                {
-                                    if(j == indexChaleira)
+                                    if(j == indexLuz)
                                     {
-                                        sendMessage("Device start"+"-"+"Chaleira");
+                                        sendMessage("Device start"+"-"+"Candeeiro");
+                                    }
+                                    else
+                                    {
+                                        if(j == indexChaleira)
+                                        {
+                                            sendMessage("Device start"+"-"+"Chaleira");
+                                        }
                                     }
                                 }
-                            }
 
-                            // Se tiver só um device
-                            // (vai para o gráfico desse plug)
-                            else
-                            {
-                                if(IsOn)
-                                {
-                                    TurnOffAndRemove(j);
-                                }
+                                // Se tiver só um device
+                                // (vai para o gráfico desse plug)
                                 else
                                 {
-                                    TurnOnAndAdd(j);
-                                    sendMessage("Plug start"+"-"+"plug"+_plug_names.get(j)+".local");
+                                    if(IsOn)
+                                    {
+                                        TurnOffAndRemove(j);
+                                    }
+                                    else
+                                    {
+                                        TurnOnAndAdd(j);
+                                    }
                                 }
-                            }
+                                break;
 
-                            //HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
-                            // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
+                            /* (Confirmação do) schedule */
+                            case SCHEDULE_MODE:
+                                if(IsOn) TurnOffAndRemove(j);
+                                ChangeColorByEnergy(renewableEnergy);
+                                currentMode = NO_MODE;
+                                new Alarm(HourScheduleStart, MinutesScheduleStart,()->
+                                {
+                                    TurnOnAndAdd(index);
+                                    new Alarm(HourScheduleEnd, MinutesScheduleEnd, ()->
+                                    {
+                                        TurnOffAndRemove(index);
+                                        currentMode = STANDARD_MODE;
+                                    },false).activate();
+                                },false).activate();
+                                break;
                         }
-                        return;
                     }
                 }
             }
@@ -1100,10 +1113,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.start();
             selected_request.join();
             enviaNome.join();
-            Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
+            Log.d("PLUGS","Plug '"+PLUG_NAMES[j % PLUG_NAMES.length]+"' has been turned off by "+Device_Name);
             IsOn = false;
-            notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned off");
-
+            notify("Wattapp","Plug '"+PLUG_NAMES[j % PLUG_NAMES.length]+"' has been turned off");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1118,9 +1130,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.start();
             selected_request.join();
             enviaNome.join();
-            Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned on by "+Device_Name);
+            Log.d("PLUGS","Plug '"+PLUG_NAMES[j % PLUG_NAMES.length]+"' has been turned on by "+Device_Name);
             IsOn = true;
-            notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned on");
+            sendMessage("Plug start"+"-"+PLUG_NAMES[j % PLUG_NAMES.length]);
+            notify("Wattapp","Plug '"+PLUG_NAMES[j % PLUG_NAMES.length]+"' has been turned on");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1229,7 +1242,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 JSONObject obj = (JSONObject) json_array.get(i);
                 try {
                     _target[i]=i;
-                    _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
+                    _plug_names.add(obj.getString("name")
+                            .substring(0, obj.getString("name").indexOf("."))
+                            .replace("plug", ""));
+
                     // Log.i(TAG, "plug "+_plug_names.get(i));
                 }catch (JSONException e){
             		Log.d("PLUGS","No plugs detected!");
@@ -1428,7 +1444,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         int power = JSONData.getInt("power");
                         sendMessage("Plug consumption"
                                 + "-"
-                                + "plug" + id + ".local"
+                                + PLUG_NAMES[id % PLUG_NAMES.length]
                                 + "-"
                                 + power);
                         Log.d("STATISTICS", "plug" + id + ".local is consuming " + power);
@@ -1436,13 +1452,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
                     sendMessage("Device consumption"
                             + "-"
-                            + "chaleira top"
+                            + "Chaleira"
                             + "-"
                             + (new Random().nextInt( 20) + 7));
 
                     sendMessage("Device consumption"
                             + "-"
-                            + "luz top"
+                            + "Candeeiro"
                             + "-"
                             + (new Random().nextInt(22) + 11));
 

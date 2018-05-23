@@ -11,6 +11,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
@@ -179,6 +180,7 @@ public class MainActivity extends Activity implements SensorEventListener
     private long _sampling_diff = 40;        // alterei o sampling rate aqui
     private boolean paused = false;
     private boolean inStudy = false;
+    private Vibrator vibrator;
 
     /* ***************** */
     /* BACK-END (SENSOR) */
@@ -279,6 +281,8 @@ public class MainActivity extends Activity implements SensorEventListener
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         _queue = Volley.newRequestQueue(this);
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         initTasks();
     }
@@ -785,6 +789,7 @@ public class MainActivity extends Activity implements SensorEventListener
             for (int j = 0; j < _devices_count; j++) {
                 if (match && led_target == _target[j]) {
                     index = j;
+                    vibrator.vibrate(500);
 
                     // Schedule mode
                     if (isScheduleMode) {

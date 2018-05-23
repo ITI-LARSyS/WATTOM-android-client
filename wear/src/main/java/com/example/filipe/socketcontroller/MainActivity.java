@@ -8,6 +8,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
@@ -58,6 +59,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private long _sampling_diff = 40;        // alterei o sampling rate aqui
     private boolean paused = false;
     private boolean inStudy = false;
+    private Vibrator vibrator;
 
     /* ***************** */
     /* BACK-END (SENSOR) */
@@ -155,6 +157,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     @Override
@@ -336,6 +340,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
             // É obtido o identificador da mensagem
             String event = valores[0];
+
+            // Haptic feedback para a ocorrência de um evento
+            vibrator.vibrate(250);
 
             switch(event)
             {
