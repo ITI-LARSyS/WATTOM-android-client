@@ -644,14 +644,4 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             }
         }
     }
-
-    public void ola(View v)
-    {
-        /*navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
-        linePlugs.add("plug3.local");
-        linePlugs.switchSeries("plug3.local");*/
-        navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
-     //   lineDevices.add("Chaleira");
-        lineDevices.switchSeries("Chaleira");
-    }
 }

@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private static String SELECTED_URL = PLUGS_URL +"%/selected/";
     private static String PLUG_URL = BASE_URL+"/plug/%";
     private int _plug_selected = 0;
-    private static String ChangeEnergyURL = PLUGS_URL+"energy/";
+    private static String ChangeEnergyURL = PLUGS_URL+"%/energy/";
     private int renewableEnergy = 0;
     private int vez = 0;
 
@@ -182,6 +182,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private static final int CORR_BAD = android.R.drawable.presence_busy;
     private static final int CORR_NORMAL = android.R.drawable.presence_away;
 
+    private int plugSelected = -1;
+
     //Ao iniciar a aplicacao
     // - Atribui cada elemento da interface uma variavel
     // - coloca a taba do debug escondida
@@ -207,7 +209,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         minTimer = new Timer();
         PowerTimer = new Timer();
 //        IsNotFirstTime = 0;
-        currentMode = STANDARD_MODE;
 
         //_simuView.setVisibility(View.GONE);
        // FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -431,8 +432,18 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             toast(getApplicationContext(),"Study started!");
 
             IsOn = false;
+            currentMode = SELECT_TARGET_MODE;
 
-            new Timer().schedule(energyTask,0,1000*60*15);
+            new Thread(()->
+            {
+                HttpRequest start = new HttpRequest(PLUGS_URL+"start/6",getApplicationContext(),_queue);
+                start.start();
+                try {
+                    start.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
 
             try {
                 Thread.sleep(1000);
@@ -441,8 +452,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
 
             new StartUp(PLUGS_URL).start();
-            new Timer().schedule(powerTask,10,1000*60);
-            new Timer().schedule(personTask,10,1000*60);
+            new Timer().schedule(energyTask,0,1000*60*15);
+            new Timer().schedule(powerTask,250,1000*60);
+            new Timer().schedule(personTask,500,1000*60);
         }).start();
     }
 
@@ -657,7 +669,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         paused = true;
     }
 
-    private void SelectedTime(int hour, int min){
+    private synchronized void SelectedTime(int hour, int min){
         HttpRequest showTime;
         showTime = new HttpRequest(BASE_URL + "plug/SelectedTime/"+ hour+"-"+min, getApplicationContext(),_queue);
         try{
@@ -700,7 +712,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 e.printStackTrace();
             }
             for(int i = 0; i < _plug_names.size();i++){
-                TurnOffAndRemove(Integer.parseInt(_plug_names.get(i)));
+                TurnOffAndRemove(i);
             }
         }
     }
@@ -708,7 +720,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private class RefreshData extends Thread{
 
         @Override
-        public void run() {
+        public synchronized void run() {
             try{
                 HttpRequest _request;
                 _request = new HttpRequest(BASE_URL + "plug", getApplicationContext() ,_queue);
@@ -721,6 +733,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 //luz = 0, chaleira =1
 
                 JSONArray json_array = new JSONArray(data);
+                indexLuz = -1;
+                indexChaleira = -1;
                 for(int i=0;i<_handlers.size();i++) {
                     JSONObject json_message = json_array.getJSONObject(i);
                     if(json_message.getInt("red") == 0)
@@ -957,26 +971,27 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
                         if(_correlations_count[i] == 3) {
                             _correlations_count[i] = 0;
-                            //if (i == _target[i]){
-                            _target_selection = true;
-                            // Beep to show its the correct match
-                           // ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
-                            //toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
-                            if(_togglers[i] == null || !_togglers[i].isAlive())
-                            {
-                                final  int finalI = i; // target correlated
-                                _togglers[i] = new Thread(() ->
+                           // if (i == _target[i]){
+                                _target_selection = true;
+                                // Beep to show its the correct match
+                               // ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+                                //toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
+                                if(_togglers[i] == null || !_togglers[i].isAlive())
                                 {
-                                    updateTarget(finalI,true);
-                                    try {
-                                        Thread.sleep(2000);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
-                                _togglers[i].start();
-                            }
-                            //}else{
+                                    final  int finalI = i; // target correlated
+                                    _togglers[i] = new Thread(() ->
+                                    {
+                                        updateTarget(finalI,true);
+                                        try {
+                                            Thread.sleep(1000);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
+                                    _togglers[i].start();
+                                }
+                           // }
+                            //else{
 //                                Log.i(TAG,"Wrong correlation");
 //                                _target_selection = false;
 //                                ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
@@ -1034,7 +1049,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
                             /* Seleção da plug */
                             case SELECT_TARGET_MODE:
-                                // ...
+                                currentMode = STANDARD_MODE;
+                                plugSelected = Integer.parseInt(_plug_names.get(led_target));
+                                ChangeColorByEnergy(renewableEnergy,plugSelected);
+                                new RefreshData().start();
                                 // ...
                                 // ...
                                 break;
@@ -1076,7 +1094,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             /* (Confirmação do) schedule */
                             case SCHEDULE_MODE:
                                 if(IsOn) TurnOffAndRemove(j);
-                                ChangeColorByEnergy(renewableEnergy);
+                                ChangeColorByEnergy(renewableEnergy,plugSelected);
                                 currentMode = NO_MODE;
                                 new Alarm(HourScheduleStart, MinutesScheduleStart,()->
                                 {
@@ -1088,14 +1106,18 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                     },false).activate();
                                 },false).activate();
                                 break;
+
+                            default:
+                                break;
                         }
                     }
                 }
             }
     }
 
-    public void ChangeColorByEnergy(int percent){
-        HttpRequest novo = new HttpRequest(ChangeEnergyURL+percent, getApplicationContext() ,_queue);
+    public synchronized void ChangeColorByEnergy(int percent, int plugId){
+        HttpRequest novo = new HttpRequest(ChangeEnergyURL
+                .replace("%", ""+plugId) +percent, getApplicationContext() ,_queue);
         try{
             novo.start();
             //novo.join();
@@ -1105,7 +1127,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         new RefreshData().start();
     }
 
-    public void TurnOffAndRemove(int j){
+    public synchronized void TurnOffAndRemove(int j){
         try{
             HttpRequest selected_request = new HttpRequest(BASE_URL + "plug/"+_plug_names.get(j)+"/relay/1", getApplicationContext(),_queue);
             HttpRequest enviaNome = new HttpRequest(BASE_URL + "plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
@@ -1113,16 +1135,16 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.start();
             selected_request.join();
             enviaNome.join();
-            Log.d("PLUGS","Plug '"+PLUG_NAMES[j % PLUG_NAMES.length]+"' has been turned off by "+Device_Name);
+            Log.d("PLUGS","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned off by "+Device_Name);
             IsOn = false;
-            notify("Wattapp","Plug '"+PLUG_NAMES[j % PLUG_NAMES.length]+"' has been turned off");
+            notify("Wattapp","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned off");
         }catch (Exception e){
             e.printStackTrace();
         }
        // ConsultUsers();
     }
 
-    public void TurnOnAndAdd(int j){
+    public synchronized void TurnOnAndAdd(int j){
         try{
             HttpRequest selected_request = new HttpRequest(BASE_URL + "plug/"+_plug_names.get(j)+"/relay/0", getApplicationContext(),_queue);
             HttpRequest enviaNome = new HttpRequest(BASE_URL + "plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
@@ -1130,10 +1152,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             enviaNome.start();
             selected_request.join();
             enviaNome.join();
-            Log.d("PLUGS","Plug '"+PLUG_NAMES[j % PLUG_NAMES.length]+"' has been turned on by "+Device_Name);
+            Log.d("PLUGS","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned on by "+Device_Name);
             IsOn = true;
-            sendMessage("Plug start"+"-"+PLUG_NAMES[j % PLUG_NAMES.length]);
-            notify("Wattapp","Plug '"+PLUG_NAMES[j % PLUG_NAMES.length]+"' has been turned on");
+            sendMessage("Plug start"+"-"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]);
+            notify("Wattapp","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned on");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1210,6 +1232,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
           } catch (InterruptedException e) {
               e.printStackTrace();
           }
+          currentMode = STANDARD_MODE;
           inStudy = true;
           sendMessage("START");
           toast(getApplicationContext(),"Study started!");
@@ -1220,13 +1243,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
           new StartUp(PLUGS_URL).start();
 
 
-          new Timer().schedule(powerTask,10,1000*60);
-          new Timer().schedule(personTask,10,1000*60);
+          new Timer().schedule(powerTask,250,1000*60);
+          new Timer().schedule(personTask,500,1000*60);
       }).start();
   }
 
     //Envia um pedido HTTTP recebe dados e adiciona as plugs que existir
-    private void getPlugsData(){
+    private synchronized void getPlugsData(){
         try {
             _plug_names = new ArrayList<>();
             HttpRequest novo = new HttpRequest(BASE_URL + "plug", getApplicationContext());
@@ -1368,7 +1391,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         PLUGS_URL       = BASE_URL +"plug/";
         PLUG_URL        = PLUGS_URL +"%/";
         SELECTED_URL    = PLUG_URL + "selected/";
-        ChangeEnergyURL = PLUGS_URL+"energy/";
+        ChangeEnergyURL = PLUGS_URL+"%/energy/";
     }
 
     public static String getBaseURL() { return BASE_URL; }
@@ -1454,13 +1477,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                             + "-"
                             + "Chaleira"
                             + "-"
-                            + (new Random().nextInt( 20) + 7));
+                            + (new Random().nextInt( 10) + 3));
 
                     sendMessage("Device consumption"
                             + "-"
                             + "Candeeiro"
                             + "-"
-                            + (new Random().nextInt(22) + 11));
+                            + (new Random().nextInt(12) + 5));
 
                     if (!paused)
                         toast(getApplicationContext(), "Device consumption" + " - " + "Updated data!");
@@ -1548,7 +1571,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
                     percentage *= 100;
                     renewableEnergy =  Math.round(percentage);
-                    ChangeColorByEnergy(renewableEnergy);
+                    if(plugSelected != -1) ChangeColorByEnergy(renewableEnergy,plugSelected);
                     new RefreshData().start();
                 }
             }

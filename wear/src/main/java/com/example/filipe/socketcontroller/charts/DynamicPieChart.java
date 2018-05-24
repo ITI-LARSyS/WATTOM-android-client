@@ -47,9 +47,9 @@ public class DynamicPieChart extends PieChart
     private void init()
     {
         values = new HashMap<>();
+        currentIndex = -1;
         this.setUsePieRotation(false);
         this.setOnClickListener((v)->switchSlice());
-        currentIndex = -1;
     }
 
     public void switchSlice()
