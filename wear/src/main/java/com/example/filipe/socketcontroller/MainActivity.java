@@ -33,8 +33,10 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
 import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
+import static com.example.filipe.socketcontroller.util.UI.hide;
 import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
+import static com.example.filipe.socketcontroller.util.UI.unhide;
 import static com.example.filipe.socketcontroller.util.UI.updateTime;
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -114,8 +116,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private DynamicLineChart lineDevices;
     private DynamicPieChart piePlugsAcum;
     private DynamicPieChart pieEnergias;
-    private TextView textCurSeries;
-    private TextView textCurSeriesDevices;
+    private DynamicLineChart linePessoasMedia;
+    private float mediaConsumoPessoa = -1;
 
 
     /* *** */
@@ -353,9 +355,19 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
                     {
+                        if(mediaConsumoPessoa != -1)
+                        {
+                            mediaConsumoPessoa += Float.parseFloat(valores[i*2+2]);
+                            mediaConsumoPessoa /= 2;
+                        }
+                        else
+                        {
+                            mediaConsumoPessoa += Float.parseFloat(valores[i*2+2]);
+                        }
                         piePessoasAcum.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                         Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
+                    linePessoasMedia.addPoint(mediaConsumoPessoa);
                     notify("Person consumption","Updated data!");
                     Log.d("PERSONS","Person consumption has been updated!");
                     break;
@@ -382,7 +394,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     break;
 
                 // Mensagem com o consumo atual de uma plug
-                // (formato: "Plug consumption-plug1.local-500")
+                // (formato: "Plug consumption-Sala de estar-500")
                 case "Plug consumption":
                     String plugName = valores[1];
                     float value = Float.parseFloat(valores[2]);
@@ -393,7 +405,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     break;
 
                 // Mensagem a indicar o 'enable' de uma plug
-                // (formato: "Plug start-plug2.local")
+                // (formato: "Plug start-Quarto de dormir")
                 case "Plug start":
                     String plug = valores[1];
                     navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
@@ -546,6 +558,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         /* ***** */
         /* STATS */
         /* ***** */
+        linePessoasMedia = (DynamicLineChart) findViewById(R.id.linepessoasmedia);
         piePessoasAcum = (DynamicPieChart) findViewById(R.id.tab_power_pessoas_total);
         pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
         piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
@@ -572,22 +585,32 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePessoasAcum.setValue("Manel",20);
         piePessoasAcum.setValue("Afonso",40);
         piePessoasAcum.setValue("Dionísio",10);
+        piePessoasAcum.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PESSOAS2.ordinal(),true);
+            return true;
+        });
 
-        linePlugs.addPoint("plug1.local","21:01",2.4f);
-        linePlugs.addPoint("plug1.local","21:02",1f);
-        linePlugs.addPoint("plug1.local","21:03",4.4f);
-        linePlugs.addPoint("plug1.local","21:04",6.9f);
-        linePlugs.addPoint("plug1.local","21:05",5.4f);
-        linePlugs.addPoint("plug2.local","21:01",4.4f);
-        linePlugs.addPoint("plug2.local","21:02",2.9f);
-        linePlugs.addPoint("plug2.local","21:03",4.0f);
-        linePlugs.addPoint("plug2.local","21:04",5f);
-        linePlugs.addPoint("plug2.local","21:05",4.4f);
-        linePlugs.addPoint("plug4.local","21:01",4.4f);
-        linePlugs.addPoint("plug4.local","21:02",2.9f);
-        linePlugs.addPoint("plug4.local","21:03",4.0f);
-        linePlugs.addPoint("plug4.local","21:04",5f);
-        linePlugs.addPoint("plug4.local","21:05",4.4f);
+        linePlugs.addPoint("Sala de estar","21:01",2.4f);
+        linePlugs.addPoint("Sala de estar","21:02",1f);
+        linePlugs.addPoint("Sala de estar","21:03",4.4f);
+        linePlugs.addPoint("Sala de estar","21:04",6.9f);
+        linePlugs.addPoint("Sala de estar","21:05",5.4f);
+        linePlugs.addPoint("Quarto de dormir","21:01",4.4f);
+        linePlugs.addPoint("Quarto de dormir","21:02",2.9f);
+        linePlugs.addPoint("Quarto de dormir","21:03",4.0f);
+        linePlugs.addPoint("Quarto de dormir","21:04",5f);
+        linePlugs.addPoint("Quarto de dormir","21:05",4.4f);
+        linePlugs.addPoint("Hall de entrada","21:01",4.4f);
+        linePlugs.addPoint("Hall de entrada","21:02",2.9f);
+        linePlugs.addPoint("Hall de entrada","21:03",4.0f);
+        linePlugs.addPoint("Hall de entrada","21:04",5f);
+        linePlugs.addPoint("Hall de entrada","21:05",4.4f);
+        linePlugs.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PLUGSTOTAL.ordinal(),true);
+            return true;
+        });
 
         lineDevices.addPoint("Chaleira","14:02",2.4f);
         lineDevices.addPoint("Candeeiro","14:02",1.4f);
@@ -603,11 +626,52 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         lineDevices.addPoint("Candeeiro","14:07",1.9f);
         lineDevices.addPoint("Chaleira","14:08",3.1f);
         lineDevices.addPoint("Candeeiro","14:08",1.6f);
-        piePlugsAcum.incValue("plug1.local",30);
-        piePlugsAcum.incValue("plug2.local",20);
-        piePlugsAcum.incValue("plug4.local",20);
-        piePlugsAcum.incValue("plug1.local",20);
-        piePlugsAcum.incValue("plug5.local",20);
+
+        linePessoasMedia.enableExtra();
+        linePessoasMedia.addPoint("Manel","14:01",10);
+        linePessoasMedia.addPoint("Afonso","14:01",20);
+        linePessoasMedia.addPoint("Dionísio","14:01",30);
+        mediaConsumoPessoa += 20;
+        linePessoasMedia.addPoint(mediaConsumoPessoa);
+
+        linePessoasMedia.addPoint("Manel","14:02",11);
+        mediaConsumoPessoa += 11;
+        mediaConsumoPessoa /= 2;
+        linePessoasMedia.addPoint("Afonso","14:02",19);
+        mediaConsumoPessoa += 19;
+        mediaConsumoPessoa /= 2;
+        linePessoasMedia.addPoint("Dionísio","14:02",20);
+        mediaConsumoPessoa += 20;
+        mediaConsumoPessoa /= 2;
+        linePessoasMedia.addPoint(mediaConsumoPessoa);
+
+        linePessoasMedia.addPoint("Manel","14:03",15);
+        mediaConsumoPessoa += 15;
+        mediaConsumoPessoa /= 3;
+        linePessoasMedia.addPoint("Afonso","14:03",3);
+        mediaConsumoPessoa += 3;
+        mediaConsumoPessoa /= 2;
+        linePessoasMedia.addPoint("Dionísio","14:03",12);
+        mediaConsumoPessoa += 12;
+        mediaConsumoPessoa /= 2;
+        linePessoasMedia.addPoint(mediaConsumoPessoa);
+
+        linePessoasMedia.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PESSOAS.ordinal(),true);
+            return true;
+        });
+
+        piePlugsAcum.incValue("Sala de estar",30);
+        piePlugsAcum.incValue("Quarto de dormir",20);
+        piePlugsAcum.incValue("Hall de entrada",20);
+        piePlugsAcum.incValue("Sala de estar",20);
+        piePlugsAcum.incValue("Escritório",20);
+        piePlugsAcum.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
+            return true;
+        });
 
         pieEnergias.setValue("Eólica",20);
         pieEnergias.setValue("Não renovável",50);

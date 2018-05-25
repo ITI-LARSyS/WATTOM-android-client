@@ -11,6 +11,7 @@
     <string name="TITLE_STATS4">Energy (Pie)</string>
     <string name="TITLE_STATS5">Power usage by plug (Pie)</string>
     <string name="TITLE_STATS6">Power usage by device (Line)</string>
+    <string name="TITLE_STATS7">Power usage by person (Line)</string>
     <string name="TITLE_LOG">Log</string>
 
     <!--- START/STOP TAB -->

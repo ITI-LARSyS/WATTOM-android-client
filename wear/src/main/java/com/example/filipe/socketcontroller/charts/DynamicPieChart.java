@@ -1,6 +1,7 @@
 package com.example.filipe.socketcontroller.charts;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
+import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
 
 public class DynamicPieChart extends PieChart
 {

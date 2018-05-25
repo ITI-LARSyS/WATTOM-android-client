@@ -26,9 +26,11 @@ import static com.example.filipe.socketcontroller.util.UI.colors;
 public class DynamicLineChart extends LinearLayout
 {
     private HashMap<String,ValueLineSeries> values;
+    private ValueLineSeries extraValues;
     private ValueLineChart chart;
     private TextView indicator;
     private int currentIndex;
+    private boolean hasExtra = false;
 
     @SuppressLint("CustomViewStyleable")
     public DynamicLineChart(Context context, AttributeSet attrs)
@@ -59,6 +61,8 @@ public class DynamicLineChart extends LinearLayout
         this.setOrientation(LinearLayout.VERTICAL);
 
         values = new HashMap<>();
+        extraValues = new ValueLineSeries();
+        extraValues.setColor(Color.parseColor(colors[colors.length-1]));
 
         initChart(c);
         initIndicator(c);
@@ -76,8 +80,8 @@ public class DynamicLineChart extends LinearLayout
         chart.setLayoutParams(new LinearLayout.LayoutParams(metrics.widthPixels - 80,metrics.heightPixels - 80));
         chart.setShowStandardValues(true);
         chart.setShowDecimal(true);
-        chart.setUseCubic(true);
-        chart.setUseOverlapFill(true);
+        chart.setUseCubic(false);
+        chart.setUseOverlapFill(false);
         chart.setUseDynamicScaling(false);
         chart.setIndicatorLineColor(Color.parseColor("#FFFFFF"));
         chart.setIndicatorTextColor(Color.parseColor("#FFFFFF"));
@@ -126,6 +130,11 @@ public class DynamicLineChart extends LinearLayout
 
         refresh();
     }
+    public void addPoint(float point)
+    {
+        ValueLinePoint value = new ValueLinePoint(getCurrentTime(),point);
+        extraValues.addPoint(value);
+    }
     private String getCurrentTime()
     {
         Calendar now = Calendar.getInstance();
@@ -170,12 +179,28 @@ public class DynamicLineChart extends LinearLayout
         {
             add(key);
         }
+
         for(ValueLinePoint p : values.get(key).getSeries())
         {
             p.setIgnore(false);
         }
         chart.addSeries(values.get(key));
+
+        if(hasExtra)
+        {
+            for(ValueLinePoint p : extraValues.getSeries())
+            {
+                p.setIgnore(false);
+            }
+            chart.addSeries(extraValues);
+        }
+
         indicator.setText(key);
+    }
+
+    public void enableExtra()
+    {
+        this.hasExtra = true;
     }
 
 }
