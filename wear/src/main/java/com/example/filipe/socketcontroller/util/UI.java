@@ -50,24 +50,6 @@ public abstract class UI
                     "#705050",
                     "#FFFFFF"
             };
-    public static void fitToScreen(Activity a, View view)
-    {
-        DisplayMetrics metrics = new DisplayMetrics();
-        a.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-        params.width = metrics.widthPixels;
-        params.height = metrics.heightPixels;
-        view.setLayoutParams(params);
-    }
-    public static void fitToScreen(Activity a, View view, int padding)
-    {
-        DisplayMetrics metrics = new DisplayMetrics();
-        a.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-        params.width = metrics.widthPixels - padding;
-        params.height = metrics.heightPixels - padding;
-        view.setLayoutParams(params);
-    }
     public static void toggleVisibility(View v)
     {
         if(isVisible(v)) hide(v);

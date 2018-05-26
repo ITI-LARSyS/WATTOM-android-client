@@ -1,12 +1,14 @@
 package com.example.filipe.socketcontroller.charts;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.DisplayMetrics;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.example.filipe.socketcontroller.R;
 
@@ -14,15 +16,14 @@ import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
-import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
 
 public class DynamicPieChart extends PieChart
 {
     private HashMap<String,PieModel> values;
     private int currentIndex;
+
     public DynamicPieChart(Context context)
     {
         super(context);
@@ -80,6 +81,28 @@ public class DynamicPieChart extends PieChart
         if(currentIndex == -1)
         {
             currentIndex = 0;
+            DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+            ViewGroup.LayoutParams params = getLayoutParams();
+            if(params == null)
+            {
+                params = new LinearLayout.LayoutParams(metrics.widthPixels,metrics.heightPixels);
+            }
+            else
+            {
+                int input_width = params.width;
+                if(input_width == LinearLayout.LayoutParams.MATCH_PARENT || input_width == LinearLayout.LayoutParams.WRAP_CONTENT)
+                {
+                    params.width = metrics.widthPixels;
+                }
+
+                int input_height = params.height;
+                if(input_height == LinearLayout.LayoutParams.MATCH_PARENT || input_height == LinearLayout.LayoutParams.WRAP_CONTENT)
+                {
+                    params.height = metrics.heightPixels;
+                }
+            }
+
+            setLayoutParams(params);
         }
         for(PieModel p : values.values())
         {

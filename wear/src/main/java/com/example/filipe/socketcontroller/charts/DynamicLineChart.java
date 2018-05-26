@@ -7,7 +7,8 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
+import android.view.Gravity;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -17,7 +18,6 @@ import org.eazegraph.lib.charts.ValueLineChart;
 import org.eazegraph.lib.models.ValueLinePoint;
 import org.eazegraph.lib.models.ValueLineSeries;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -25,59 +25,103 @@ import static com.example.filipe.socketcontroller.util.UI.colors;
 
 public class DynamicLineChart extends LinearLayout
 {
+    // Size attributes
+    private int width = -1;
+    private int height = -1;
+
+    // Data attributes
     private HashMap<String,ValueLineSeries> values;
     private ValueLineSeries extraValues;
     private ValueLineChart chart;
     private TextView indicator;
     private int currentIndex;
-    private boolean hasExtra = false;
+    private boolean hasExtra;
+    private String unit;
+
+    // Constants
+    private static final double PADDING_GRAPH_LEFT_RIGHT = 0.9;
+    private static final double GRAPH_SIZE_RATIO = 0.7;
+    private static final double INDICATOR_SIZE_RATIO = 0.2;
+    private static final double EXTRA_LEGEND_SIZE_RATIO = 0.1;
 
     @SuppressLint("CustomViewStyleable")
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         init(context);
-
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.DynamicCharts, 0, 0);
         try
         {
-            String unit = ta.getString(R.styleable.DynamicCharts_unitShown);
-            chart.setIndicatorTextUnit(unit);
+            unit = ta.getString(R.styleable.DynamicCharts_unitShown);
+            hasExtra = ta.getBoolean(R.styleable.DynamicCharts_showAverage,false);
         }
         finally
         {
             ta.recycle();
         }
+        initChart(context);
+        initIndicator(context);
+        initLegend(context);
     }
 
     public DynamicLineChart(Context context)
     {
         super(context);
         init(context);
+        initChart(context);
+        initIndicator(context);
+        initLegend(context);
     }
 
     private void init(Context c)
     {
-        this.setOrientation(LinearLayout.VERTICAL);
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        ViewGroup.LayoutParams params = getLayoutParams();
+        if(params == null)
+        {
+            width = metrics.widthPixels;
+            height = metrics.heightPixels;
+        }
+        else
+        {
+            int input_width = params.width;
+            if(input_width == LayoutParams.MATCH_PARENT || input_width == LayoutParams.WRAP_CONTENT)
+            {
+                width = metrics.widthPixels;
+            }
+            else
+            {
+                width = input_width;
+            }
 
-        values = new HashMap<>();
+            int input_height = params.height;
+            if(input_height == LayoutParams.MATCH_PARENT || input_height == LayoutParams.WRAP_CONTENT)
+            {
+                height = metrics.heightPixels;
+            }
+            else
+            {
+                height = input_height;
+            }
+        }
+
         extraValues = new ValueLineSeries();
         extraValues.setColor(Color.parseColor(colors[colors.length-1]));
 
-        initChart(c);
-        initIndicator(c);
+        this.setOrientation(LinearLayout.VERTICAL);
+        this.setGravity(Gravity.CENTER);
+
+        values = new HashMap<>();
 
         currentIndex = -1;
-
-        addView(chart);
-        addView(indicator);
     }
 
     private void initChart(Context c)
     {
         chart = new ValueLineChart(c);
-        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        chart.setLayoutParams(new LinearLayout.LayoutParams(metrics.widthPixels - 80,metrics.heightPixels - 80));
+        chart.setLayoutParams(new LinearLayout.LayoutParams(
+                (int)(width * PADDING_GRAPH_LEFT_RIGHT),
+                (int)(height  * GRAPH_SIZE_RATIO)));
         chart.setShowStandardValues(true);
         chart.setShowDecimal(true);
         chart.setUseCubic(false);
@@ -85,17 +129,38 @@ public class DynamicLineChart extends LinearLayout
         chart.setUseDynamicScaling(false);
         chart.setIndicatorLineColor(Color.parseColor("#FFFFFF"));
         chart.setIndicatorTextColor(Color.parseColor("#FFFFFF"));
+        addView(chart);
     }
 
     private void initIndicator(Context c)
     {
         indicator = new TextView(c);
-        indicator.setLayoutParams(new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT));
+        if(hasExtra)
+        {
+            indicator.setLayoutParams(new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    (int)(height * INDICATOR_SIZE_RATIO)));
+        }
+        else
+        {
+            indicator.setLayoutParams(new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    (int)(height * (INDICATOR_SIZE_RATIO+EXTRA_LEGEND_SIZE_RATIO))));
+        }
+
+        indicator.setGravity(Gravity.CENTER);
+        chart.setIndicatorTextUnit(unit);
         indicator.setOnClickListener((v)-> switchSeries());
         indicator.setText("-");
-        indicator.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
+        addView(indicator);
+    }
+
+    private void initLegend(Context c)
+    {
+        if(hasExtra)
+        {
+            addView(new AverageLegend(c));
+        }
     }
 
     public void refresh()
@@ -198,9 +263,24 @@ public class DynamicLineChart extends LinearLayout
         indicator.setText(key);
     }
 
-    public void enableExtra()
+    private class AverageLegend extends android.support.v7.widget.AppCompatTextView
     {
-        this.hasExtra = true;
+        private static final String LEGEND = "Average value";
+        public AverageLegend(Context c)
+        {
+            super(c);
+            init();
+        }
+        private void init()
+        {
+            this.setLayoutParams(new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    (int)(height * EXTRA_LEGEND_SIZE_RATIO)));
+            this.setText(LEGEND);
+            this.setGravity(Gravity.CENTER);
+            this.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.editbox_dropdown_light_frame,0,0,0);
+            this.setCompoundDrawablePadding(5);
+        }
     }
 
 }

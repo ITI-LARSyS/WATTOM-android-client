@@ -32,11 +32,8 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
-import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
-import static com.example.filipe.socketcontroller.util.UI.hide;
 import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
-import static com.example.filipe.socketcontroller.util.UI.unhide;
 import static com.example.filipe.socketcontroller.util.UI.updateTime;
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, SensorEventListener , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -558,24 +555,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         /* ***** */
         /* STATS */
         /* ***** */
-        linePessoasMedia = (DynamicLineChart) findViewById(R.id.linepessoasmedia);
+        linePessoasMedia = (DynamicLineChart) findViewById(R.id.tab_power_pessoas_media);
         piePessoasAcum = (DynamicPieChart) findViewById(R.id.tab_power_pessoas_total);
         pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
         piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
-        linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
-        lineDevices = (DynamicLineChart) findViewById(R.id.linechartdevices);
-        fitToScreen(this,piePessoasAcum);
-        fitToScreen(this,pieEnergias);
-        fitToScreen(this,piePlugsAcum);
-
-        /* *** */
-        /* LOG */
-        /* *** */
-        _x_acc          = (TextView) findViewById(R.id.x_text_field);
-        _y_acc          = (TextView) findViewById(R.id.y_text_field);
-        _z_acc          = (TextView) findViewById(R.id.z_text_field);
-        _tms            = (TextView) findViewById(R.id.tms_text_field);
-        _consumo        = (TextView) findViewById(R.id.ConsumoInsert);
+        linePlugs = (DynamicLineChart) findViewById(R.id.tab_power_plugs_current);
+        lineDevices = (DynamicLineChart) findViewById(R.id.tab_power_devices);
 
        fillEazeGraph();
     }
@@ -627,7 +612,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         lineDevices.addPoint("Chaleira","14:08",3.1f);
         lineDevices.addPoint("Candeeiro","14:08",1.6f);
 
-        linePessoasMedia.enableExtra();
         linePessoasMedia.addPoint("Manel","14:01",10);
         linePessoasMedia.addPoint("Afonso","14:01",20);
         linePessoasMedia.addPoint("Dionísio","14:01",30);
