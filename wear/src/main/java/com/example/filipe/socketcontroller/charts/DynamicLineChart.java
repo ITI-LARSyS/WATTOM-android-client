@@ -49,8 +49,23 @@ public class DynamicLineChart extends LinearLayout
     {
         super(context, attrs);
         loadAttributes(context,attrs);
-        adjustParams(context, attrs);
         init(context);
+    }
+
+    public DynamicLineChart(Context context)
+    {
+        super(context);
+        init(context);
+    }
+
+    @Override
+    protected void onAttachedToWindow()
+    {
+        super.onAttachedToWindow();
+        adjustParams();
+        initChart();
+        initIndicator();
+        initLegend(getContext());
     }
 
     @SuppressLint("CustomViewStyleable")
@@ -68,26 +83,10 @@ public class DynamicLineChart extends LinearLayout
         }
     }
 
-    private void init(Context context)
-    {
-        extraValues = new ValueLineSeries();
-        extraValues.setColor(Color.parseColor(colors[colors.length-1]));
-
-        this.setOrientation(LinearLayout.VERTICAL);
-        this.setGravity(Gravity.CENTER);
-
-        values = new HashMap<>();
-        currentIndex = NONE;
-
-        initChart(context);
-        initIndicator(context);
-        initLegend(context);
-    }
-
-    private void adjustParams(Context context,AttributeSet attrs)
+    private void adjustParams()
     {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        ViewGroup.LayoutParams params = new LayoutParams(context,attrs);
+        ViewGroup.LayoutParams params = getLayoutParams();
         int input_width = params.width;
         int input_height = params.height;
         if(input_width == LayoutParams.MATCH_PARENT || input_width == LayoutParams.WRAP_CONTENT)
@@ -108,9 +107,23 @@ public class DynamicLineChart extends LinearLayout
         }
     }
 
-    private void initChart(Context c)
+    private void init(Context c)
     {
+        extraValues = new ValueLineSeries();
+        extraValues.setColor(Color.parseColor(colors[colors.length-1]));
+
         chart = new ValueLineChart(c);
+        indicator = new TextView(c);
+
+        this.setOrientation(LinearLayout.VERTICAL);
+        this.setGravity(Gravity.CENTER);
+
+        values = new HashMap<>();
+        currentIndex = NONE;
+    }
+
+    private void initChart()
+    {
         chart.setLayoutParams(new LinearLayout.LayoutParams(
                 (int)(width * PADDING_GRAPH_LEFT_RIGHT),
                 (int)(height  * GRAPH_SIZE_RATIO)));
@@ -124,9 +137,8 @@ public class DynamicLineChart extends LinearLayout
         addView(chart);
     }
 
-    private void initIndicator(Context c)
+    private void initIndicator()
     {
-        indicator = new TextView(c);
         if(hasExtra)
         {
             indicator.setLayoutParams(new LinearLayout.LayoutParams(
@@ -142,7 +154,7 @@ public class DynamicLineChart extends LinearLayout
         indicator.setGravity(Gravity.CENTER);
         chart.setIndicatorTextUnit(unit);
         indicator.setOnClickListener((v)-> switchSeries());
-        indicator.setText("-");
+        if(values.size() == 0) indicator.setText("-");
         addView(indicator);
     }
 
@@ -162,7 +174,7 @@ public class DynamicLineChart extends LinearLayout
         }
         else
         {
-            invalidate();
+            switchSeries(currentIndex);
         }
     }
 

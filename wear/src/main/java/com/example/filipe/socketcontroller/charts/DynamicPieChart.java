@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.support.annotation.UiThread;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -25,7 +27,6 @@ public class DynamicPieChart extends PieChart
     private int currentIndex;
     private static final int NONE = -1;
 
-    @SuppressLint("CustomViewStyleable")
     public DynamicPieChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
@@ -33,9 +34,22 @@ public class DynamicPieChart extends PieChart
         init();
     }
 
+    public DynamicPieChart(Context context)
+    {
+        super(context);
+        init();
+    }
+
+    @Override
+    protected void onAttachedToWindow()
+    {
+        super.onAttachedToWindow();
+        adjustParams();
+    }
+
+    @SuppressLint("CustomViewStyleable")
     private void loadAttributes(Context context, AttributeSet attrs)
     {
-        setLayoutParams(new LinearLayout.LayoutParams(context,attrs));
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.DynamicCharts, 0, 0);
         try
         {
@@ -46,14 +60,6 @@ public class DynamicPieChart extends PieChart
         {
             ta.recycle();
         }
-    }
-
-    private void init()
-    {
-        values = new HashMap<>();
-        currentIndex = NONE;
-        this.setUsePieRotation(false);
-        this.setOnClickListener((v)->switchSlice());
     }
 
     private void adjustParams()
@@ -70,6 +76,14 @@ public class DynamicPieChart extends PieChart
         {
             params.height = metrics.heightPixels;
         }
+    }
+
+    private void init()
+    {
+        values = new HashMap<>();
+        currentIndex = NONE;
+        this.setUsePieRotation(false);
+        this.setOnClickListener((v)->switchSlice());
     }
 
     public void switchSlice()
@@ -97,7 +111,6 @@ public class DynamicPieChart extends PieChart
         clearChart();
         if(currentIndex == NONE)
         {
-            adjustParams();
             currentIndex = 0;
         }
         for(PieModel p : values.values())
