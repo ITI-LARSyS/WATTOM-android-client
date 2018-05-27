@@ -2,5 +2,6 @@
 <resources>
     <declare-styleable name="DynamicCharts">
         <attr name="unitShown" format="string"/>
+        <attr name="showAverage" format="boolean"/>
     </declare-styleable>
 </resources>

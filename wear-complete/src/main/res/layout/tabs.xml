@@ -2,15 +2,16 @@
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center">
 
         <include layout="@layout/tab_start_stop"            android:id="@+id/tab_start_stop"    />
         <include layout="@layout/tab_schedule"              android:id="@+id/tab_schedule"              />
-        <include layout="@layout/tab_power_pessoas_total"   android:id="@+id/tab_power_pessoas_total"   />
-        <include layout="@layout/tab_power_plugs_current"   android:id="@+id/tab_power_plugs_current"   />
-        <include layout="@layout/tab_power_plugs_total"     android:id="@+id/tab_power_plugs_total"     />
-        <include layout="@layout/tab_power_devices"   android:id="@+id/tab_power_devices"   />
-        <include layout="@layout/tab_energias"              android:id="@+id/tab_energias"              />
-        <!-- <include layout="@layout/tab_log"                   android:id="@+id/tab_log"                   /> -->
+        <include layout="@layout/tab_pie_pessoas" android:id="@+id/tab_pie_pessoas"   />
+        <include layout="@layout/tab_line_pessoas" android:id="@+id/tab_line_pessoas" />
+        <include layout="@layout/tab_line_plugs" android:id="@+id/tab_line_plugs"   />
+        <include layout="@layout/tab_pie_plugs" android:id="@+id/tab_pie_plugs"     />
+        <include layout="@layout/tab_line_devices" android:id="@+id/tab_line_devices"   />
+        <include layout="@layout/tab_pie_energias" android:id="@+id/tab_pie_energias"             />
 
 </LinearLayout>

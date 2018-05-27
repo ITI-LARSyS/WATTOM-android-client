@@ -10,9 +10,16 @@
     <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="handleStartStudyClick"
+        android:text="Study"
+        android:switchPadding="10dp"
+        android:padding="10dp"/>
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:onClick="handleSensorClick"
         android:text="@string/SENSOR"
-        android:textSize="20sp"
         android:switchPadding="10dp"
         android:padding="10dp"/>
 

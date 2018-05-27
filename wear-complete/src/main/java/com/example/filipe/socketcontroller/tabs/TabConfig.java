@@ -14,27 +14,27 @@ public enum TabConfig
 
     PESSOAS(R.string.TITLE_STATS1,
             android.R.drawable.ic_menu_myplaces,
-            R.id.tab_power_pessoas_total),
+            R.id.tab_pie_pessoas),
+
+    PESSOAS2(R.string.TITLE_STATS7,
+            android.R.drawable.ic_menu_myplaces,
+            R.id.tab_line_pessoas),
 
     PLUGS(R.string.TITLE_STATS3,
             android.R.drawable.ic_menu_sort_by_size,
-            R.id.tab_power_plugs_current),
+            R.id.tab_line_plugs),
 
     PLUGSTOTAL(R.string.TITLE_STATS5,
             android.R.drawable.ic_menu_sort_by_size,
-            R.id.tab_power_plugs_total),
+            R.id.tab_pie_plugs),
 
     DEVICES(R.string.TITLE_STATS6,
             android.R.drawable.ic_menu_camera,
-            R.id.tab_power_devices),
+            R.id.tab_line_devices),
 
     ENERGIAS(R.string.TITLE_STATS4,
             android.R.drawable.ic_lock_idle_low_battery,
-            R.id.tab_energias)/*,
-
-    LOG(R.string.TITLE_LOG,
-            android.R.drawable.ic_menu_info_details,
-            R.id.tab_log)*/;
+            R.id.tab_pie_energias);
 
     public final int title;
     public final int icon;

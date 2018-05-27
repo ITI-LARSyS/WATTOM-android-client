@@ -35,15 +35,12 @@ import com.example.filipe.socketcontroller.util.UI;
 import com.google.android.gms.wearable.Node;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.eazegraph.lib.charts.BarChart;
-import org.eazegraph.lib.models.BarModel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.Timer;
@@ -223,13 +220,13 @@ public class MainActivity extends Activity implements SensorEventListener
     /* ***** */
     /* STATS */
     /* ***** */
-    private DynamicPieChart piePessoasAcum;
+    private DynamicPieChart piePessoas;
+    private DynamicLineChart linePessoas;
     private DynamicLineChart linePlugs;
-    private DynamicPieChart piePlugsAcum;
+    private DynamicPieChart piePlugs;
     private DynamicPieChart pieEnergias;
-    private BarChart mBarChart;
-    private TextView textCurSeries;
     private DynamicLineChart lineDevices;
+    private float mediaConsumoPessoa = -1;
 
 
     /* *** */
@@ -240,6 +237,16 @@ public class MainActivity extends Activity implements SensorEventListener
     private TextView _z_acc;
     private TextView _tms;
     private TextView _consumo;
+
+    private int currentMode;
+    private static final int NO_MODE = -1;
+    private static final int SELECT_TARGET_MODE = 0;
+    private static final int STANDARD_MODE = 1;
+    private static final int SCHEDULE_MODE = 2;
+
+    private static final String[] PLUG_NAMES = { "Cozinha" , "Sala de estar" , "Quarto de dormir" , "Casa de banho" , "Hall de entrada" , "Escritório" , "Lavandaria" , "Dispensa" , "Arrecadação" };
+
+    private int plugSelected = -1;
 
     /* ******************************************************************************** */
     /* ******************************************************************************** */
@@ -521,48 +528,47 @@ public class MainActivity extends Activity implements SensorEventListener
         /* ***** */
         /* STATS */
         /* ***** */
-        piePessoasAcum = (DynamicPieChart) findViewById(R.id.tab_power_pessoas_total);
-        pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
-        piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
-        linePlugs = (DynamicLineChart) findViewById(R.id.linechartplugs);
-        lineDevices = (DynamicLineChart) findViewById(R.id.linechartdevices);
-        fitToScreen(this,piePessoasAcum);
-        fitToScreen(this,pieEnergias);
-        fitToScreen(this,piePlugsAcum);
+        linePessoas = (DynamicLineChart) findViewById(R.id.tab_line_pessoas);
+        piePessoas = (DynamicPieChart) findViewById(R.id.tab_pie_pessoas);
+        pieEnergias = (DynamicPieChart) findViewById(R.id.tab_pie_energias);
+        piePlugs = (DynamicPieChart) findViewById(R.id.tab_pie_plugs);
+        linePlugs = (DynamicLineChart) findViewById(R.id.tab_line_plugs);
+        lineDevices = (DynamicLineChart) findViewById(R.id.tab_line_devices);
 
-        /* *** */
-        /* LOG */
-        /* *** */
-        _x_acc          = (TextView) findViewById(R.id.x_text_field);
-        _y_acc          = (TextView) findViewById(R.id.y_text_field);
-        _z_acc          = (TextView) findViewById(R.id.z_text_field);
-        _tms            = (TextView) findViewById(R.id.tms_text_field);
-        _consumo        = (TextView) findViewById(R.id.ConsumoInsert);
-
-       fillEazeGraph();
+        fillEazeGraph();
     }
 
     private void fillEazeGraph()
     {
-        piePessoasAcum.setValue("Manel",20);
-        piePessoasAcum.setValue("Afonso",40);
-        piePessoasAcum.setValue("Dionísio",10);
+        piePessoas.setValue("Manel",20);
+        piePessoas.setValue("Afonso",40);
+        piePessoas.setValue("Dionísio",10);
+        piePessoas.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PESSOAS2.ordinal(),true);
+            return true;
+        });
 
-        linePlugs.addPoint("plug1.local","21:01",2.4f);
-        linePlugs.addPoint("plug1.local","21:02",1f);
-        linePlugs.addPoint("plug1.local","21:03",4.4f);
-        linePlugs.addPoint("plug1.local","21:04",6.9f);
-        linePlugs.addPoint("plug1.local","21:05",5.4f);
-        linePlugs.addPoint("plug2.local","21:01",4.4f);
-        linePlugs.addPoint("plug2.local","21:02",2.9f);
-        linePlugs.addPoint("plug2.local","21:03",4.0f);
-        linePlugs.addPoint("plug2.local","21:04",5f);
-        linePlugs.addPoint("plug2.local","21:05",4.4f);
-        linePlugs.addPoint("plug4.local","21:01",4.4f);
-        linePlugs.addPoint("plug4.local","21:02",2.9f);
-        linePlugs.addPoint("plug4.local","21:03",4.0f);
-        linePlugs.addPoint("plug4.local","21:04",5f);
-        linePlugs.addPoint("plug4.local","21:05",4.4f);
+        linePlugs.addPoint("Sala de estar","21:01",2.4f);
+        linePlugs.addPoint("Sala de estar","21:02",1f);
+        linePlugs.addPoint("Sala de estar","21:03",4.4f);
+        linePlugs.addPoint("Sala de estar","21:04",6.9f);
+        linePlugs.addPoint("Sala de estar","21:05",5.4f);
+        linePlugs.addPoint("Quarto de dormir","21:01",4.4f);
+        linePlugs.addPoint("Quarto de dormir","21:02",2.9f);
+        linePlugs.addPoint("Quarto de dormir","21:03",4.0f);
+        linePlugs.addPoint("Quarto de dormir","21:04",5f);
+        linePlugs.addPoint("Quarto de dormir","21:05",4.4f);
+        linePlugs.addPoint("Hall de entrada","21:01",4.4f);
+        linePlugs.addPoint("Hall de entrada","21:02",2.9f);
+        linePlugs.addPoint("Hall de entrada","21:03",4.0f);
+        linePlugs.addPoint("Hall de entrada","21:04",5f);
+        linePlugs.addPoint("Hall de entrada","21:05",4.4f);
+        linePlugs.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PLUGSTOTAL.ordinal(),true);
+            return true;
+        });
 
         lineDevices.addPoint("Chaleira","14:02",2.4f);
         lineDevices.addPoint("Candeeiro","14:02",1.4f);
@@ -578,11 +584,51 @@ public class MainActivity extends Activity implements SensorEventListener
         lineDevices.addPoint("Candeeiro","14:07",1.9f);
         lineDevices.addPoint("Chaleira","14:08",3.1f);
         lineDevices.addPoint("Candeeiro","14:08",1.6f);
-        piePlugsAcum.incValue("plug1.local",30);
-        piePlugsAcum.incValue("plug2.local",20);
-        piePlugsAcum.incValue("plug4.local",20);
-        piePlugsAcum.incValue("plug1.local",20);
-        piePlugsAcum.incValue("plug5.local",20);
+
+        linePessoas.addPoint("Manel","14:01",10);
+        linePessoas.addPoint("Afonso","14:01",20);
+        linePessoas.addPoint("Dionísio","14:01",30);
+        mediaConsumoPessoa += 20;
+        linePessoas.addPoint(mediaConsumoPessoa);
+
+        linePessoas.addPoint("Manel","14:02",11);
+        mediaConsumoPessoa += 11;
+        mediaConsumoPessoa /= 2;
+        linePessoas.addPoint("Afonso","14:02",19);
+        mediaConsumoPessoa += 19;
+        mediaConsumoPessoa /= 2;
+        linePessoas.addPoint("Dionísio","14:02",20);
+        mediaConsumoPessoa += 20;
+        mediaConsumoPessoa /= 2;
+        linePessoas.addPoint(mediaConsumoPessoa);
+
+        linePessoas.addPoint("Manel","14:03",15);
+        mediaConsumoPessoa += 15;
+        mediaConsumoPessoa /= 3;
+        linePessoas.addPoint("Afonso","14:03",3);
+        mediaConsumoPessoa += 3;
+        mediaConsumoPessoa /= 2;
+        linePessoas.addPoint("Dionísio","14:03",12);
+        mediaConsumoPessoa += 12;
+        mediaConsumoPessoa /= 2;
+        linePessoas.addPoint(mediaConsumoPessoa);
+
+        linePessoas.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PESSOAS.ordinal(),true);
+            return true;
+        });
+
+        piePlugs.incValue("Sala de estar",30);
+        piePlugs.incValue("Quarto de dormir",20);
+        piePlugs.incValue("Hall de entrada",20);
+        piePlugs.incValue("Sala de estar",20);
+        piePlugs.incValue("Escritório",20);
+        piePlugs.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
+            return true;
+        });
 
         pieEnergias.setValue("Eólica",20);
         pieEnergias.setValue("Não renovável",50);
@@ -781,76 +827,102 @@ public class MainActivity extends Activity implements SensorEventListener
             }
         }
 
-        private synchronized void updateTarget(final int led_target, boolean match) {
+        private synchronized void updateTarget(final int led_target, boolean match){
 //            _countingTime     = false;
 //            _aquisition_time = System.currentTimeMillis()-_aquisition_time;
 //            _studyResult = _studyResult +"\n"+_participant+","+_target_selection+","+_aquisition_time+","+_angles[_angleCount]+","+_pointing+","+(System.currentTimeMillis());
             //Log.wtf("Corr", "aq time= "+_aquisition_time);
-            for (int j = 0; j < _devices_count; j++) {
-                if (match && led_target == _target[j]) {
+            for(int j = 0; j<_devices_count;j++){
+                if(match && led_target == _target[j]){
                     index = j;
-                    vibrator.vibrate(500);
 
-                    // Schedule mode
-                    if (isScheduleMode) {
-                        TurnOffAndRemove(j);
-                        ChangeColorByEnergy(renewableEnergy);
-                        isScheduleMode = false;
-                        new Alarm(HourScheduleStart, MinutesScheduleStart, () ->
-                        {
-                            TurnOnAndAdd(index);
-                            new Alarm(HourScheduleEnd, MinutesScheduleEnd, () ->
+                    switch(currentMode)
+                    {
+                        case NO_MODE:
+                            // (does nothing)
+                            break;
+
+                            /* Seleção da plug */
+                        case SELECT_TARGET_MODE:
+                            currentMode = STANDARD_MODE;
+                            plugSelected = Integer.parseInt(_plug_names.get(led_target));
+                            ChangeColorByEnergy(renewableEnergy,plugSelected);
+                            new RefreshData().start();
+                            // ...
+                            // ...
+                            break;
+
+                            /* Ligar/desligar uma plug */
+                        case STANDARD_MODE:
+                            // Se tiver mais que um device
+                            // (vai para o gráfico desse device)
+                            if(isMultiTarget())
                             {
-                                TurnOffAndRemove(index);
-                            }, false).activate();
-                        }, false).activate();
-                    }
-
-                    // Caso contrário (caso geral)
-                    else {
-                        // Se tiver mais que um device
-                        // (vai para o gráfico desse device)
-                        if (isMultiTarget()) {
-                            if (j == indexLuz) {
-                                navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(), true);
-                                lineDevices.switchSeries("Candeeiro");
-                            } else {
-                                if (j == indexChaleira) {
-                                    navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(), true);
-                                    lineDevices.switchSeries("Chaleira");
+                                if(j == indexLuz)
+                                {
+                                    navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
+                                    lineDevices.switchSeries("Candeeiro");
+                                }
+                                else
+                                {
+                                    if(j == indexChaleira)
+                                    {
+                                        navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
+                                        lineDevices.switchSeries("Chaleira");
+                                    }
                                 }
                             }
-                        }
 
-                        // Se tiver só um device
-                        // (vai para o gráfico desse plug)
-                        else {
-                            if (IsOn) {
-                                TurnOffAndRemove(j);
-                            } else {
-                                TurnOnAndAdd(j);
+                            // Se tiver só um device
+                            // (vai para o gráfico desse plug)
+                            else
+                            {
+                                if(IsOn)
+                                {
+                                    TurnOffAndRemove(j);
+                                }
+                                else
+                                {
+                                    TurnOnAndAdd(j);
+                                }
                             }
-                        }
+                            break;
 
-                        //HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + led_target, getApplicationContext(),_queue);
-                        // Log.e(TAG, "-----   running "+SELECTED_URL + "" + led_target+" request  ------");
+                            /* (Confirmação do) schedule */
+                        case SCHEDULE_MODE:
+                            if(IsOn) TurnOffAndRemove(j);
+                            ChangeColorByEnergy(renewableEnergy,plugSelected);
+                            currentMode = NO_MODE;
+                            new Alarm(HourScheduleStart, MinutesScheduleStart,()->
+                            {
+                                TurnOnAndAdd(index);
+                                new Alarm(HourScheduleEnd, MinutesScheduleEnd, ()->
+                                {
+                                    TurnOffAndRemove(index);
+                                    currentMode = STANDARD_MODE;
+                                },false).activate();
+                            },false).activate();
+                            break;
+
+                        default:
+                            break;
                     }
-                    return;
                 }
             }
         }
     }
 
-        public void ChangeColorByEnergy(int percent){
-            HttpRequest novo = new HttpRequest(ChangeEnergyURL+percent, getApplicationContext() ,_queue);
-            try{
-                novo.start();
-                //novo.join();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            new RefreshData().start();
+    public synchronized void ChangeColorByEnergy(int percent, int plugId){
+        HttpRequest novo = new HttpRequest(ChangeEnergyURL
+                .replace("%", ""+plugId) +percent, getApplicationContext() ,_queue);
+        try{
+            novo.start();
+            //novo.join();
+        }catch (Exception e){
+            e.printStackTrace();
         }
+        new RefreshData().start();
+    }
 
         public void TurnOffAndRemove(int j){
             try{
@@ -940,9 +1012,9 @@ public class MainActivity extends Activity implements SensorEventListener
                 for(int i = 0; i < IdPower.length(); i++)
                 {
                     JSONObject User = (JSONObject) IdPower.get(i);
-                    piePessoasAcum.setValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
+                    piePessoas.setValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
                 }
-                piePessoasAcum.startAnimation();
+                piePessoas.startAnimation();
                 if(!paused) toast(getApplicationContext(),"Person consumption" + " - " + "Updated data!" );
                 else UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
             }catch (Exception e){
@@ -1161,7 +1233,7 @@ public class MainActivity extends Activity implements SensorEventListener
                         JSONObject JSONData = new JSONObject(data);
                         int power = JSONData.getInt("power");
                         linePlugs.addPoint(plugName,power);
-                        piePlugsAcum.setValue(plugName,power);
+                        piePlugs.setValue(plugName,power);
                     }
 
                     lineDevices.addPoint("Chaleira",new Random().nextInt( 20) + 7);
@@ -1247,7 +1319,7 @@ public class MainActivity extends Activity implements SensorEventListener
                     float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
                     percentage *= 100;
                     renewableEnergy =  Math.round(percentage);
-                    ChangeColorByEnergy(renewableEnergy);
+                    ChangeColorByEnergy(plugSelected,renewableEnergy);
                     new RefreshData().start();
             }
         };
@@ -1267,9 +1339,9 @@ public class MainActivity extends Activity implements SensorEventListener
                     for(int i = 0; i < IdPower.length(); i++)
                     {
                         JSONObject User = (JSONObject) IdPower.get(i);
-                        piePessoasAcum.setValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
+                        piePessoas.setValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
                     }
-                    piePessoasAcum.startAnimation();
+                    piePessoas.startAnimation();
                     if(!paused) toast(getApplicationContext(),"Person consumption" + " - " + "Updated data!" );
                     else UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
                 }catch (Exception e){
