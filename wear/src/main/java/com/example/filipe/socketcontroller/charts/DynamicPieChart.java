@@ -23,8 +23,11 @@ import static com.example.filipe.socketcontroller.util.UI.colors;
 
 public class DynamicPieChart extends PieChart
 {
+    // Data
     private HashMap<String,PieModel> values;
     private int currentIndex;
+
+    // Constants
     private static final int NONE = -1;
 
     public DynamicPieChart(Context context, AttributeSet attrs)
@@ -47,6 +50,7 @@ public class DynamicPieChart extends PieChart
         adjustParams();
     }
 
+    // Leitura dos atributos presentes no XML
     @SuppressLint("CustomViewStyleable")
     private void loadAttributes(Context context, AttributeSet attrs)
     {
@@ -62,6 +66,8 @@ public class DynamicPieChart extends PieChart
         }
     }
 
+    // Ajuste dos parâmetros do layout
+    // (por causa de problemas com match_parent e wrap_content)
     private void adjustParams()
     {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
@@ -78,6 +84,7 @@ public class DynamicPieChart extends PieChart
         }
     }
 
+    // Preparação geral do layout
     private void init()
     {
         values = new HashMap<>();
@@ -86,6 +93,7 @@ public class DynamicPieChart extends PieChart
         this.setOnClickListener((v)->switchSlice());
     }
 
+    // Troca de slice
     public void switchSlice()
     {
         if(values.size() > 1)
@@ -93,19 +101,21 @@ public class DynamicPieChart extends PieChart
             switchSlice((currentIndex + 1) % values.size());
         }
     }
-
     public void switchSlice(int index)
     {
         currentIndex = index;
         setCurrentItem(currentIndex);
     }
 
+    // Adição de uma nova slice
     private void add(String key)
     {
         PieModel slice = new PieModel(key,0,Color.parseColor(colors[values.size() % colors.length]));
         values.put(key,slice);
         refresh();
     }
+
+    // Refresh do layout
     private void refresh()
     {
         clearChart();
@@ -119,6 +129,8 @@ public class DynamicPieChart extends PieChart
         }
         setCurrentItem(currentIndex);
     }
+
+    // Mudança de valor de uma slice
     public void setValue(String key,float value)
     {
         if(!contains(key))
@@ -136,6 +148,7 @@ public class DynamicPieChart extends PieChart
         values.get(key).setValue(old + value);
         refresh();
     }
+
     public boolean contains(String key)
     {
         return values.containsKey(key);

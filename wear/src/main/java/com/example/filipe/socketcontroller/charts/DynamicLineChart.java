@@ -29,14 +29,18 @@ public class DynamicLineChart extends LinearLayout
     private int width = -1;
     private int height = -1;
 
-    // Data attributes
+    // Data
     private HashMap<String,ValueLineSeries> values;
-    private ValueLineSeries extraValues;
+    private ValueLineSeries averageValues;
+
+    // Layout elements
     private ValueLineChart chart;
     private TextView indicator;
-    private int currentIndex;
-    private boolean hasExtra;
     private String unit;
+
+    // Misc attributes
+    private int currentIndex;
+    private boolean hasAverageLegend;
 
     // Constants
     private static final double PADDING_GRAPH_LEFT_RIGHT = 0.9;
@@ -68,6 +72,7 @@ public class DynamicLineChart extends LinearLayout
         initLegend(getContext());
     }
 
+    // Leitura dos atributos presentes no XML
     @SuppressLint("CustomViewStyleable")
     private void loadAttributes(Context context, AttributeSet attrs)
     {
@@ -75,7 +80,7 @@ public class DynamicLineChart extends LinearLayout
         try
         {
             unit = ta.getString(R.styleable.DynamicCharts_unitShown);
-            hasExtra = ta.getBoolean(R.styleable.DynamicCharts_showAverage,false);
+            hasAverageLegend = ta.getBoolean(R.styleable.DynamicCharts_showAverage,false);
         }
         finally
         {
@@ -83,6 +88,8 @@ public class DynamicLineChart extends LinearLayout
         }
     }
 
+    // Ajuste dos parâmetros do layout
+    // (por causa de problemas com match_parent e wrap_content)
     private void adjustParams()
     {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
@@ -107,10 +114,11 @@ public class DynamicLineChart extends LinearLayout
         }
     }
 
+    // Preparação geral do layout
     private void init(Context c)
     {
-        extraValues = new ValueLineSeries();
-        extraValues.setColor(Color.parseColor(colors[colors.length-1]));
+        averageValues = new ValueLineSeries();
+        averageValues.setColor(Color.parseColor(colors[colors.length-1]));
 
         chart = new ValueLineChart(c);
         indicator = new TextView(c);
@@ -122,6 +130,7 @@ public class DynamicLineChart extends LinearLayout
         currentIndex = NONE;
     }
 
+    // Preparação do chart
     private void initChart()
     {
         chart.setLayoutParams(new LinearLayout.LayoutParams(
@@ -132,14 +141,16 @@ public class DynamicLineChart extends LinearLayout
         chart.setUseCubic(false);
         chart.setUseOverlapFill(false);
         chart.setUseDynamicScaling(false);
+        chart.setLegendHeight(30);
         chart.setIndicatorLineColor(Color.parseColor("#FFFFFF"));
         chart.setIndicatorTextColor(Color.parseColor("#FFFFFF"));
         addView(chart);
     }
 
+    // Preparação do indicador
     private void initIndicator()
     {
-        if(hasExtra)
+        if(hasAverageLegend)
         {
             indicator.setLayoutParams(new LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT,
@@ -158,14 +169,16 @@ public class DynamicLineChart extends LinearLayout
         addView(indicator);
     }
 
+    // Preparação da legenda da média
     private void initLegend(Context c)
     {
-        if(hasExtra)
+        if(hasAverageLegend)
         {
             addView(new AverageLegend(c));
         }
     }
 
+    // Refresh no layout
     public void refresh()
     {
         if (currentIndex == NONE)
@@ -178,12 +191,14 @@ public class DynamicLineChart extends LinearLayout
         }
     }
 
+    // Adição de uma nova série de valores
     public void add(String key)
     {
         values.put(key, new ValueLineSeries());
         values.get(key).setColor(Color.parseColor(colors[(values.size() - 1) % colors.length]));
     }
 
+    // Adição de um ponto
     public void addPoint(String key,float point)
     {
         addPoint(key,getCurrentTime(),point);
@@ -201,8 +216,10 @@ public class DynamicLineChart extends LinearLayout
     public void addPoint(float point)
     {
         ValueLinePoint value = new ValueLinePoint(getCurrentTime(),point);
-        extraValues.addPoint(value);
+        averageValues.addPoint(value);
     }
+
+    // Obtenção do tempo atual
     private String getCurrentTime()
     {
         Calendar now = Calendar.getInstance();
@@ -219,10 +236,13 @@ public class DynamicLineChart extends LinearLayout
 
         return time;
     }
+
     public boolean contains(String key)
     {
         return values.containsKey(key);
     }
+
+    // Troca de série de valores
     public void switchSeries()
     {
         if(values.size() > 1)
@@ -239,7 +259,6 @@ public class DynamicLineChart extends LinearLayout
             switchSeries(key);
         }
     }
-
     public void switchSeries(String key)
     {
         chart.clearChart();
@@ -254,18 +273,19 @@ public class DynamicLineChart extends LinearLayout
         }
         chart.addSeries(values.get(key));
 
-        if(hasExtra)
+        if(hasAverageLegend)
         {
-            for(ValueLinePoint p : extraValues.getSeries())
+            for(ValueLinePoint p : averageValues.getSeries())
             {
                 p.setIgnore(false);
             }
-            chart.addSeries(extraValues);
+            chart.addSeries(averageValues);
         }
 
         indicator.setText(key);
     }
 
+    // Classe para a legenda da média
     private class AverageLegend extends android.support.v7.widget.AppCompatTextView
     {
         private static final String LEGEND = "Average value";

@@ -108,12 +108,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     /* ***** */
     /* STATS */
     /* ***** */
-    private DynamicPieChart piePessoasAcum;
+    private DynamicPieChart piePessoas;
+    private DynamicLineChart linePessoas;
+    private DynamicPieChart piePlugs;
     private DynamicLineChart linePlugs;
     private DynamicLineChart lineDevices;
-    private DynamicPieChart piePlugsAcum;
     private DynamicPieChart pieEnergias;
-    private DynamicLineChart linePessoasMedia;
+
     private float mediaConsumoPessoa = -1;
 
 
@@ -361,10 +362,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         {
                             mediaConsumoPessoa += Float.parseFloat(valores[i*2+2]);
                         }
-                        piePessoasAcum.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
+                        piePessoas.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
                         Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
-                    linePessoasMedia.addPoint(mediaConsumoPessoa);
+                    linePessoas.addPoint(mediaConsumoPessoa);
                     notify("Person consumption","Updated data!");
                     Log.d("PERSONS","Person consumption has been updated!");
                     break;
@@ -396,7 +397,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     String plugName = valores[1];
                     float value = Float.parseFloat(valores[2]);
                     linePlugs.addPoint(plugName,value);
-                    piePlugsAcum.setValue(plugName,value);
+                    piePlugs.setValue(plugName,value);
                     notify("Plug consumption","Updated data!");
                     Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;
@@ -555,22 +556,22 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         /* ***** */
         /* STATS */
         /* ***** */
-        linePessoasMedia = (DynamicLineChart) findViewById(R.id.tab_power_pessoas_media);
-        piePessoasAcum = (DynamicPieChart) findViewById(R.id.tab_power_pessoas_total);
-        pieEnergias = (DynamicPieChart) findViewById(R.id.tab_energias);
-        piePlugsAcum = (DynamicPieChart) findViewById(R.id.tab_power_plugs_total);
-        linePlugs = (DynamicLineChart) findViewById(R.id.tab_power_plugs_current);
-        lineDevices = (DynamicLineChart) findViewById(R.id.tab_power_devices);
+        linePessoas = (DynamicLineChart) findViewById(R.id.tab_line_pessoas);
+        piePessoas = (DynamicPieChart) findViewById(R.id.tab_pie_pessoas);
+        pieEnergias = (DynamicPieChart) findViewById(R.id.tab_pie_energias);
+        piePlugs = (DynamicPieChart) findViewById(R.id.tab_pie_plugs);
+        linePlugs = (DynamicLineChart) findViewById(R.id.tab_line_plugs);
+        lineDevices = (DynamicLineChart) findViewById(R.id.tab_line_devices);
 
        fillEazeGraph();
     }
 
     private void fillEazeGraph()
     {
-        piePessoasAcum.setValue("Manel",20);
-        piePessoasAcum.setValue("Afonso",40);
-        piePessoasAcum.setValue("Dionísio",10);
-        piePessoasAcum.setOnLongClickListener((v)->
+        piePessoas.setValue("Manel",20);
+        piePessoas.setValue("Afonso",40);
+        piePessoas.setValue("Dionísio",10);
+        piePessoas.setOnLongClickListener((v)->
         {
             navigationDrawer.setCurrentItem(TabConfig.PESSOAS2.ordinal(),true);
             return true;
@@ -612,46 +613,46 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         lineDevices.addPoint("Chaleira","14:08",3.1f);
         lineDevices.addPoint("Candeeiro","14:08",1.6f);
 
-        linePessoasMedia.addPoint("Manel","14:01",10);
-        linePessoasMedia.addPoint("Afonso","14:01",20);
-        linePessoasMedia.addPoint("Dionísio","14:01",30);
+        linePessoas.addPoint("Manel","14:01",10);
+        linePessoas.addPoint("Afonso","14:01",20);
+        linePessoas.addPoint("Dionísio","14:01",30);
         mediaConsumoPessoa += 20;
-        linePessoasMedia.addPoint(mediaConsumoPessoa);
+        linePessoas.addPoint(mediaConsumoPessoa);
 
-        linePessoasMedia.addPoint("Manel","14:02",11);
+        linePessoas.addPoint("Manel","14:02",11);
         mediaConsumoPessoa += 11;
         mediaConsumoPessoa /= 2;
-        linePessoasMedia.addPoint("Afonso","14:02",19);
+        linePessoas.addPoint("Afonso","14:02",19);
         mediaConsumoPessoa += 19;
         mediaConsumoPessoa /= 2;
-        linePessoasMedia.addPoint("Dionísio","14:02",20);
+        linePessoas.addPoint("Dionísio","14:02",20);
         mediaConsumoPessoa += 20;
         mediaConsumoPessoa /= 2;
-        linePessoasMedia.addPoint(mediaConsumoPessoa);
+        linePessoas.addPoint(mediaConsumoPessoa);
 
-        linePessoasMedia.addPoint("Manel","14:03",15);
+        linePessoas.addPoint("Manel","14:03",15);
         mediaConsumoPessoa += 15;
         mediaConsumoPessoa /= 3;
-        linePessoasMedia.addPoint("Afonso","14:03",3);
+        linePessoas.addPoint("Afonso","14:03",3);
         mediaConsumoPessoa += 3;
         mediaConsumoPessoa /= 2;
-        linePessoasMedia.addPoint("Dionísio","14:03",12);
+        linePessoas.addPoint("Dionísio","14:03",12);
         mediaConsumoPessoa += 12;
         mediaConsumoPessoa /= 2;
-        linePessoasMedia.addPoint(mediaConsumoPessoa);
+        linePessoas.addPoint(mediaConsumoPessoa);
 
-        linePessoasMedia.setOnLongClickListener((v)->
+        linePessoas.setOnLongClickListener((v)->
         {
             navigationDrawer.setCurrentItem(TabConfig.PESSOAS.ordinal(),true);
             return true;
         });
 
-        piePlugsAcum.incValue("Sala de estar",30);
-        piePlugsAcum.incValue("Quarto de dormir",20);
-        piePlugsAcum.incValue("Hall de entrada",20);
-        piePlugsAcum.incValue("Sala de estar",20);
-        piePlugsAcum.incValue("Escritório",20);
-        piePlugsAcum.setOnLongClickListener((v)->
+        piePlugs.incValue("Sala de estar",30);
+        piePlugs.incValue("Quarto de dormir",20);
+        piePlugs.incValue("Hall de entrada",20);
+        piePlugs.incValue("Sala de estar",20);
+        piePlugs.incValue("Escritório",20);
+        piePlugs.setOnLongClickListener((v)->
         {
             navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
             return true;

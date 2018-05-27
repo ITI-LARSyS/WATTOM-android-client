@@ -37,7 +37,8 @@ public class TabAdapter extends WearableNavigationDrawer.WearableNavigationDrawe
     public int getCount()
     { return TabConfig.values().length; }
 
-    public void drawTab(TabConfig openTab)
+    // Desenho de um separador
+    private void drawTab(TabConfig openTab)
     {
         for(TabConfig tab : TabConfig.values())
         {
@@ -45,12 +46,10 @@ public class TabAdapter extends WearableNavigationDrawer.WearableNavigationDrawe
             else hideTab(tab);
         }
     }
-
     private void hideTab(TabConfig tab)
     {
         hide(((Activity)context).findViewById(tab.id));
     }
-
     private void unhideTab(TabConfig tab)
     {
         unhide(((Activity)context).findViewById(tab.id));
