@@ -43,12 +43,19 @@ public class DynamicLineChart extends LinearLayout
     private static final double GRAPH_SIZE_RATIO = 0.7;
     private static final double INDICATOR_SIZE_RATIO = 0.2;
     private static final double EXTRA_LEGEND_SIZE_RATIO = 0.1;
+    private static final int NONE = -1;
 
-    @SuppressLint("CustomViewStyleable")
     public DynamicLineChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        loadAttributes(context,attrs);
+        adjustParams(context, attrs);
         init(context);
+    }
+
+    @SuppressLint("CustomViewStyleable")
+    private void loadAttributes(Context context, AttributeSet attrs)
+    {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.DynamicCharts, 0, 0);
         try
         {
@@ -59,52 +66,10 @@ public class DynamicLineChart extends LinearLayout
         {
             ta.recycle();
         }
-        initChart(context);
-        initIndicator(context);
-        initLegend(context);
     }
 
-    public DynamicLineChart(Context context)
+    private void init(Context context)
     {
-        super(context);
-        init(context);
-        initChart(context);
-        initIndicator(context);
-        initLegend(context);
-    }
-
-    private void init(Context c)
-    {
-        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        ViewGroup.LayoutParams params = getLayoutParams();
-        if(params == null)
-        {
-            width = metrics.widthPixels;
-            height = metrics.heightPixels;
-        }
-        else
-        {
-            int input_width = params.width;
-            if(input_width == LayoutParams.MATCH_PARENT || input_width == LayoutParams.WRAP_CONTENT)
-            {
-                width = metrics.widthPixels;
-            }
-            else
-            {
-                width = input_width;
-            }
-
-            int input_height = params.height;
-            if(input_height == LayoutParams.MATCH_PARENT || input_height == LayoutParams.WRAP_CONTENT)
-            {
-                height = metrics.heightPixels;
-            }
-            else
-            {
-                height = input_height;
-            }
-        }
-
         extraValues = new ValueLineSeries();
         extraValues.setColor(Color.parseColor(colors[colors.length-1]));
 
@@ -112,8 +77,35 @@ public class DynamicLineChart extends LinearLayout
         this.setGravity(Gravity.CENTER);
 
         values = new HashMap<>();
+        currentIndex = NONE;
 
-        currentIndex = -1;
+        initChart(context);
+        initIndicator(context);
+        initLegend(context);
+    }
+
+    private void adjustParams(Context context,AttributeSet attrs)
+    {
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        ViewGroup.LayoutParams params = new LayoutParams(context,attrs);
+        int input_width = params.width;
+        int input_height = params.height;
+        if(input_width == LayoutParams.MATCH_PARENT || input_width == LayoutParams.WRAP_CONTENT)
+        {
+            width = metrics.widthPixels - getPaddingLeft() - getPaddingRight();
+        }
+        else
+        {
+            width = input_width;
+        }
+        if(input_height == LayoutParams.MATCH_PARENT || input_height == LayoutParams.WRAP_CONTENT)
+        {
+            height = metrics.heightPixels - getPaddingTop() - getPaddingBottom();
+        }
+        else
+        {
+            height = input_height;
+        }
     }
 
     private void initChart(Context c)
@@ -147,7 +139,6 @@ public class DynamicLineChart extends LinearLayout
                     LayoutParams.MATCH_PARENT,
                     (int)(height * (INDICATOR_SIZE_RATIO+EXTRA_LEGEND_SIZE_RATIO))));
         }
-
         indicator.setGravity(Gravity.CENTER);
         chart.setIndicatorTextUnit(unit);
         indicator.setOnClickListener((v)-> switchSeries());
@@ -165,7 +156,7 @@ public class DynamicLineChart extends LinearLayout
 
     public void refresh()
     {
-        if (currentIndex == -1)
+        if (currentIndex == NONE)
         {
             switchSeries(0);
         }

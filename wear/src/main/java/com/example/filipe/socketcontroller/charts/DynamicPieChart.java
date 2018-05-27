@@ -23,18 +23,19 @@ public class DynamicPieChart extends PieChart
 {
     private HashMap<String,PieModel> values;
     private int currentIndex;
-
-    public DynamicPieChart(Context context)
-    {
-        super(context);
-        init();
-    }
+    private static final int NONE = -1;
 
     @SuppressLint("CustomViewStyleable")
     public DynamicPieChart(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        loadAttributes(context,attrs);
         init();
+    }
+
+    private void loadAttributes(Context context, AttributeSet attrs)
+    {
+        setLayoutParams(new LinearLayout.LayoutParams(context,attrs));
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.DynamicCharts, 0, 0);
         try
         {
@@ -50,9 +51,25 @@ public class DynamicPieChart extends PieChart
     private void init()
     {
         values = new HashMap<>();
-        currentIndex = -1;
+        currentIndex = NONE;
         this.setUsePieRotation(false);
         this.setOnClickListener((v)->switchSlice());
+    }
+
+    private void adjustParams()
+    {
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        ViewGroup.LayoutParams params = getLayoutParams();
+        int input_width = params.width;
+        int input_height = params.height;
+        if(input_width == LinearLayout.LayoutParams.MATCH_PARENT || input_width == LinearLayout.LayoutParams.WRAP_CONTENT)
+        {
+            params.width = metrics.widthPixels;
+        }
+        if(input_height == LinearLayout.LayoutParams.MATCH_PARENT || input_height == LinearLayout.LayoutParams.WRAP_CONTENT)
+        {
+            params.height = metrics.heightPixels;
+        }
     }
 
     public void switchSlice()
@@ -78,31 +95,10 @@ public class DynamicPieChart extends PieChart
     private void refresh()
     {
         clearChart();
-        if(currentIndex == -1)
+        if(currentIndex == NONE)
         {
+            adjustParams();
             currentIndex = 0;
-            DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-            ViewGroup.LayoutParams params = getLayoutParams();
-            if(params == null)
-            {
-                params = new LinearLayout.LayoutParams(metrics.widthPixels,metrics.heightPixels);
-            }
-            else
-            {
-                int input_width = params.width;
-                if(input_width == LinearLayout.LayoutParams.MATCH_PARENT || input_width == LinearLayout.LayoutParams.WRAP_CONTENT)
-                {
-                    params.width = metrics.widthPixels;
-                }
-
-                int input_height = params.height;
-                if(input_height == LinearLayout.LayoutParams.MATCH_PARENT || input_height == LinearLayout.LayoutParams.WRAP_CONTENT)
-                {
-                    params.height = metrics.heightPixels;
-                }
-            }
-
-            setLayoutParams(params);
         }
         for(PieModel p : values.values())
         {
