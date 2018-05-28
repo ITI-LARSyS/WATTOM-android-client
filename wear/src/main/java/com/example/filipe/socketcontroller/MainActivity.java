@@ -142,7 +142,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         setContentView(R.layout.general_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // São obtidos os IDs dos elementos da View e estes são configurados
+        // Preparação da view
         setupView();
 
         // Inicializações
@@ -154,10 +154,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
         _last_push = System.currentTimeMillis();
-
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     }
 
@@ -353,6 +351,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
                     {
+                        // A média é atualizada
                         if(mediaConsumoPessoa != -1)
                         {
                             mediaConsumoPessoa += Float.parseFloat(valores[i*2+2]);
@@ -362,10 +361,19 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                         {
                             mediaConsumoPessoa += Float.parseFloat(valores[i*2+2]);
                         }
+
+                        // O pie chart é atualizado
                         piePessoas.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
+
+                        // O gráfico de linhas é atualizado
+                        linePessoas.addPoint(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
+
                         Log.d("PERSONS","Consumption of "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
+
+                    // A média é atualizada no gráfico de linhas
                     linePessoas.addPoint(mediaConsumoPessoa);
+
                     notify("Person consumption","Updated data!");
                     Log.d("PERSONS","Person consumption has been updated!");
                     break;
@@ -376,9 +384,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int tamanho = (valores.length - 1 )/ 2;
                     for(int i = 0; i < tamanho; i++)
                     {
+                        // O pie chart é atualizado
                         pieEnergias.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
+
                         Log.d("ENERGY","Energia "+valores[i*2+1]+": "+valores[i*2+2]);
                     }
+
                     notify("Energy","Updated data!");
                     Log.d("ENERGY","Energy data has been updated!");
                     break;
@@ -387,8 +398,9 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 // (formato: "Total overall power-900")
                 case "Total overall power":
                     _consumo.setText(valores[1]);
+
                     notify("Overall power  consumption","Updated data!");
-                    Log.d("PLUGS","Total overall consumption (current): "+valores[1]);
+                    Log.d("LINE_PLUGS","Total overall consumption (current): "+valores[1]);
                     break;
 
                 // Mensagem com o consumo atual de uma plug
@@ -396,28 +408,41 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Plug consumption":
                     String plugName = valores[1];
                     float value = Float.parseFloat(valores[2]);
+
+                    // O gráfico de linhas é atualizado
                     linePlugs.addPoint(plugName,value);
+
+                    // O pie chart é atualizado
                     piePlugs.setValue(plugName,value);
+
                     notify("Plug consumption","Updated data!");
-                    Log.d("PLUGS","Consumption of plug"+plugName+".local: "+value);
+                    Log.d("LINE_PLUGS","Consumption of plug"+plugName+".local: "+value);
                     break;
 
                 // Mensagem a indicar o 'enable' de uma plug
                 // (formato: "Plug start-Quarto de dormir")
                 case "Plug start":
                     String plug = valores[1];
-                    navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
-                   // linePlugs.add(plug);
+
+                    // Passa para o separador 'Power usage by plug'
+                    navigationDrawer.setCurrentItem(TabConfig.LINE_PLUGS.ordinal(),true);
+
+                    // Passa para a série de valores da respetiva plug
                     linePlugs.switchSeries(plug);
+
                     break;
 
                 // Mensagem a indicar o 'enable' de um device
                 // (formato: "Device start-Forno3000MX")
                 case "Device start":
                     String device = valores[1];
-                    navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
-                //    lineDevices.add(device);
+
+                    // Passa para o separador 'Power usage by device'
+                    navigationDrawer.setCurrentItem(TabConfig.LINE_DEVICES.ordinal(),true);
+
+                    // Passa para a série de valores do respetivo device
                     lineDevices.switchSeries(device);
+
                     break;
 
                 // Mensagem a indicar o consumo de um device
@@ -425,7 +450,10 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Device consumption":
                     String deviceName = valores[1];
                     float deviceConsumption = Float.parseFloat(valores[2]);
+
+                    // O gráfico de linhas é atualizado
                     lineDevices.addPoint(deviceName,deviceConsumption);
+
                     notify("Device consumption","Updated data!");
                     break;
 
@@ -480,10 +508,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         }
         else
         {
-            //cpuWakeLock.release();
             _sensorManager.unregisterListener(this);
             _sensor_running = false;
-
             try
             { pushThread.join(); }
             catch (InterruptedException e)
@@ -499,12 +525,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         {
             case SELECT_TIME_START:
                 _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_START);
-                scheduleState++;
+                scheduleState = SELECT_TIME_END;
                 break;
 
             case SELECT_TIME_END:
                 _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_END);
-                scheduleState++;
+                scheduleState = TIME_CONFIRMED;
                 break;
 
             case TIME_CONFIRMED:
@@ -563,6 +589,28 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePlugs = (DynamicLineChart) findViewById(R.id.tab_line_plugs);
         lineDevices = (DynamicLineChart) findViewById(R.id.tab_line_devices);
 
+        // Ações click n' hold
+        piePessoas.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.LINE_PESSOAS.ordinal(),true);
+            return true;
+        });
+        linePlugs.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PIE_PLUGS.ordinal(),true);
+            return true;
+        });
+        linePessoas.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.PIE_PESSOAS.ordinal(),true);
+            return true;
+        });
+        piePlugs.setOnLongClickListener((v)->
+        {
+            navigationDrawer.setCurrentItem(TabConfig.LINE_PLUGS.ordinal(),true);
+            return true;
+        });
+
        fillEazeGraph();
     }
 
@@ -571,11 +619,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         piePessoas.setValue("Manel",20);
         piePessoas.setValue("Afonso",40);
         piePessoas.setValue("Dionísio",10);
-        piePessoas.setOnLongClickListener((v)->
-        {
-            navigationDrawer.setCurrentItem(TabConfig.PESSOAS2.ordinal(),true);
-            return true;
-        });
 
         linePlugs.addPoint("Sala de estar","21:01",2.4f);
         linePlugs.addPoint("Sala de estar","21:02",1f);
@@ -592,11 +635,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePlugs.addPoint("Hall de entrada","21:03",4.0f);
         linePlugs.addPoint("Hall de entrada","21:04",5f);
         linePlugs.addPoint("Hall de entrada","21:05",4.4f);
-        linePlugs.setOnLongClickListener((v)->
-        {
-            navigationDrawer.setCurrentItem(TabConfig.PLUGSTOTAL.ordinal(),true);
-            return true;
-        });
 
         lineDevices.addPoint("Chaleira","14:02",2.4f);
         lineDevices.addPoint("Candeeiro","14:02",1.4f);
@@ -641,22 +679,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         mediaConsumoPessoa /= 2;
         linePessoas.addPoint(mediaConsumoPessoa);
 
-        linePessoas.setOnLongClickListener((v)->
-        {
-            navigationDrawer.setCurrentItem(TabConfig.PESSOAS.ordinal(),true);
-            return true;
-        });
-
         piePlugs.incValue("Sala de estar",30);
         piePlugs.incValue("Quarto de dormir",20);
         piePlugs.incValue("Hall de entrada",20);
         piePlugs.incValue("Sala de estar",20);
         piePlugs.incValue("Escritório",20);
-        piePlugs.setOnLongClickListener((v)->
-        {
-            navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
-            return true;
-        });
 
         pieEnergias.setValue("Eólica",20);
         pieEnergias.setValue("Não renovável",50);
@@ -665,7 +692,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
 
     public void notify(String title, String message)
     {
-        //if(!paused) toast(getApplicationContext(),title + " - " + message);
         if(paused) UI.notify(this,MainActivity.class,title,message);
     }
 

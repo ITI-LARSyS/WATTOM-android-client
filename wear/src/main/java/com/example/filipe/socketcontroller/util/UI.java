@@ -1,6 +1,5 @@
 package com.example.filipe.socketcontroller.util;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,7 +7,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
-import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;

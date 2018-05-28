@@ -1,12 +1,9 @@
 package com.example.filipe.socketcontroller.tabs;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
-
-import com.example.filipe.socketcontroller.MainActivity;
 
 import static com.example.filipe.socketcontroller.util.UI.hide;
 import static com.example.filipe.socketcontroller.util.UI.unhide;
