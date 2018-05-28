@@ -27,5 +27,8 @@
     <string name="SET_SCHEDULE_START">Begin</string>
     <string name="SET_SCHEDULE_END">End</string>
     <string name="NOTHING">-</string>
+    <string name="multi_target_mode">Multi-target mode</string>
+    <string name="start_new_study">Start new study</string>
+    <string name="stop_study">Stop study</string>
 
 </resources>

@@ -47,8 +47,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.example.filipe.socketcontroller.util.UI.fitToScreen;
+import static com.example.filipe.socketcontroller.util.UI.hide;
 import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
+import static com.example.filipe.socketcontroller.util.UI.unhide;
 import static com.example.filipe.socketcontroller.util.UI.updateTime;
 
 public class MainActivity extends Activity implements SensorEventListener
@@ -705,7 +707,7 @@ public class MainActivity extends Activity implements SensorEventListener
         PLUGS_URL       = BASE_URL +"plug/";
         PLUG_URL        = PLUGS_URL +"%/";
         SELECTED_URL    = PLUG_URL + "selected/";
-        ChangeEnergyURL = PLUGS_URL+"energy/";
+        ChangeEnergyURL = PLUGS_URL+"%/energy/";
     }
 
     public static String getBaseURL() { return BASE_URL; }
@@ -832,6 +834,10 @@ public class MainActivity extends Activity implements SensorEventListener
 //            _aquisition_time = System.currentTimeMillis()-_aquisition_time;
 //            _studyResult = _studyResult +"\n"+_participant+","+_target_selection+","+_aquisition_time+","+_angles[_angleCount]+","+_pointing+","+(System.currentTimeMillis());
             //Log.wtf("Corr", "aq time= "+_aquisition_time);
+
+            // Haptic feedback para a ocorrência de um evento
+            vibrator.vibrate(250);
+
             for(int j = 0; j<_devices_count;j++){
                 if(match && led_target == _target[j]){
                     index = j;
@@ -1048,19 +1054,10 @@ public class MainActivity extends Activity implements SensorEventListener
             }
         }
 
-        public void handleStartStudyClick(View v)
-        {
-            start();
-            v.setOnClickListener((x)-> handleStopStudyClick(x));
-        }
-
-        public void handleStopStudyClick(View v)
-        {
-            stop();
-            v.setOnClickListener((x)-> handleStartStudyClick(x));
-        }
-
-        public void start()
+    public void handleStartStudyClick(View v)
+    {
+        prepareStudy();
+        new Thread(()->
         {
             //_participant = Integer.parseInt(_pId.getText().toString());
             //_angle       = 0;
@@ -1071,8 +1068,18 @@ public class MainActivity extends Activity implements SensorEventListener
             toast(getApplicationContext(),"Study started!");
 
             IsOn = false;
+            currentMode = SELECT_TARGET_MODE;
 
-            new Timer().schedule(energyTask,10,1000*60*15);
+            new Thread(()->
+            {
+                HttpRequest start = new HttpRequest(PLUGS_URL+"start/6",getApplicationContext(),_queue);
+                start.start();
+                try {
+                    start.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
 
             try {
                 Thread.sleep(1000);
@@ -1081,15 +1088,14 @@ public class MainActivity extends Activity implements SensorEventListener
             }
 
             new StartUp(PLUGS_URL).start();
-            new Timer().schedule(powerTask,10,1000*60);
-            new Timer().schedule(personTask,10,1000*60);
-        }
+            new Timer().schedule(energyTask,0,1000*60*15);
+            new Timer().schedule(powerTask,250,1000*60);
+            new Timer().schedule(personTask,500,1000*60);
+        }).start();
+    }
 
-        public void stop()
+        public void handleStopStudyClick(View v)
         {
-            inStudy = false;
-           // sendMessage("STOP");
-          //  toast(getApplicationContext(),"Study ended!");
             new Thread(()->
             {
                 HttpRequest stopMoving = new HttpRequest(PLUGS_URL + "StopMoving", getApplicationContext(), _queue);
@@ -1103,10 +1109,47 @@ public class MainActivity extends Activity implements SensorEventListener
                     e.printStackTrace();
                 }
             }).start();
-            stopServices();
-            _correlationRunning = false;
             startActivity(new Intent(this,MainActivity.class));
             this.finish();
+        }
+
+        private void prepareStudy()
+        {
+            Button start = (Button) findViewById(R.id.btnStartStudy);
+            hide(start);
+
+            Button demo = (Button) findViewById(R.id.btnDemo3);
+            hide(demo);
+
+            Button stop = (Button) findViewById(R.id.btnStopStudy);
+            unhide(stop);
+        }
+
+        public void demo3(View v)
+        {
+            prepareStudy();
+            new Thread(()->
+            {
+                HttpRequest demo = new HttpRequest(PLUGS_URL + "Demo3/2", getApplicationContext() ,_queue);
+                demo.start();
+                try {
+                    demo.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                currentMode = STANDARD_MODE;
+                inStudy = true;
+                toast(getApplicationContext(),"Study started!");
+
+                IsOn = false;
+
+
+                new StartUp(PLUGS_URL).start();
+
+
+                new Timer().schedule(powerTask,250,1000*60);
+                new Timer().schedule(personTask,500,1000*60);
+            }).start();
         }
 
         //- Inicializa o correlationHandler
@@ -1304,13 +1347,22 @@ public class MainActivity extends Activity implements SensorEventListener
 
                 finally
                 {
-                    pieEnergias.setValue("Não renovável", (total - termica - hidrica - eolica - biomassa - foto));
-                    pieEnergias.setValue("Térmica", termica);
-                    pieEnergias.setValue("Hídrica", hidrica);
-                    pieEnergias.setValue("Eólica", eolica);
-                    pieEnergias.setValue("Biomassa", biomassa);
-                    pieEnergias.setValue("Fotovoltaica", foto);
-                    pieEnergias.startAnimation();
+                    float finalTotal = total;
+                    float finalTermica = termica;
+                    float finalHidrica = hidrica;
+                    float finalEolica = eolica;
+                    float finalBiomassa = biomassa;
+                    float finalFoto = foto;
+                    runOnUiThread(()->
+                    {
+                        pieEnergias.setValue("Não renovável", (finalTotal - finalTermica - finalHidrica - finalEolica - finalBiomassa - finalFoto));
+                        pieEnergias.setValue("Térmica", finalTermica);
+                        pieEnergias.setValue("Hídrica", finalHidrica);
+                        pieEnergias.setValue("Eólica", finalEolica);
+                        pieEnergias.setValue("Biomassa", finalBiomassa);
+                        pieEnergias.setValue("Fotovoltaica", finalFoto);
+                        pieEnergias.startAnimation();
+                    });
                 }
                    /* if(!paused) toast(getApplicationContext(),"Energy consumption" + " - " + "Updated data!");
                     else UI.notify(getApplicationContext(),MainActivity.class,"Energy consumption","Updated data!"); */

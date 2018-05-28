@@ -2,32 +2,48 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:paddingTop="50dp">
+    android:gravity="bottom|center">
 
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <Button
+        android:id="@+id/btnStartStudy"
+        android:text="@string/start_new_study"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:onClick="handleStartStudyClick"
-        android:text="Study"
-        android:switchPadding="10dp"
-        android:padding="10dp"/>
+        android:layout_weight="0.25"/>
+
+    <Button
+        android:id="@+id/btnDemo3"
+        android:text="@string/multi_target_mode"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:onClick="demo3"
+        android:layout_weight="0.25"/>
+
+    <Button
+        android:id="@+id/btnStopStudy"
+        android:text="@string/stop_study"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:onClick="handleStopStudyClick"
+        android:layout_weight="0.5"
+        android:visibility="gone"/>
 
     <Switch
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:onClick="handleSensorClick"
-        android:text="@string/SENSOR"
+        android:layout_weight="0.25"
         android:switchPadding="10dp"
-        android:padding="10dp"/>
+        android:text="@string/SENSOR"/>
 
     <CheckBox
         android:id="@+id/checkLeftHanded"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/LEFT_HANDED"
-        android:padding="10dp"/>
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:text="@string/LEFT_HANDED"/>
 
 </LinearLayout>
