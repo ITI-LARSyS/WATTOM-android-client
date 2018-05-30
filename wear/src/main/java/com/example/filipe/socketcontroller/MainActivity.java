@@ -115,9 +115,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private DynamicLineChart lineDevices;
     private DynamicPieChart pieEnergias;
 
-    private float mediaConsumoPessoa = -1;
-
-
     /* *** */
     /* LOG */
     /* *** */
@@ -351,17 +348,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     int nrPessoas = (valores.length - 1 )/ 2;
                     for(int i = 0; i < nrPessoas; i++)
                     {
-                        // A média é atualizada
-                        if(mediaConsumoPessoa != -1)
-                        {
-                            mediaConsumoPessoa += Float.parseFloat(valores[i*2+2]);
-                            mediaConsumoPessoa /= 2;
-                        }
-                        else
-                        {
-                            mediaConsumoPessoa += Float.parseFloat(valores[i*2+2]);
-                        }
-
                         // O pie chart é atualizado
                         piePessoas.setValue(valores[i*2+1], Float.parseFloat(valores[i*2+2]));
 
@@ -372,7 +358,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     }
 
                     // A média é atualizada no gráfico de linhas
-                    linePessoas.addPoint(mediaConsumoPessoa);
+                    linePessoas.updateAverageSeries();
 
                     notify("Person consumption","Updated data!");
                     Log.d("PERSONS","Person consumption has been updated!");
@@ -654,30 +640,15 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePessoas.addPoint("Manel","14:01",10);
         linePessoas.addPoint("Afonso","14:01",20);
         linePessoas.addPoint("Dionísio","14:01",30);
-        mediaConsumoPessoa += 20;
-        linePessoas.addPoint(mediaConsumoPessoa);
-
+        linePessoas.updateAverageSeries();
         linePessoas.addPoint("Manel","14:02",11);
-        mediaConsumoPessoa += 11;
-        mediaConsumoPessoa /= 2;
         linePessoas.addPoint("Afonso","14:02",19);
-        mediaConsumoPessoa += 19;
-        mediaConsumoPessoa /= 2;
         linePessoas.addPoint("Dionísio","14:02",20);
-        mediaConsumoPessoa += 20;
-        mediaConsumoPessoa /= 2;
-        linePessoas.addPoint(mediaConsumoPessoa);
-
+        linePessoas.updateAverageSeries();
         linePessoas.addPoint("Manel","14:03",15);
-        mediaConsumoPessoa += 15;
-        mediaConsumoPessoa /= 3;
         linePessoas.addPoint("Afonso","14:03",3);
-        mediaConsumoPessoa += 3;
-        mediaConsumoPessoa /= 2;
         linePessoas.addPoint("Dionísio","14:03",12);
-        mediaConsumoPessoa += 12;
-        mediaConsumoPessoa /= 2;
-        linePessoas.addPoint(mediaConsumoPessoa);
+        linePessoas.updateAverageSeries();
 
         piePlugs.incValue("Sala de estar",30);
         piePlugs.incValue("Quarto de dormir",20);

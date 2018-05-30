@@ -20,6 +20,8 @@ import org.eazegraph.lib.models.ValueLineSeries;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
 
@@ -133,7 +135,7 @@ public class DynamicLineChart extends LinearLayout
     // Preparação do chart
     private void initChart()
     {
-        chart.setLayoutParams(new LinearLayout.LayoutParams(
+        chart.setLayoutParams(new LayoutParams(
                 (int)(width * PADDING_GRAPH_LEFT_RIGHT),
                 (int)(height  * GRAPH_SIZE_RATIO)));
         chart.setShowStandardValues(true);
@@ -152,13 +154,13 @@ public class DynamicLineChart extends LinearLayout
     {
         if(hasAverageLegend)
         {
-            indicator.setLayoutParams(new LinearLayout.LayoutParams(
+            indicator.setLayoutParams(new LayoutParams(
                     LayoutParams.MATCH_PARENT,
                     (int)(height * INDICATOR_SIZE_RATIO)));
         }
         else
         {
-            indicator.setLayoutParams(new LinearLayout.LayoutParams(
+            indicator.setLayoutParams(new LayoutParams(
                     LayoutParams.MATCH_PARENT,
                     (int)(height * (INDICATOR_SIZE_RATIO+EXTRA_LEGEND_SIZE_RATIO))));
         }
@@ -213,9 +215,22 @@ public class DynamicLineChart extends LinearLayout
 
         refresh();
     }
-    public void addPoint(float point)
+
+    // Adição de um ponto média
+    public void updateAverageSeries()
     {
-        ValueLinePoint value = new ValueLinePoint(getCurrentTime(),point);
+        int nrValues = values.size();
+        float sumValues = 0;
+        for(Map.Entry<String,ValueLineSeries> s : values.entrySet())
+        {
+            List<ValueLinePoint> points = s
+                    .getValue()
+                    .getSeries();
+            sumValues += points
+                    .get(points.size() - 1)
+                    .getValue();
+        }
+        ValueLinePoint value = new ValueLinePoint(getCurrentTime(),sumValues / nrValues);
         averageValues.addPoint(value);
     }
 
@@ -296,7 +311,7 @@ public class DynamicLineChart extends LinearLayout
         }
         private void init()
         {
-            this.setLayoutParams(new LinearLayout.LayoutParams(
+            this.setLayoutParams(new LayoutParams(
                     LayoutParams.MATCH_PARENT,
                     (int)(height * EXTRA_LEGEND_SIZE_RATIO)));
             this.setText(LEGEND);

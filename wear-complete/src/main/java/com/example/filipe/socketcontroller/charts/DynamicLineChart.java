@@ -20,6 +20,8 @@ import org.eazegraph.lib.models.ValueLineSeries;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.example.filipe.socketcontroller.util.UI.colors;
 
@@ -213,9 +215,22 @@ public class DynamicLineChart extends LinearLayout
 
         refresh();
     }
-    public void addPoint(float point)
+
+    // Adição de um ponto média
+    public void updateAverageSeries()
     {
-        ValueLinePoint value = new ValueLinePoint(getCurrentTime(),point);
+        int nrValues = values.size();
+        float sumValues = 0;
+        for(Map.Entry<String,ValueLineSeries> s : values.entrySet())
+        {
+            List<ValueLinePoint> points = s
+                    .getValue()
+                    .getSeries();
+            sumValues += points
+                    .get(points.size() - 1)
+                    .getValue();
+        }
+        ValueLinePoint value = new ValueLinePoint(getCurrentTime(),sumValues / nrValues);
         averageValues.addPoint(value);
     }
 

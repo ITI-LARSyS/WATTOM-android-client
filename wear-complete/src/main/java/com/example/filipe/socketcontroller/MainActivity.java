@@ -228,8 +228,6 @@ public class MainActivity extends Activity implements SensorEventListener
     private DynamicPieChart piePlugs;
     private DynamicPieChart pieEnergias;
     private DynamicLineChart lineDevices;
-    private float mediaConsumoPessoa = -1;
-
 
     /* *** */
     /* LOG */
@@ -547,7 +545,7 @@ public class MainActivity extends Activity implements SensorEventListener
         piePessoas.setValue("Dionísio",10);
         piePessoas.setOnLongClickListener((v)->
         {
-            navigationDrawer.setCurrentItem(TabConfig.PESSOAS2.ordinal(),true);
+            navigationDrawer.setCurrentItem(TabConfig.LINE_PESSOAS.ordinal(),true);
             return true;
         });
 
@@ -568,7 +566,7 @@ public class MainActivity extends Activity implements SensorEventListener
         linePlugs.addPoint("Hall de entrada","21:05",4.4f);
         linePlugs.setOnLongClickListener((v)->
         {
-            navigationDrawer.setCurrentItem(TabConfig.PLUGSTOTAL.ordinal(),true);
+            navigationDrawer.setCurrentItem(TabConfig.PIE_PLUGS.ordinal(),true);
             return true;
         });
 
@@ -590,34 +588,19 @@ public class MainActivity extends Activity implements SensorEventListener
         linePessoas.addPoint("Manel","14:01",10);
         linePessoas.addPoint("Afonso","14:01",20);
         linePessoas.addPoint("Dionísio","14:01",30);
-        mediaConsumoPessoa += 20;
-        linePessoas.addPoint(mediaConsumoPessoa);
-
+        linePessoas.updateAverageSeries();
         linePessoas.addPoint("Manel","14:02",11);
-        mediaConsumoPessoa += 11;
-        mediaConsumoPessoa /= 2;
         linePessoas.addPoint("Afonso","14:02",19);
-        mediaConsumoPessoa += 19;
-        mediaConsumoPessoa /= 2;
         linePessoas.addPoint("Dionísio","14:02",20);
-        mediaConsumoPessoa += 20;
-        mediaConsumoPessoa /= 2;
-        linePessoas.addPoint(mediaConsumoPessoa);
-
+        linePessoas.updateAverageSeries();
         linePessoas.addPoint("Manel","14:03",15);
-        mediaConsumoPessoa += 15;
-        mediaConsumoPessoa /= 3;
         linePessoas.addPoint("Afonso","14:03",3);
-        mediaConsumoPessoa += 3;
-        mediaConsumoPessoa /= 2;
         linePessoas.addPoint("Dionísio","14:03",12);
-        mediaConsumoPessoa += 12;
-        mediaConsumoPessoa /= 2;
-        linePessoas.addPoint(mediaConsumoPessoa);
+        linePessoas.updateAverageSeries();
 
         linePessoas.setOnLongClickListener((v)->
         {
-            navigationDrawer.setCurrentItem(TabConfig.PESSOAS.ordinal(),true);
+            navigationDrawer.setCurrentItem(TabConfig.PIE_PESSOAS.ordinal(),true);
             return true;
         });
 
@@ -628,7 +611,7 @@ public class MainActivity extends Activity implements SensorEventListener
         piePlugs.incValue("Escritório",20);
         piePlugs.setOnLongClickListener((v)->
         {
-            navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
+            navigationDrawer.setCurrentItem(TabConfig.LINE_PLUGS.ordinal(),true);
             return true;
         });
 
@@ -866,14 +849,14 @@ public class MainActivity extends Activity implements SensorEventListener
                             {
                                 if(j == indexLuz)
                                 {
-                                    navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
+                                    navigationDrawer.setCurrentItem(TabConfig.LINE_DEVICES.ordinal(),true);
                                     lineDevices.switchSeries("Candeeiro");
                                 }
                                 else
                                 {
                                     if(j == indexChaleira)
                                     {
-                                        navigationDrawer.setCurrentItem(TabConfig.DEVICES.ordinal(),true);
+                                        navigationDrawer.setCurrentItem(TabConfig.LINE_DEVICES.ordinal(),true);
                                         lineDevices.switchSeries("Chaleira");
                                     }
                                 }
@@ -939,7 +922,7 @@ public class MainActivity extends Activity implements SensorEventListener
                 selected_request.join();
                 enviaNome.join();
 
-                Log.d("PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
+                Log.d("LINE_PLUGS","plug"+_plug_names.get(j)+".local has been turned off by "+Device_Name);
                 IsOn = false;
                 //notify("Wattapp","plug"+_plug_names.get(j)+".local has been turned off");
 
@@ -957,9 +940,9 @@ public class MainActivity extends Activity implements SensorEventListener
                 enviaNome.start();
                 selected_request.join();
                 enviaNome.join();
-                Log.d("PLUGS", "plug" + _plug_names.get(j) + ".local has been turned on by " + Device_Name);
+                Log.d("LINE_PLUGS", "plug" + _plug_names.get(j) + ".local has been turned on by " + Device_Name);
                 IsOn = true;
-                navigationDrawer.setCurrentItem(TabConfig.PLUGS.ordinal(),true);
+                navigationDrawer.setCurrentItem(TabConfig.LINE_PLUGS.ordinal(),true);
                 linePlugs.switchSeries("plug" + _plug_names.get(j) + ".local");
                 //notify("Wattapp", "plug" + _plug_names.get(j) + ".local has been turned on");
             } catch (Exception e) {
@@ -978,7 +961,7 @@ public class MainActivity extends Activity implements SensorEventListener
                 _devices_count = json_array.length();
                 _target = new int [_devices_count];
 
-                // Log.i(TAG, "---- AVAILABLE PLUGS ---");
+                // Log.i(TAG, "---- AVAILABLE LINE_PLUGS ---");
                 for(int i=0;i<_devices_count;i++){
                     JSONObject obj = (JSONObject) json_array.get(i);
                     try {
@@ -986,7 +969,7 @@ public class MainActivity extends Activity implements SensorEventListener
                         _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
                         // Log.i(TAG, "plug "+_plug_names.get(i));
                     }catch (JSONException e){
-                        Log.d("PLUGS","No plugs detected!");
+                        Log.d("LINE_PLUGS","No plugs detected!");
                     }
                 }
                 //Log.i(TAG,"-------");
@@ -994,7 +977,7 @@ public class MainActivity extends Activity implements SensorEventListener
             }
             catch (JSONException e)
             {
-                Log.d("PLUGS","No plugs detected!");
+                Log.d("LINE_PLUGS","No plugs detected!");
                 //e.printStackTrace();
             }
             catch(InterruptedException e)
@@ -1019,8 +1002,11 @@ public class MainActivity extends Activity implements SensorEventListener
                 {
                     JSONObject User = (JSONObject) IdPower.get(i);
                     piePessoas.setValue(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
+                    linePessoas.addPoint(User.get("id").toString(), Float.parseFloat(User.get("power").toString()));
                 }
                 piePessoas.startAnimation();
+                // A média é atualizada no gráfico de linhas
+                linePessoas.updateAverageSeries();
                 if(!paused) toast(getApplicationContext(),"Person consumption" + " - " + "Updated data!" );
                 else UI.notify(getApplicationContext(),MainActivity.class,"Person consumption","Updated data!");
             }catch (Exception e){
