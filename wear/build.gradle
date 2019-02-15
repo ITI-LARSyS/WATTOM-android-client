@@ -20,7 +20,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
     }
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '27.0.3'
 }
 
 dependencies {
@@ -30,6 +30,6 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:24.2.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.google.android.support:wearable:2.0.1'
-    implementation 'com.google.android.gms:play-services-wearable:10.2.4'
+    implementation 'com.google.android.gms:play-services-wearable:16.0.1'
     implementation 'com.google.android.wearable:wearable:2.0.1'
 }

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/SocketController.iml" filepath="$PROJECT_DIR$/.idea/SocketController.iml" />
       <module fileurl="file://$PROJECT_DIR$/SocketController.iml" filepath="$PROJECT_DIR$/SocketController.iml" />
       <module fileurl="file://$PROJECT_DIR$/mobile/mobile.iml" filepath="$PROJECT_DIR$/mobile/mobile.iml" />
       <module fileurl="file://$PROJECT_DIR$/mobile-debug/mobile-debug.iml" filepath="$PROJECT_DIR$/mobile-debug/mobile-debug.iml" />

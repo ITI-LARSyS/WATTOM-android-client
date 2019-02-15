@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     //plugs url for notifying good correlation
     private static String BASE_URL = "http://0.0.0.0:3000/";
     //  private final static String BASE_URL = "http://192.168.1.7:3000";
-    private final static String EnergyData = "http://aveiro.m-iti.org/sinais_energy_production/services/today_production_request.php?date=";
+    private final static String EnergyData = "https://smile.prsma.com/api/source/madeira-production";//"http://aveiro.m-iti.org/sinais_energy_production/services/today_production_request.php?date=";
 
     private static String PLUGS_URL =BASE_URL+"/plug/";
     private static String SELECTED_URL = PLUGS_URL +"%/selected/";
@@ -184,6 +184,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     private int plugSelected = -1;
 
+    private long lastOnOffEvent = System.currentTimeMillis();
+
     //Ao iniciar a aplicacao
     // - Atribui cada elemento da interface uma variavel
     // - coloca a taba do debug escondida
@@ -238,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     // - Indica que já iniciou
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        Log.i(TAG,messageEvent.toString());
+        //Log.i(TAG,messageEvent.toString());
         String merda = messageEvent.getPath();
         String data = merda.replace("acc", "");
         String [] horas = data.split("/");
@@ -296,21 +298,26 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }else{
             if(!_started)
             {
-                notify("Wattapp (Sensor)","Started receiving coordinates!");
-                Log.d("SENSOR","Started receiving coordinates!");
+               // notify("Wattapp (Sensor)","Started receiving coordinates!");
+               // Log.d("SENSOR","Started receiving coordinates!");
             }
             _started = true;
 
             String[] tokens = data.split("#");
 
             try {
-                double x = Double.parseDouble(tokens[0]);
-                double z = Double.parseDouble(tokens[1])*-1;
-                _last_acc_x = x;            // updatre the global variables to be used elsewhere in the code
-                _last_acc_y = z;
+                double x = Double.parseDouble(tokens[0])*-1;
+                            // double x = Double.parseDouble(tokens[0]);
+                            // double z = Double.parseDouble(tokens[1])*-1;
+                double z = Double.parseDouble(tokens[1]);
+                                // _last_acc_x = x;            // updatre the global variables to be used elsewhere in the code
+                                // _last_acc_y = z;
 
-                Log.i(TAG,"got data from watch x "+x+","+z);
-                Log.d("SENSOR","x:"+x+" z:"+z);
+                _last_acc_x = z;            // updatre the global variables to be used elsewhere in the code
+                _last_acc_y = x;
+
+                //Log.i(TAG,"got data from watch x "+x+","+z);
+                //Log.d("SENSOR","x:"+x+" z:"+z);
                 //toast("got data from watch x "+x+","+z);
             } catch (NumberFormatException e) {
                 //Log.e(TAG, "format exception data " + data);
@@ -383,7 +390,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 //    }
 
     public void onConnected(@Nullable Bundle bundle) {
-        //Log.d(TAG, "Google API Client was connected");
+        Log.d(TAG, "Google API Client was connected");
         Wearable.NodeApi.getConnectedNodes(_client)
                 .setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
                     @Override
@@ -391,8 +398,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         for (Node node : nodes.getNodes()) {
                             _wear = node;
                             toast(getApplicationContext(), "Connected to `"+node.getDisplayName()+"`!");
+                            Log.i(TAG,"Connected to `"+node.getDisplayName()+"`!");
                         }
-                        //Log.i(TAG,"watch connected");
+
                     }
                 });
     }
@@ -436,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
             new Thread(()->
             {
-                HttpRequest start = new HttpRequest(PLUGS_URL+"start/6",getApplicationContext(),_queue);
+                HttpRequest start = new HttpRequest(PLUGS_URL+"start/1",getApplicationContext(),_queue);
                 start.start();
                 try {
                     start.join();
@@ -960,7 +968,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 }
                 for(int i=0;i<_devices_count;i++){
                     int current = i;
-                    //Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
+                    Log.i("Corr","correlation "+ i +" "+_correlations[0][i]+","+_correlations[1][i]);
                     if (((_correlations[0][i] > 0.8 && _correlations[0][i] < 1) && (_correlations[1][i] > 0.8 &&  _correlations[1][i] < 1)))
                     {  // sometimes at the start we get 1.0 we want to avoid that
 
@@ -968,12 +976,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
-                        // Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
+                        Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
                         if(_correlations_count[i] == 3) {
                             _correlations_count[i] = 0;
                            // if (i == _target[i]){
                                 _target_selection = true;
-                                // Beep to show its the correct match
+                               //  Beep to show its the correct match
                                // ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
                                 //toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
                                 if(_togglers[i] == null || !_togglers[i].isAlive())
@@ -1065,13 +1073,13 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 {
                                     if(j == indexLuz)
                                     {
-                                        sendMessage("Device start"+"-"+"Candeeiro");
+                                        sendMessage("Device start"+"-"+"Desk lamp");
                                     }
                                     else
                                     {
                                         if(j == indexChaleira)
                                         {
-                                            sendMessage("Device start"+"-"+"Chaleira");
+                                            sendMessage("Device start"+"-"+"Kettle");
                                         }
                                     }
                                 }
@@ -1080,20 +1088,26 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                 // (vai para o gráfico desse plug)
                                 else
                                 {
-                                    if(IsOn)
+                                    if(IsOn && System.currentTimeMillis()-lastOnOffEvent >5000)
                                     {
                                         TurnOffAndRemove(j);
+                                        lastOnOffEvent = System.currentTimeMillis();
                                     }
-                                    else
+                                    else if(!IsOn && System.currentTimeMillis()-lastOnOffEvent >5000 )
                                     {
                                         TurnOnAndAdd(j);
-                                    }
+                                        lastOnOffEvent = System.currentTimeMillis();
+                                    }else
+                                        Log.e(TAG,"Too many requests");
                                 }
                                 break;
 
                             /* (Confirmação do) schedule */
                             case SCHEDULE_MODE:
-                                if(IsOn) TurnOffAndRemove(j);
+                                Log.d(TAG,"in schedule mode corr success");
+                                if(IsOn)
+                                    TurnOffAndRemove(j);
+
                                 ChangeColorByEnergy(renewableEnergy,plugSelected);
                                 currentMode = NO_MODE;
                                 new Alarm(HourScheduleStart, MinutesScheduleStart,()->
@@ -1475,15 +1489,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
                     sendMessage("Device consumption"
                             + "-"
-                            + "Chaleira"
+                            + "Kettle"
                             + "-"
-                            + (new Random().nextInt( 10) + 3));
+                            + (new Random().nextInt( 2000) + 3));
 
                     sendMessage("Device consumption"
                             + "-"
-                            + "Candeeiro"
+                            + "Desk lamp"
                             + "-"
-                            + (new Random().nextInt(12) + 5));
+                            + (new Random().nextInt(40) + 5));
 
                     if (!paused)
                         toast(getApplicationContext(), "Device consumption" + " - " + "Updated data!");
@@ -1513,10 +1527,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 float biomassa = 0;
                 float foto = 0;
 
-                Date dNow = new Date();
-                SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
-                String data = dateFormat.format(dNow);
-                String DataURL = EnergyData+data;
+              //  Date dNow = new Date();
+              //  SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyy-MM-dd");
+              // String data = dateFormat.format(dNow);
+                String DataURL = EnergyData;
 
                 HttpRequest request = new HttpRequest(DataURL, getApplicationContext() ,_queue);
 
@@ -1525,16 +1539,16 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     request.start();
                     request.join();
                     String StringData = request.getData();
-                    JSONObject JSONData = new JSONObject(StringData);
-                    JSONArray aux = (JSONArray) JSONData.get("prod_data");
-                    JSONData = (JSONObject) aux.get(0);
+                    JSONArray aux = new JSONArray(StringData);
+                    JSONObject jsonData = (JSONObject) aux.get(0);
 
-                    total = JSONData.getInt("total");
-                    termica = JSONData.getInt("termica");
-                    hidrica = JSONData.getInt("hidrica");
-                    eolica = JSONData.getInt("eolica");
-                    biomassa = JSONData.getInt("biomassa");
-                    foto = JSONData.getInt("foto");
+                    total = jsonData.getInt("total");
+                    termica = jsonData.getInt("termica");
+                    hidrica = jsonData.getInt("hidrica");
+                    eolica = jsonData.getInt("eolica");
+                    biomassa = jsonData.getInt("bio");
+                    foto = jsonData.getInt("foto");
+                    Log.i(TAG,"Total "+total+" termica "+termica+" hidrica "+hidrica+" eolica "+eolica+" bio "+biomassa+" foto "+foto );
                 }
 
                 catch(Exception e)
@@ -1568,9 +1582,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     else UI.notify(getApplicationContext(),MainActivity.class,"Energy consumption","Updated data!");
 
                     // falta enviar para o wear (para atualizar o pie chart)
-                    float percentage = ((termica+hidrica+eolica+biomassa+foto) / total);
+                    float percentage = ((hidrica+eolica+foto) / total);
                     percentage *= 100;
                     renewableEnergy =  Math.round(percentage);
+                    Log.e(TAG, "energy :" +renewableEnergy);
                     if(plugSelected != -1) ChangeColorByEnergy(renewableEnergy,plugSelected);
                     new RefreshData().start();
                 }

@@ -11,8 +11,11 @@ public class Alarm
     private TimerTask task;
     private boolean repeating;
     private long interval;
-    public Alarm(int hour, int minute, Runnable action, boolean repeating)
+    private int plug;
+    private boolean active = true;
+    public Alarm(int hour, int minute, Runnable action, boolean repeatingint, int plug)
     {
+        this.plug=plug;
         this.repeating = repeating;
         if(!repeating)
         {
@@ -54,6 +57,15 @@ public class Alarm
         {
             interval = TimeUnit.MINUTES.toMillis(minute);
         }
+    }
+    public int getPlug(){
+        return this.plug;
+    }
+    public void setActive(boolean active){
+        this.active = false;
+    }
+    public boolean isActive(){
+        return this.active;
     }
     public void activate()
     {

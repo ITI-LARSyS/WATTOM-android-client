@@ -13,12 +13,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.drawer.WearableNavigationDrawer;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.example.filipe.socketcontroller.charts.DynamicLineChart;
 import com.example.filipe.socketcontroller.charts.DynamicPieChart;
@@ -31,6 +33,10 @@ import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
+
+import java.security.Key;
+import java.util.Calendar;
+import java.util.List;
 
 import static com.example.filipe.socketcontroller.util.UI.toast;
 import static com.example.filipe.socketcontroller.util.UI.toggleVisibility;
@@ -59,16 +65,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private boolean paused = false;
     private boolean inStudy = false;
     private Vibrator vibrator;
+    private boolean started = false;
 
     /* ***************** */
     /* BACK-END (SENSOR) */
     /* ***************** */
     private float[] _rotationMatrix = new float[16];
     private float x;
+    private float y;
     private float z;
     private boolean _sensor_running = false;
     private SensorManager _sensorManager;
     private Sensor _sensor;
+    private final static float yaw_boundary = 3.05432619f;
+    private boolean flipped_orientation;
 
     /* ****************** */
     /* BACK-END (CONEXÃO) */
@@ -97,13 +107,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     private static final int SELECT_TIME_START = 0;
     private static final int SELECT_TIME_END = 1;
     private static final int TIME_CONFIRMED = 2;
-    private int scheduleState = 0;
+    private int scheduleState = 2;
     private TimePicker _pickerInitTime;
     private TimePicker _pickerEndTime;
     private boolean changedStart;
     private boolean changedEnd;
     private Button _buttonStart;
     private Button _buttonEnd;
+    private Button _exitButton;
 
     /* ***** */
     /* STATS */
@@ -149,7 +160,14 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         primeiro = 0;
         consumoTotal = 0;
         _sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);
+        //_sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_GAME_ROTATION_VECTOR);
+        _sensor = _sensorManager.getDefaultSensor( Sensor.TYPE_ORIENTATION);  // WORKS WELL ON THE LG G WATCH
+
+
+        final List<Sensor> deviceSensors = _sensorManager.getSensorList(Sensor.TYPE_ALL);
+        for(Sensor type : deviceSensors){
+            Log.e("sensors",type.getStringType());
+        }
         _last_push = System.currentTimeMillis();
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -209,8 +227,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     public void onStop()
     {
         super.onStop();
-        paused = true;
-        if(inStudy) cpuWakeLock.acquire();
+       // paused = true;
+        //if(inStudy)
+        cpuWakeLock.acquire();
+
+
     }
 
     @Override
@@ -223,52 +244,37 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     @Override
     public void onSensorChanged(SensorEvent event)
     {
-            //Log.wtf(TAG,event.toString());
+        /*float[] rotationV = new float[16];
 
-/*
-        SensorManager.getRotationMatrixFromVector(_rotationMatrix,
-                event.values);
-        SensorManager
-                .remapCoordinateSystem(_rotationMatrix,
-                        SensorManager.AXIS_X, SensorManager.AXIS_Z,
-                        _rotationMatrix);
-        SensorManager.getOrientation(_rotationMatrix, _orientationVals);
+        SensorManager.getRotationMatrixFromVector(rotationV, event.values);
+        float[] remappedRotationV = new float[16];
+        float[] orientationValuesV = new float[3];
 
-        // Optionally convert the result from radians to degrees
-        _orientationVals[0] = (float) Math.toDegrees(_orientationVals[0]);
-        _orientationVals[1] = (float) Math.toDegrees(_orientationVals[1]);
-        _orientationVals[2] = (float) Math.toDegrees(_orientationVals[2]);
+        if (flipped_orientation){
+            SensorManager.remapCoordinateSystem(rotationV, SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Y, remappedRotationV);
+            SensorManager.getOrientation(remappedRotationV, orientationValuesV);        // 3 values: yaw,roll,pitch (in that order)
+        } else {
+            SensorManager.getOrientation(rotationV, orientationValuesV);        // 3 values: yaw,roll,pitch (in that order)
+            orientationValuesV[1] = -1*orientationValuesV[1];                   // adjust for negative relation roll
+            orientationValuesV[2] = -1*orientationValuesV[2];                   // adjust for negative relation pitch
+        }
 
-//        Yaw:  _orientationVals[0]
-//        Pitch:  _orientationVals[1]
-//        Roll:     _orientationVals[2]
-
-        float x = _orientationVals[0];//event.values[0];
-        float y = _orientationVals[1];//event.values[1];
-        float z = _orientationVals[2];
-        int val =4;*/
-
-            // if(x>val||y>val||z>val) {
-            // float y = event.values[1];
+        if (orientationValuesV[0]>yaw_boundary || orientationValuesV[0]<-yaw_boundary)
+            flipped_orientation = !flipped_orientation;
 
 
-
-
-
-            //}
-            //  Log.i(TAG,"Sending data");
-
-            //  float[] data = {x,y};
+        x = orientationValuesV[0]*_factor;
+        z = orientationValuesV[2]* -1;*/
+           // ORIGINAL CODE WORKS WELL ON THE LG G WATCH
             x = event.values[0];
             // _x_acc.setText(x+"");
             z = event.values[2];
+            //z = _factor*z;
             z = _factor*z;
-            //Log.d("XYZ","x:"+event.values[0]+",y:"+event.values[1]+",z:"+event.values[2]);
-            // _y_acc.setText(z+"");
+            Log.d("XYZ",x+","+z);
 
-//            Log.i("DEBUG",x+","+z);
+        //Log.i("SENSOR LOG",x+","+z);
 
-            //Log.i(TAG,"sending data form watch");
     }
 
     /* ******************************************************************************** */
@@ -342,7 +348,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             switch(event)
             {
                 // Mensagem com o consumo atual de cada pessoa
-                // (formato: "Person consumption-Maria-22-Pedro-11-Joao-7")
+                // (formato: "Person consumption-Maria-22-Pedro-11-Joao-7"
                 case "Person consumption":
 
                     int nrPessoas = (valores.length - 1 )/ 2;
@@ -409,7 +415,6 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 // (formato: "Plug start-Quarto de dormir")
                 case "Plug start":
                     String plug = valores[1];
-
                     // Passa para o separador 'Power usage by plug'
                     navigationDrawer.setCurrentItem(TabConfig.LINE_PLUGS.ordinal(),true);
 
@@ -422,10 +427,11 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 // (formato: "Device start-Forno3000MX")
                 case "Device start":
                     String device = valores[1];
+                    Log.i(TAG,"plug "+device+"   valores "+valores[1]);
 
                     // Passa para o separador 'Power usage by device'
                     navigationDrawer.setCurrentItem(TabConfig.LINE_DEVICES.ordinal(),true);
-
+                    //navigationDrawer.setCurrentItem(TabConfig.PIE_PESSOAS.ordinal(),true);
                     // Passa para a série de valores do respetivo device
                     lineDevices.switchSeries(device);
 
@@ -436,11 +442,13 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                 case "Device consumption":
                     String deviceName = valores[1];
                     float deviceConsumption = Float.parseFloat(valores[2]);
-
                     // O gráfico de linhas é atualizado
                     lineDevices.addPoint(deviceName,deviceConsumption);
-
                     notify("Device consumption","Updated data!");
+                    break;
+
+                case "Device reboot":
+                    started = false;
                     break;
 
                 case "START":
@@ -452,8 +460,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     inStudy = false;
                     notify("Wattapp","Study ended!");
                     break;
-
-                // Mensagem inválida
+                 // Mensagem inválida
                 default:
                     Log.d("ERROR","Error: evento `"+event+"` desconhecido");
                     notify("Wattapp","Invalid message received!");
@@ -466,6 +473,18 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             e.printStackTrace();
             notify("Wattapp","Invalid message received!");
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.i(TAG,event.toString());
+       if((keyCode==KeyEvent.KEYCODE_NAVIGATE_NEXT || keyCode== KeyEvent.KEYCODE_NAVIGATE_PREVIOUS) && !started) {
+           Toast.makeText(this, "Listened to events", Toast.LENGTH_LONG).show();
+           sendMessage("start");
+           started=true;
+       }
+        // If you did not handle it, let it be handled by the next possible element as deemed by the Activity.
+        return super.onKeyDown(keyCode, event);
     }
 
     /* ******************************************************************************** */
@@ -486,7 +505,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
     {
         if(!_sensor_running)
         {
-            _factor = _leftHanded.isChecked()? -1 : 1;
+            _factor = _leftHanded.isChecked()? 1 : -1;
             _sensorManager.registerListener(this, _sensor, SensorManager.SENSOR_DELAY_FASTEST);
             _sensor_running = true;
             pushThread = new PushThread();
@@ -496,6 +515,8 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         {
             _sensorManager.unregisterListener(this);
             _sensor_running = false;
+            started = false;
+            sendMessage("stop");
             try
             { pushThread.join(); }
             catch (InterruptedException e)
@@ -528,6 +549,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
             default:
                 break;
         }
+        Log.i(TAG,"Sending time : "+time);
         sendMessage(time);
     }
 
@@ -541,6 +563,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         /* START/STOP */
         /* ********** */
         _leftHanded     = (CheckBox) findViewById(R.id.checkLeftHanded);
+        _exitButton     = (Button) findViewById(R.id.exit_btn);
 
         /* ******** */
         /* SCHEDULE */
@@ -552,6 +575,12 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         _textEndTime = (TextView) findViewById(R.id.HoraFim);
         _pickerInitTime = (TimePicker) findViewById(R.id.InitialPicker);
         _pickerEndTime = (TimePicker) findViewById(R.id.EndPicker);
+        Calendar c = Calendar.getInstance();
+        _pickerInitTime.setHour(c.get(Calendar.HOUR_OF_DAY));
+        _pickerInitTime.setMinute(c.get(Calendar.MINUTE));
+        _textInitTime.setText(_pickerInitTime.getHour()+":"+_pickerInitTime.getMinute());
+        c.add(Calendar.MINUTE, 10);
+        _textEndTime.setText(c.get(Calendar.HOUR_OF_DAY)+":"+c.get(Calendar.MINUTE));
         _pickerInitTime.setIs24HourView(true);
         _pickerInitTime.setOnTimeChangedListener((view, hourOfDay, minute) ->
         {
@@ -598,13 +627,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         });
 
        fillEazeGraph();
+
+        /*_exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getApplicationContext().
+            }
+        });*/
     }
 
     private void fillEazeGraph()
     {
-        piePessoas.setValue("Manel",20);
-        piePessoas.setValue("Afonso",40);
-        piePessoas.setValue("Dionísio",10);
+        piePessoas.setValue("Manuel",820);
+        piePessoas.setValue("Afonso",650);
+        piePessoas.setLegendTextSize(12);
 
         linePlugs.addPoint("Sala de estar","21:01",2.4f);
         linePlugs.addPoint("Sala de estar","21:02",1f);
@@ -622,20 +658,20 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         linePlugs.addPoint("Hall de entrada","21:04",5f);
         linePlugs.addPoint("Hall de entrada","21:05",4.4f);
 
-        lineDevices.addPoint("Chaleira","14:02",2.4f);
-        lineDevices.addPoint("Candeeiro","14:02",1.4f);
-        lineDevices.addPoint("Chaleira","14:03",4.1f);
-        lineDevices.addPoint("Candeeiro","14:03",1.2f);
-        lineDevices.addPoint("Chaleira","14:04",2.3f);
-        lineDevices.addPoint("Candeeiro","14:04",1.3f);
-        lineDevices.addPoint("Chaleira","14:05",3.7f);
-        lineDevices.addPoint("Candeeiro","14:05",1.7f);
-        lineDevices.addPoint("Chaleira","14:06",2.5f);
-        lineDevices.addPoint("Candeeiro","14:06",1.2f);
-        lineDevices.addPoint("Chaleira","14:07",3.0f);
-        lineDevices.addPoint("Candeeiro","14:07",1.9f);
-        lineDevices.addPoint("Chaleira","14:08",3.1f);
-        lineDevices.addPoint("Candeeiro","14:08",1.6f);
+        lineDevices.addPoint("Kettle","14:30",0.0f);
+        lineDevices.addPoint("Desk Lamp","14:30",1.4f);
+        lineDevices.addPoint("Kettle","14:35",500.1f);
+        lineDevices.addPoint("Desk Lamp","14:35",20.0f);
+        lineDevices.addPoint("Kettle","14:40",1000.3f);
+        lineDevices.addPoint("Desk Lamp","14:40",40.0f);
+        lineDevices.addPoint("Kettle","14:45",1500.7f);
+        lineDevices.addPoint("Desk Lamp","14:45",40.0f);
+        lineDevices.addPoint("Kettle","14:50",1500.5f);
+        lineDevices.addPoint("Desk Lamp","14:50",40.0f);
+        lineDevices.addPoint("Kettle","14:55",1500.0f);
+        lineDevices.addPoint("Desk Lamp","14:55",50.9f);
+        lineDevices.addPoint("Kettle","15:00",1000.1f);
+        lineDevices.addPoint("Desk Lamp","15:00",40.6f);
 
         linePessoas.addPoint("Manel","14:01",10);
         linePessoas.addPoint("Afonso","14:01",20);

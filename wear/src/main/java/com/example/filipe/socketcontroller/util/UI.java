@@ -37,16 +37,7 @@ public abstract class UI
     public static final String[] colors =
             {
                     "#FF0000",
-                    "#FF8000",
-                    "#FFFF00",
-                    "#00FF00",
-                    "#00FFFF",
-                    "#0080FF",
-                    "#0000FF",
-                    "#8000FF",
-                    "#FF00FF",
-                    "#705050",
-                    "#FFFFFF"
+                    "#0000FF"
             };
     public static void toggleVisibility(View v)
     {

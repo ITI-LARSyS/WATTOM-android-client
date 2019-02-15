@@ -72,13 +72,18 @@ public class HttpRequest extends Thread {
                 5,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
-        if(_queue == null)  _queue = Volley.newRequestQueue(_appCtx);
+        if(_queue == null)  {
+            Log.i(TAG,"Updating the requests queue");
+            _queue = Volley.newRequestQueue(_appCtx);
+        }
         _queue.add(stringRequest);
 
         try {
             Log.e(TAG, "-----   running  request  ------ "+_url);
             String response = future.get();
             parseData(response);
+            Log.e(TAG, "-----  response: "+response);
+
         }catch (Exception e){
             e.printStackTrace();
         }

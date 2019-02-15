@@ -196,8 +196,12 @@ public class DynamicLineChart extends LinearLayout
     // Adição de uma nova série de valores
     public void add(String key)
     {
+
         values.put(key, new ValueLineSeries());
-        values.get(key).setColor(Color.parseColor(colors[(values.size() - 1) % colors.length]));
+        if(key.equals("Kettle"))
+            values.get(key).setColor(Color.parseColor("#FF0000"));
+        else
+            values.get(key).setColor(Color.parseColor("#0000FF"));
     }
 
     // Adição de um ponto

@@ -218,14 +218,14 @@ public class PlugMotionHandler extends Thread{
 
                 milis2 = System.currentTimeMillis();
 
-                //Log.i(TAG, "total: "+total+" , counter: "+counter+" , limit: "+limit+" , LED: "+_currentLED);
+                   // Log.i(TAG, "tartet:"+_led_target+"total: "+total+" , counter: "+counter+" , limit: "+limit+" , LED: "+_currentLED);
 
-                if(_currentLED==0 && SOUND)
-                    toneGen1.startTone(ToneGenerator.TONE_CDMA_CALLDROP_LITE,100);
-
-
-                if(_currentLED==6 && SOUND)
-                    toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_REORDER,100);
+//                if(_currentLED==0 && SOUND)
+//                    toneGen1.startTone(ToneGenerator.TONE_CDMA_CALLDROP_LITE,100);
+//
+//
+//                if(_currentLED==6 && SOUND)
+//                    toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_REORDER,100);
 
                 if(counter == limit) {
 

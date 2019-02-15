@@ -1,5 +1,6 @@
 package com.example.filipe.socketcontroller;
 
+import android.content.ContentValues;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
@@ -22,12 +23,16 @@ import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.example.filipe.socketcontroller.motion.PlugMotionHandler;
+import com.example.filipe.socketcontroller.util.Alarm;
 import com.example.filipe.socketcontroller.util.HttpRequest;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
@@ -39,6 +44,11 @@ import org.w3c.dom.Text;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static com.example.filipe.socketcontroller.util.UI.toast;
 
 public class MainActivity extends AppCompatActivity implements  MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -77,13 +87,15 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private double _last_acc_y = 0;
 
     //plugs url for notifying good correlation
-    private final static String BASE_URL = "http://192.168.8.195:3000";
+    // private final static String BASE_URL = "http://192.168.0.112:3000";
+    private final static String BASE_URL = "http://192.168.1.8:3000";
+
     //  private final static String BASE_URL = "http://192.168.1.7:3000";
 
     private final static String PLUGS_URL =BASE_URL+"/plug/";
     private  String SELECTED_URL =BASE_URL+"/plug/%/selected/";
     private  String PLUG_URL =BASE_URL+"/plug/%";
-    private int _plug_selected = 0;
+    private String _plug_selected = "";
 
 
     //handlers and receivers for the targets
@@ -94,8 +106,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     //devices
     private int _devices_count;
-
-    int tonto =0;
+    private Node _wear;
 
     //target
     private int _target;
@@ -122,6 +133,21 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private TextView _condition;
     private TextView _trial_field;
 
+    //Tei DEMO STUFF
+    private int mode = 0;
+    private int relay = 0;
+    private JSONArray activeLeds;
+    //0 - plug selection
+    //1 - ON/OFF or Disagregation
+    //3 - Disagregation
+    //4 - Scheduling
+
+    // Scheduling stuff
+    private int vez = 0;
+    private int hourStart,minStart,hourEnd,minEnd;
+    private int HourScheduleStart, MinutesScheduleStart,HourScheduleEnd, MinutesScheduleEnd;
+    private ArrayList<Alarm>  _alarms;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -130,38 +156,18 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-       // _counter        = (TextView) findViewById(R.id.counter);
-      //  _pId            = (EditText) findViewById(R.id.participant_id);
         _simuView       = (SimulationView) findViewById(R.id.simulation_view);
-       // _instructions   = (TextView) findViewById(R.id.instructions_field);
-       // _condition      = (TextView) findViewById(R.id.condition_field);
-       // _trial_field    = (TextView) findViewById(R.id.trial_field);
 
-        //_simuView.setVisibility(View.GONE);
-      /*  FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        final View debug_view = findViewById(R.id.debug_view);
-        debug_view.setVisibility(View.GONE);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //_debug_thread = !_debug_thread;
-                if(debug_view.getVisibility()==View.VISIBLE)
-                    debug_view.setVisibility(View.GONE);
-                else
-                    debug_view.setVisibility(View.VISIBLE);
-            }
-        }); */
-
-       _client = new GoogleApiClient.Builder(this)
+        _client = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(AppIndex.API).build();
 
-       _client.connect();
+        _client.connect();
         Wearable.MessageApi.addListener(_client, this);
-       _queue = Volley.newRequestQueue(getApplicationContext());
+        _queue = Volley.newRequestQueue(getApplicationContext());
+        _alarms = new ArrayList<Alarm>();
 
     }
 
@@ -172,6 +178,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         _client.connect();
+        //new InitAvailablePlugs(InitAvailablePlugs.FIRST_STARTUP).start();
+        // lets startup the system no matter what
     }
 
     @Override
@@ -180,18 +188,130 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         String merda = messageEvent.getPath();
         String data = merda.replace("acc", "");
-        String[] tokens = data.split("#");
-        Log.i(TAG,"test");
-        try {
-            double x = Double.parseDouble(tokens[0]);
-            double z = Double.parseDouble(tokens[1])*-1;
-            _last_acc_x = x;            // updatre the global variables to be used elsewhere in the code
-            _last_acc_y = z;
-            Log.i(TAG,"got data from watch x "+x+","+z);
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "format exception data " + data);
+        String [] horas = data.split("/");
+        if(merda.contains("start")) {
+            Log.e(TAG," Recebi mensagem para começar");
+            startUpDemo();
+        }else if(merda.contains("stop")){
+            Log.e(TAG,"Recebi mensagem para para parar");
+            _correlationRunning=false;
+            mode = 0;
+            stopServices();
+        }
+        else if(horas.length == 2){
+            Log.i(TAG, "horas: "+horas.toString());
+            //parar tudo aqui:
+            _correlationRunning = false;
+            stopServices();
+            String [] detailsStart = horas[0].split(":");
+            hourStart = Integer.parseInt(detailsStart[0]);
+            minStart = Integer.parseInt(detailsStart[1]);
+            detailsStart = horas[1].split(":");
+            hourEnd = Integer.parseInt(detailsStart[0]);
+            minEnd = Integer.parseInt(detailsStart[1]);
+            HourScheduleStart = hourStart;
+            MinutesScheduleStart = minStart;
+            HourScheduleEnd = hourEnd;
+            MinutesScheduleEnd = minEnd;
+            Log.i(TAG, "horas "+HourScheduleStart+":"+MinutesScheduleStart+"  "+HourScheduleEnd+":"+MinutesScheduleEnd);
+            /*if(vez == 0){
+                // _correlationRunning = false;
+                String [] detailsStart = horas[0].split(":");
+                hourStart = Integer.parseInt(detailsStart[0]);
+                minStart = Integer.parseInt(detailsStart[1]);
+                detailsStart = horas[1].split(":");
+                hourEnd = Integer.parseInt(detailsStart[0]);
+                minEnd = Integer.parseInt(detailsStart[1]);
+                HourScheduleStart = hourStart;
+                MinutesScheduleStart = minStart;
+                HourScheduleEnd = hourEnd;
+                MinutesScheduleEnd = minEnd;
+
+                if(hourStart > 12){
+                    hourStart = hourStart - 12;
+                }else if (hourStart == 0){
+                    hourStart = 0;
+                }
+                if(minStart < 5){
+                    minStart = 0;
+                }else{
+                    minStart = Math.round(minStart/5);
+                }
+
+                if(hourEnd > 12){
+                    hourEnd = hourEnd - 12;
+                }else if(hourEnd == 0){
+                    hourEnd = 0;
+                }
+                if(minEnd < 5){
+                    minEnd = 0;
+                }else{
+                    minEnd = Math.round(minEnd/5);
+                }
+                selectedTimeRequest(hourStart,minStart);
+                vez++;
+            }else if(vez == 1){
+                selectedTimeRequest(hourEnd,minEnd);
+                vez++;
+            }else {*/
+            mode = 4;
+            vez = 0;
+            updateStudyMode(0);
+            //}
+        }else{
+            String[] tokens = data.split("#");
+            //Log.i(TAG,"test");
+            try {
+                double x = Double.parseDouble(tokens[0]);
+                double z = Double.parseDouble(tokens[1]);
+                _last_acc_x = x;            // updatre the global variables to be used elsewhere in the code
+                _last_acc_y = z;
+                //Log.i(TAG,"got data from watch x "+x+","+z);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "format exception data " + data);
+            }
         }
     }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d(TAG, "Google API Client was connected");
+        Wearable.NodeApi.getConnectedNodes(_client)
+                .setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+                    @Override
+                    public void onResult(NodeApi.GetConnectedNodesResult nodes) {
+                        for (Node node : nodes.getNodes()) {
+                            _wear = node;
+                            toast(getApplicationContext(), "Connected to `"+node.getDisplayName()+"`!");
+                            Log.i(TAG,"Connected to `"+node.getDisplayName()+"`!");
+                        }
+
+                    }
+                });
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(TAG, "Connection to Google API client was suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d(TAG, "Connection to Google API client was failed");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Wearable.MessageApi.removeListener(_client, this);
+        Log.wtf(TAG, " wtf called from main activity");
+        stopServices();
+        _correlationRunning = false;
+        //     saveFile();
+        _client.disconnect();
+    }
+
+
 
     private void push(int index, double[][] data,double x, double y){
 
@@ -220,42 +340,25 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     handler.stopSimulation();
                 Log.i(TAG, "stoping simulation");
             }
+        }if(_aggregators!=null){
+            for(DataAggregator agg: _aggregators){
+                if(agg!= null)
+                    agg.stopAgregator();
+                Log.i(TAG,"stopoing aggregators");
+            }
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Wearable.MessageApi.removeListener(_client, this);
-        Log.wtf(TAG, " wtf called from main activity");
-        stopServices();
-        _correlationRunning = false;
-   //     saveFile();
-        _client.disconnect();
-    }
-
-    private boolean saveFile(){
-        String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root + "/participants_data"); // creates the dir
-        myDir.mkdirs();                                     // builds the dir, (only returns true once)
-        String fname = _participant+"__"+System.currentTimeMillis()+".txt"; // file name with the pId plus the current tms
-        File file = new File (myDir, fname);
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            out.write(_studyResult.getBytes());
-            out.flush();
-            out.close();
-            return true;
-
-        } catch (Exception e) {
+    private synchronized void selectedTimeRequest(int hour, int min){
+        HttpRequest showTime;
+        showTime = new HttpRequest(BASE_URL + "/plug/SelectedTime/"+ hour+"-"+min, getApplicationContext(),_queue);
+        try{
+            showTime.start();
+            // showTime.join();
+        }catch(Exception e){
             e.printStackTrace();
-            return false;
         }
     }
-
-    /*
-        Handlers for the user interaction most of these are for the debug purposes
-     */
 
     public void handleDebugClick(View v){
         if(v.getId() == R.id.debug_btn)
@@ -268,10 +371,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     public void handleStartStudyClick(View v){
 //        _participant = Integer.parseInt(_pId.getText().toString());
-     //   _angle       = 0;
-   //     _pointing    = _condition.getText().toString();
-        SELECTED_URL =  SELECTED_URL.replace("%",_plug+"");
-        new StartUp(PLUGS_URL+_plug).start();
+        //   _angle       = 0;
+        //     _pointing    = _condition.getText().toString();
+        new StartUp(PLUGS_URL).start();
     }
 
     public void handleUpdateClick(View v){
@@ -339,21 +441,34 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.d(TAG, "Google API Client was connected");
+    //Sends Message Back to the watch
+    private void sendMessage(String key){
+        if (_wear != null && _client!= null && _client.isConnected()) {
+            //   Log.d(TAG, "-- " + _client.isConnected());
+            Wearable.MessageApi.sendMessage(
+                    _client, _wear.getId(), "" + key, null).setResultCallback(
 
+                    new ResultCallback<MessageApi.SendMessageResult>() {
+                        @Override
+                        public void onResult(MessageApi.SendMessageResult sendMessageResult) {
+
+//                            if (!sendMessageResult.getStatus().isSuccess()) {
+//                                Log.e(TAG, "Failed to send message with status code: "
+//                                        + sendMessageResult.getStatus().getStatusCode());
+//                            }else{
+//                                //  Log.i(TAG,"status "+sendMessageResult.getStatus().isSuccess());
+//                            }
+                        }
+                    }
+            );
+        }
+        else
+        {
+            Log.d("ERROR","Failed to send message!");
+        }
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG, "Connection to Google API client was suspended");
-    }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(TAG, "Connection to Google API client was failed");
-    }
 
 
     private void updateTarget(String server_url) {
@@ -407,19 +522,20 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 JSONObject obj = (JSONObject) json_array.get(i);
                 try {
 //                    if ((int) (obj.get("blue")) == 0)
-                        _target = i;
+                    _target = i;
                         /*String red = Integer.toHexString(Integer.parseInt(obj.getString("red")));
                         String green =  Integer.toHexString(Integer.parseInt(obj.getString("green")));
                     String blue =  Integer.toHexString(Integer.parseInt(obj.getString("blue")));
-                    _simuView.setColor(i,"#"+red+green+blue);*/
+                    _simuView.setColor(i,"#"+red+green+blue);
                     int red = Integer.parseInt(obj.getString("red"));
                     int green =  Integer.parseInt(obj.getString("green"));
                     int blue =  Integer.parseInt(obj.getString("blue"));
                     String hex = String.format("#%02x%02x%02x",red,green,blue);
                     _simuView.setColor(i,hex);
                     System.out.println("cor:"+"#"+red+green+blue);
-                    _plug_names.add("3");
-                    //_plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
+                    _plug_names.add("3");*/
+                    // Log.i(TAG,obj.toString());
+                    _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
                     Log.i(TAG, "plug "+_plug_names.get(i));
 
                 }catch (JSONException e){
@@ -438,6 +554,253 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         }
     }
 
+    private void initCorrelationHandlers(int selectedPlug){
+        try{
+            //find the new targets
+            Log.i(TAG,"Finding new targets");
+            HttpRequest novo = new HttpRequest(BASE_URL+"/plug/"+_plug_selected, getApplicationContext(),_queue);
+            novo.start();
+            novo.join();
+            String data = novo.getData();
+            JSONArray json_array = new JSONArray(data);
+            activeLeds = new JSONArray(data);
+            Log.e(TAG,"Active Leds: "+activeLeds.toString());
+            _devices_count = json_array.length();
+            Log.i(TAG,"Devices count "+_devices_count);
+            for (int i = 0; i < _devices_count; i++) {
+                JSONObject obj = (JSONObject) json_array.get(i);
+                try {
+                    if ((int) (obj.get("red")) == 255)
+                        _target = i;
+
+                } catch (JSONException e) {
+                    Log.wtf(TAG, " não devia dar prob aqui");
+                }
+            }
+            // creates clean arrays for the new correlations;
+            Log.i(TAG,"Creating new arrays for "+_devices_count+" targets");
+            _acc_data           = new double[_devices_count][2][WINDOW_SIZE];
+            _plug_target_data   = new double[_devices_count][2][WINDOW_SIZE];
+            _plug_data_indexes  = new int[_devices_count];
+
+            Log.i(TAG,"TARGET: "+_target);
+            _started            = true;
+            // creates handlers and aggregators for everything
+            _handlers = new ArrayList<>();
+            _aggregators = new ArrayList<>();
+
+            for(int i=0;i<_devices_count;i++){
+                Log.i(TAG,"Creating handler and aggregator for "+i);
+                _handlers.add(new PlugMotionHandler(getApplicationContext(),(int)_simulationSpeed,i,BASE_URL+"/plug/"+_plug_names.get(selectedPlug),_queue));
+                _aggregators.add(new DataAggregator(i,_simulationSpeed));
+            }
+
+            for(int i=0;i<_devices_count;i++) {
+                _handlers.get(i).start();
+                _aggregators.get(i).start();
+            }
+
+
+            Thread.sleep(2000);
+
+            _corrHandler = new CorrelationHandler();
+            _correlationRunning=true;
+            _corrHandler.start();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateStudyMode(int index){
+        Log.i(TAG," Updating Study");
+        if(mode==0){
+            mode=1;
+            try {
+                _started = false;
+                // selects the plug
+                _plug_selected = _plug_names.get(index);
+                HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+_plug_selected+"/selected/", getApplicationContext(),_queue);
+                select_plug.start();
+                // select_plug.join();
+                Thread.sleep(500);
+
+                initCorrelationHandlers(index);
+
+
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else if(mode==1){
+            try {
+                relay = relay == 0 ? 1 : 0;
+                JSONObject selected_led = (JSONObject) activeLeds.get(index);
+                int blue = Integer.parseInt(selected_led.getString("blue"));
+                int red = Integer.parseInt(selected_led.getString("red"));
+                int green = Integer.parseInt(selected_led.getString("green"));
+                if (blue == 255) {
+                    if (red == 0)
+                        Log.i(TAG, "TURNING ON");
+                    else
+                        Log.i(TAG, "TURNIN OFF");
+
+                    // turn on or off the plug relay to turn on/off the appliances
+                    HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+_plug_names.get(index)+"/relay/"+relay, getApplicationContext(),_queue);
+                    select_plug.start();
+                    select_plug.join();
+
+                    //turn the leds off once we stop interacting
+                    HttpRequest turn_off_stuff  = new HttpRequest(BASE_URL+"/plug/"+_plug_names.get(index)+"/stopLeds/", getApplicationContext(),_queue);
+                    turn_off_stuff.start();
+                    turn_off_stuff.join();
+                    _correlationRunning = false;
+                    stopServices();
+                    mode=0;
+                    sendMessage("Device reboot");
+
+                } else if (green == 0){
+                    Log.i(TAG,"MENU MODE");
+                    mode=3;
+                    // init = new InitAvailablePlugs();
+                    //init.start();
+                    //init.join();
+                    //Thread.sleep(50);
+                    HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+"/Demo3/"+"2", getApplicationContext(),_queue);
+                    select_plug.start();
+                    select_plug.join();
+                    Thread.sleep(500);
+                    //find the new targets
+                    Log.i(TAG,"Finding new targets");
+                    HttpRequest novo = new HttpRequest(BASE_URL+"/plug/"+_plug_selected, getApplicationContext(),_queue);
+                    novo.start();
+                    novo.join();
+                    String data = novo.getData();
+                    activeLeds = new JSONArray(data);
+                    Log.e(TAG,"Active Leds: "+activeLeds.toString());
+                    Message msg = Message.obtain();
+                    msg.arg1=6;
+                    _ui_handler.sendMessage(msg);
+
+                }
+
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else if(mode==3){
+            try {
+                Log.i(TAG,"CORRELATING MENU "+activeLeds.get(index).toString());
+                if(((JSONObject)activeLeds.get(index)).getInt("red")==0) {
+                    sendMessage("Device start" + "-" + "Desk Lamp");
+                }else{
+                    sendMessage("Device start"+"-"+"Kettle");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }else if(mode == 4){
+            try {
+                HttpRequest CrazyLights = new HttpRequest(BASE_URL + "/plug/ScheduleMode", getApplicationContext(), _queue);
+                CrazyLights.start();
+                //CrazyLights.join();
+                new InitAvailablePlugs(InitAvailablePlugs.UPDATE).start();
+
+                Log.d(TAG,"Initialized crazy lights");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void startUpDemo(){
+        new InitAvailablePlugs(InitAvailablePlugs.FIRST_STARTUP).start();
+        new StartUp(PLUGS_URL).start();
+
+    }
+
+    private void scheduleTimeOff(int sleep) {
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                HttpRequest turn_off_stuff = new HttpRequest(BASE_URL + "/plug/" + _plug_selected + "/stopLeds/", getApplicationContext(), _queue);
+                turn_off_stuff.start();
+                _correlationRunning = false;
+                stopServices();
+                mode = 0;
+                sendMessage("Device reboot");
+            }
+        }, sleep*1000);
+
+    }
+
+    private void removeScheduleTimeOff(int plug){
+        for(int i=0; i<_alarms.size();i++){
+            if(_alarms.get(i).getPlug()==plug)
+                _alarms.get(i).setActive(false);
+
+        }
+    }
+
+    public synchronized void TurnOffAndRemove(int j){
+        if (_alarms.get(j).isActive()) {
+            try {
+                HttpRequest selected_request = new HttpRequest(BASE_URL + "/plug/" + _plug_names.get(j) + "/relay/0", getApplicationContext(), _queue);
+                //HttpRequest enviaNome = new HttpRequest(BASE_URL + "plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
+                selected_request.start();
+                //enviaNome.start();
+                //selected_request.join();
+                //enviaNome.join();
+                //Log.d("PLUGS","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned off by "+Device_Name);
+                relay = 0;
+                //notify("Wattapp","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned off");
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        // ConsultUsers();
+    }
+
+    public synchronized void TurnOnAndAdd(int j){
+        if (_alarms.get(j).isActive()) {
+            try {
+                HttpRequest selected_request = new HttpRequest(BASE_URL + "/plug/" + _plug_names.get(j) + "/relay/1", getApplicationContext(), _queue);
+                //HttpRequest enviaNome = new HttpRequest(BASE_URL + "plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
+                selected_request.start();
+                //enviaNome.start();
+                selected_request.join();
+                //enviaNome.join();
+                //Log.d("PLUGS","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned on by "+Device_Name);
+                relay = 1;
+                //sendMessage("Plug start"+"-"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]);
+                //notify("Wattapp","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned on");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        //ConsultUsers();
+    }
+
+    private void createSchedule(int index){
+        Log.i(TAG,"Creating schedule");
+        Alarm novo = new Alarm(HourScheduleStart, MinutesScheduleStart,()->
+        {
+            TurnOnAndAdd(index);
+            new Alarm(HourScheduleEnd, MinutesScheduleEnd, ()->
+            {
+                TurnOffAndRemove(index);
+            },false,index).activate();
+        },false,index);
+        _alarms.add(novo);
+        _alarms.get(0).activate();
+    }
+
     private class StartUp extends Thread{
 
         private String _url;
@@ -450,7 +813,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         public void run(){
             try {
 
-                Log.e(TAG, "Starging up");
+                Log.e(TAG, "Starting up");
 
                 _updating = true;
                 _started = false;
@@ -495,11 +858,11 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 msg.arg1 = 3;
                 _ui_handler.sendMessage(msg);
 
-                // Thread.sleep(1000);
+                //   Thread.sleep(1000);
 
                 //   refresh = new HttpRequest(URL_PLUG+"/start/6", getApplicationContext(),_queue);
-                // refresh.start();
-                //    refresh.join();
+                //   refresh.start();
+                //   refresh.join();
 
                 Thread.sleep(1000);
 
@@ -577,7 +940,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }}
+            }
+            Log.i(TAG,"Agragattor dying");
+        }
 
         public void stopAgregator(){
             _aggregatorRunning = false;
@@ -636,6 +1001,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         double _correlations[][];
         int _correlations_count[];
 
+
         private void updateCorrelations(int index, int[] correlations){
 
             int temp = correlations[index]+1;
@@ -647,44 +1013,60 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         //
         @Override
         public void run(){
-
+            Log.i(TAG,"Starting to run correlation "+_correlationRunning+" devices targets: "+_devices_count);
             _correlations       = new double[2][_devices_count];
             _correlations_count = new int[_devices_count];
-
+            long _lastCorr      = 0;
             while(_correlationRunning){
                 if(_countingTime)       // check if we are counting time in the current matching process
                     checkRunningTime();
 
-                for(int i=0;(i<_devices_count) && (_plug_data_indexes[_target] == WINDOW_SIZE);i++){
+                //Log.i(TAG," problema aqui "+_plug_data_indexes[_target]+" ou aqui "+WINDOW_SIZE);
+                //Log.i(TAG,"problema aqui "+_correlations[0].length+"  "+_correlations[1].length+"   "+_plug_data_indexes.length+"   "+_acc_data.length+" "+this.toString());
+                for(int i=0;(i<_devices_count) && (_plug_data_indexes[_target] == WINDOW_SIZE) && _correlationRunning;i++){
                     _correlations[0][i] = pc.correlation(_plug_target_data[i][0], _acc_data[i][0]);
                     _correlations[1][i] = pc.correlation(_plug_target_data[i][1], _acc_data[i][1]);
                 }
                 for(int i=0;i<_devices_count;i++){
-                  //  Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
+                    //Log.i("Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]+" targets "+_devices_count);
 
                     if ((_correlations[0][i] > 0.8 && _correlations[0][i] < 0.9999) && (_correlations[1][i]>0.8 &&  _correlations[1][i]<0.9999)) {  // sometimes at the start we get 1.0 we want to avoid that
                         if(!_updating)
                             updateCorrelations(i,_correlations_count);
-
-
-
                         if(_correlations_count[i]==3) {
                             _correlations_count[i] = 0;
-
                             Log.i("Positive Corr","correlation "+i+" "+_correlations[0][i]+","+_correlations[1][i]);
-
-                            try {
-                                HttpRequest selected_request = new HttpRequest(SELECTED_URL + "" + i, getApplicationContext(),_queue);
-                                selected_request.start();
+                            if(System.currentTimeMillis()>_lastCorr+3000) {
                                 ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
                                 toneGen1.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT,150);
-                                selected_request.join();
-                                Log.e(TAG, "-----   running "+SELECTED_URL + "" + i+" request  ------");
-
-                                Thread.sleep(6000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                sendMessage("Corr" + "-" + "Positive");
+                                _lastCorr = System.currentTimeMillis();
+                                if (mode == 0) {
+                                    _correlationRunning = false;
+                                    stopServices();
+                                    updateStudyMode(i);
+                                    return;
+                                } else if (mode == 1) {
+                                    updateStudyMode(i);
+                                } else if (mode == 3) {
+                                    updateStudyMode(i);
+                                } else if (mode == 4) {
+                                    mode = 0;
+                                    _correlationRunning = false;
+                                    createSchedule(i);
+                                    stopServices();
+                                    updateStudyMode(i);
+                                    return;
+                                }
                             }
+
+
+                            //                          selected_request.join();
+                            // Thread.sleep(200);
+
+                            //  } catch (InterruptedException e) {
+                            //      e.printStackTrace();
+                            //  }
 
                            /* if (i == _target){
                                 _target_selection = true;
@@ -707,7 +1089,9 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
             }
+            Log.i(TAG,"Correlation handler dying");
         }
 
         public boolean checkRunningTime(){
@@ -772,8 +1156,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         _ui_handler.sendMessage(msg);
                         Log.wtf("Corr", "AQUI");
 
-                       // stopServices();
-                       // _correlationRunning = false;
+                        // stopServices();
+                        // _correlationRunning = false;
                     }else{
                         _updateStudyWorker = new UpdateStudy(10);
                         _updateStudyWorker.start();
@@ -801,8 +1185,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _counter.setText("Please wait!!");
             }else if(msg.arg1==4){
                 _instructions.setText("Pease move to the next position");
-            }else if(msg.arg1==5){
-                _trial_field.setText("Trial "+msg.arg2+" out of 21");
+            }else if(msg.arg1==5) {
+                _trial_field.setText("Trial " + msg.arg2 + " out of 21");
+            }else if(msg.arg1==6){
+                scheduleTimeOff(10);
             }else if(msg.arg1==99){
                 _counter.setText("Thank you");
                 _instructions.setText("-");
@@ -831,4 +1217,41 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
         }
     }*/
+
+    private class InitAvailablePlugs extends Thread{
+
+        private static final int FIRST_STARTUP = 0;
+        private static final int UPDATE = 1;
+
+        private int _mode;
+
+        public InitAvailablePlugs(int mode){
+            this._mode = mode;
+        }
+
+        @Override
+        public void run() {
+
+            //Testes
+            try {
+                if(this._mode == FIRST_STARTUP){
+                    HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+"start/"+"2", getApplicationContext(),_queue);
+                    select_plug.start();
+                    select_plug.join();
+                }else if(this._mode == UPDATE){
+                    initCorrelationHandlers(_target);
+                }
+            /*  HttpRequest showTime;
+              showTime = new HttpRequest(BASE_URL + "/plug/SelectedTime/" + 1 + "-" + 5, getApplicationContext(), _queue);
+              showTime.start();
+              showTime.join();
+              HttpRequest CrazyLights = new HttpRequest(BASE_URL + "/plug/ScheduleMode", getApplicationContext(), _queue);
+              CrazyLights.start();
+              CrazyLights.join();*/
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            //
+
+        }}
 }
