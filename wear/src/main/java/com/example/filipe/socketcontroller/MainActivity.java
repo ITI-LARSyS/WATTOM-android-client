@@ -532,7 +532,7 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         {
             case SELECT_TIME_START:
                 _buttonSchedule.setText(R.string.SET_SCHEDULE_CONFIRM_START);
-                scheduleState = SELECT_TIME_END;
+                //scheduleState = SELECT_TIME_END;
                 break;
 
             case SELECT_TIME_END:

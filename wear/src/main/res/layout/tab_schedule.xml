@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:gravity="center"
     android:padding="10dp"
     tools:context="com.example.filipe.socketcontroller.MainActivity"
@@ -41,8 +42,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/buttonEnd"
@@ -55,8 +56,8 @@
             android:id="@+id/HoraFim"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="@string/INIT_TIME" />
+            android:text="@string/INIT_TIME"
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -67,20 +68,30 @@
         android:timePickerMode="spinner"
         android:visibility="gone"/>
 
+
     <Button
         android:id="@+id/buttonSchedule"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:backgroundTint="@color/green"
         android:onClick="handleScheduleButton"
         android:text="@string/SET_SCHEDULE"
-        android:backgroundTint="@color/green"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="94dp" />
 
-    <Button
-        android:id="@+id/removeSchedule"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Remove Schedule"
-        android:backgroundTint="@color/red"
-        />
+        <!--<Button-->
+            <!--android:id="@+id/removeSchedule"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginEnd="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:backgroundTint="@color/red"-->
+            <!--android:text="Remove Schedule"-->
+            <!--app:layout_constraintEnd_toEndOf="parent"-->
+            <!--app:layout_constraintStart_toStartOf="parent"-->
+            <!--tools:layout_editor_absoluteY="0dp" />-->
 
-</LinearLayout>
+ </LinearLayout>

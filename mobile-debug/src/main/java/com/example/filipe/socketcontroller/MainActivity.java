@@ -44,6 +44,8 @@ import org.w3c.dom.Text;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     //plugs url for notifying good correlation
     // private final static String BASE_URL = "http://192.168.0.112:3000";
-    private final static String BASE_URL = "http://192.168.1.8:3000";
+    private final static String BASE_URL = "http://192.168.0.104:3000";
 
     //  private final static String BASE_URL = "http://192.168.1.7:3000";
 
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
 
     //Tei DEMO STUFF
     private int mode = 0;
-    private int relay = 0;
+    private Map<String, Integer> relayStatus = new HashMap<String, Integer>();
     private JSONArray activeLeds;
     //0 - plug selection
     //1 - ON/OFF or Disagregation
@@ -146,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     private int vez = 0;
     private int hourStart,minStart,hourEnd,minEnd;
     private int HourScheduleStart, MinutesScheduleStart,HourScheduleEnd, MinutesScheduleEnd;
-    private ArrayList<Alarm>  _alarms;
+    private Map<String,Alarm>  _alarms = new HashMap<String,Alarm>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,8 +169,6 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         _client.connect();
         Wearable.MessageApi.addListener(_client, this);
         _queue = Volley.newRequestQueue(getApplicationContext());
-        _alarms = new ArrayList<Alarm>();
-
     }
 
     @Override
@@ -537,6 +537,10 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     // Log.i(TAG,obj.toString());
                     _plug_names.add(obj.getString("name").substring(0, obj.getString("name").indexOf(".")).replace("plug", ""));
                     Log.i(TAG, "plug "+_plug_names.get(i));
+                    if(relayStatus.get(_plug_names.get(i))==null){
+                            relayStatus.put(_plug_names.get(i),0);
+                            Log.i(TAG, "setting new plugs relay at 0");
+                    }
 
                 }catch (JSONException e){
                     Log.wtf(TAG," não devia dar prob aqui");
@@ -622,21 +626,24 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 _started = false;
                 // selects the plug
                 _plug_selected = _plug_names.get(index);
+                Log.i(TAG,"--- selected plug "+_plug_selected+" ---- from ---"+_plug_names.toString());
                 HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+_plug_selected+"/selected/", getApplicationContext(),_queue);
                 select_plug.start();
                 // select_plug.join();
                 Thread.sleep(500);
-
                 initCorrelationHandlers(index);
-
-
-
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }else if(mode==1){
             try {
+                int relay = relayStatus.get(_plug_selected);
                 relay = relay == 0 ? 1 : 0;
+                relayStatus.put(_plug_selected,relay);
+
+                Log.i(TAG,"----"+ relayStatus.toString()+"----- "+_plug_selected);
+
+
                 JSONObject selected_led = (JSONObject) activeLeds.get(index);
                 int blue = Integer.parseInt(selected_led.getString("blue"));
                 int red = Integer.parseInt(selected_led.getString("red"));
@@ -648,12 +655,12 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                         Log.i(TAG, "TURNIN OFF");
 
                     // turn on or off the plug relay to turn on/off the appliances
-                    HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+_plug_names.get(index)+"/relay/"+relay, getApplicationContext(),_queue);
+                    HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+_plug_selected+"/relay/"+relay, getApplicationContext(),_queue);
                     select_plug.start();
                     select_plug.join();
 
                     //turn the leds off once we stop interacting
-                    HttpRequest turn_off_stuff  = new HttpRequest(BASE_URL+"/plug/"+_plug_names.get(index)+"/stopLeds/", getApplicationContext(),_queue);
+                    HttpRequest turn_off_stuff  = new HttpRequest(BASE_URL+"/plug/"+_plug_selected+"/stopLeds/", getApplicationContext(),_queue);
                     turn_off_stuff.start();
                     turn_off_stuff.join();
                     _correlationRunning = false;
@@ -668,7 +675,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                     //init.start();
                     //init.join();
                     //Thread.sleep(50);
-                    HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+"/Demo3/"+"2", getApplicationContext(),_queue);
+                    HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+_plug_selected+"/Demo3/"+"2", getApplicationContext(),_queue);
                     select_plug.start();
                     select_plug.join();
                     Thread.sleep(500);
@@ -705,12 +712,16 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             }
         }else if(mode == 4){
             try {
-                HttpRequest CrazyLights = new HttpRequest(BASE_URL + "/plug/ScheduleMode", getApplicationContext(), _queue);
-                CrazyLights.start();
+                HttpRequest scheduleModeRequest = new HttpRequest(BASE_URL + "/plug/ScheduleMode", getApplicationContext(), _queue);
+                scheduleModeRequest.start();
                 //CrazyLights.join();
-                new InitAvailablePlugs(InitAvailablePlugs.UPDATE).start();
-
-                Log.d(TAG,"Initialized crazy lights");
+                //new InitAvailablePlugs(InitAvailablePlugs.UPDATE).start();
+                new StartUp(PLUGS_URL).start();
+                Log.d(TAG,"Initialized schdule mode");
+                Log.d(TAG, "Created a time off to finish the schedule mode");
+                Message msg = Message.obtain();
+                msg.arg1=6;
+                _ui_handler.sendMessage(msg);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -729,7 +740,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
-                HttpRequest turn_off_stuff = new HttpRequest(BASE_URL + "/plug/" + _plug_selected + "/stopLeds/", getApplicationContext(), _queue);
+                HttpRequest turn_off_stuff = new HttpRequest(BASE_URL + "/plug/stopLeds/", getApplicationContext(), _queue);
                 turn_off_stuff.start();
                 _correlationRunning = false;
                 stopServices();
@@ -749,16 +760,17 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
 
     public synchronized void TurnOffAndRemove(int j){
-        if (_alarms.get(j).isActive()) {
+        String plug = _plug_names.get(j);
+        if (_alarms.get(plug).isActive()) {
             try {
                 HttpRequest selected_request = new HttpRequest(BASE_URL + "/plug/" + _plug_names.get(j) + "/relay/0", getApplicationContext(), _queue);
-                //HttpRequest enviaNome = new HttpRequest(BASE_URL + "plug/RemovePerson/"+_plug_names.get(j),getApplicationContext(),_queue);
+                HttpRequest clear_schedule = new HttpRequest(BASE_URL + "/plug/cleanSchedules/"+_plug_names.get(j),getApplicationContext(),_queue);
                 selected_request.start();
-                //enviaNome.start();
+                clear_schedule.start();
                 //selected_request.join();
                 //enviaNome.join();
                 //Log.d("PLUGS","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned off by "+Device_Name);
-                relay = 0;
+                relayStatus.put(_plug_names.get(j),0);
                 //notify("Wattapp","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned off");
             }catch(Exception e){
                 e.printStackTrace();
@@ -768,7 +780,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
 
     public synchronized void TurnOnAndAdd(int j){
-        if (_alarms.get(j).isActive()) {
+        String plug = _plug_names.get(j);
+        if (_alarms.get(plug).isActive()) {
             try {
                 HttpRequest selected_request = new HttpRequest(BASE_URL + "/plug/" + _plug_names.get(j) + "/relay/1", getApplicationContext(), _queue);
                 //HttpRequest enviaNome = new HttpRequest(BASE_URL + "plug/InsertNewPerson/"+Device_Name+"-"+_plug_names.get(j),getApplicationContext(),_queue);
@@ -777,7 +790,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 selected_request.join();
                 //enviaNome.join();
                 //Log.d("PLUGS","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned on by "+Device_Name);
-                relay = 1;
+                relayStatus.put(_plug_names.get(j),1);
                 //sendMessage("Plug start"+"-"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]);
                 //notify("Wattapp","Plug '"+PLUG_NAMES[Integer.parseInt(_plug_names.get(j)) % PLUG_NAMES.length]+"' has been turned on");
             } catch (Exception e) {
@@ -788,7 +801,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
     }
 
     private void createSchedule(int index){
-        Log.i(TAG,"Creating schedule");
+        String plug = _plug_names.get(index);
+        Log.i(TAG,"Creating schedule for plug "+plug);
         Alarm novo = new Alarm(HourScheduleStart, MinutesScheduleStart,()->
         {
             TurnOnAndAdd(index);
@@ -797,8 +811,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                 TurnOffAndRemove(index);
             },false,index).activate();
         },false,index);
-        _alarms.add(novo);
-        _alarms.get(0).activate();
+        _alarms.put(plug,novo);
+        _alarms.get(plug).activate();
     }
 
     private class StartUp extends Thread{
@@ -1018,8 +1032,8 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             _correlations_count = new int[_devices_count];
             long _lastCorr      = 0;
             while(_correlationRunning){
-                if(_countingTime)       // check if we are counting time in the current matching process
-                    checkRunningTime();
+               // if(_countingTime)       // check if we are counting time in the current matching process
+               //     checkRunningTime();
 
                 //Log.i(TAG," problema aqui "+_plug_data_indexes[_target]+" ou aqui "+WINDOW_SIZE);
                 //Log.i(TAG,"problema aqui "+_correlations[0].length+"  "+_correlations[1].length+"   "+_plug_data_indexes.length+"   "+_acc_data.length+" "+this.toString());
@@ -1045,18 +1059,21 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
                                     _correlationRunning = false;
                                     stopServices();
                                     updateStudyMode(i);
+                                    Log.i(TAG,"---- corretate plug with index "+i+"-----");
                                     return;
                                 } else if (mode == 1) {
                                     updateStudyMode(i);
                                 } else if (mode == 3) {
                                     updateStudyMode(i);
                                 } else if (mode == 4) {
-                                    mode = 0;
-                                    _correlationRunning = false;
+                                    //mode = 0;
+                                    //_correlationRunning = false;
                                     createSchedule(i);
-                                    stopServices();
-                                    updateStudyMode(i);
-                                    return;
+                                   // stopServices();
+                                    HttpRequest novo = new HttpRequest(BASE_URL+"/plug/"+_plug_names.get(i)+"/selected", getApplicationContext(),_queue);
+                                    novo.start();
+                                    Log.i(TAG,"---- corretate plug with index "+i+" and color ?? -----");
+                                   // return;
                                 }
                             }
 
@@ -1235,6 +1252,7 @@ public class MainActivity extends AppCompatActivity implements  MessageApi.Messa
             //Testes
             try {
                 if(this._mode == FIRST_STARTUP){
+                    Thread.sleep(1000);
                     HttpRequest select_plug = new HttpRequest(BASE_URL+"/plug/"+"start/"+"2", getApplicationContext(),_queue);
                     select_plug.start();
                     select_plug.join();

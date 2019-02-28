@@ -1,5 +1,7 @@
 package com.example.filipe.socketcontroller.util;
 
+import android.util.Log;
+
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,7 +21,12 @@ public class Alarm
         this.repeating = repeating;
         if(!repeating)
         {
+            Log.i("Alarm","Creating alarm with hour");
             calendar = Calendar.getInstance();
+            if(hour < calendar.get(Calendar.HOUR_OF_DAY)){
+                calendar.set(Calendar.DAY_OF_YEAR,calendar.get(Calendar.DAY_OF_YEAR)+1);
+                Log.i("Alarm", "previous time, adding one day");
+            }
             calendar.set(Calendar.HOUR_OF_DAY,hour);
             calendar.set(Calendar.MINUTE,minute);
             calendar.set(Calendar.SECOND,0);
@@ -69,6 +76,7 @@ public class Alarm
     }
     public void activate()
     {
+        Log.i("Alarm ",calendar.getTimeInMillis() +" - "+ System.currentTimeMillis());
         if(!repeating) new Timer().schedule(task,calendar.getTimeInMillis() - System.currentTimeMillis());
         else new Timer().schedule(task,0,interval);
     }
