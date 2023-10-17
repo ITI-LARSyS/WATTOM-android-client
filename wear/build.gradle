@@ -31,5 +31,5 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
     implementation 'com.google.android.support:wearable:2.9.0'
     implementation 'com.google.android.gms:play-services-wearable:18.1.0'
-    implementation 'com.google.android.wearable:wearable:2.0.1'
+    implementation 'com.google.android.wearable:wearable:2.9.0'
 }
